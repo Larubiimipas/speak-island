@@ -1,9 +1,10 @@
 # Speak Island
 
-Game petualangan 3D untuk latihan berbicara bahasa Inggris tingkat pemula.
+Game kota pulau 3D dunia terbuka (gaya GTA, ramah anak) untuk latihan berbicara bahasa Inggris tingkat pemula.
 
-- Jelajahi kota pulau dan temui 20 warga di 20 area percakapan sehari-hari: menyapa, kenalan, kafe, kios jual beli, lapangan bola, sekolah, taman, toko roti, rumah makan, bertanya arah, halte bus, perpustakaan, klinik, toko baju, kebun buah, pos bantuan, hotel, pelabuhan, rumah nenek, dan pesta ulang tahun.
-- Tiap quest berisi pilihan balasan, tantangan gema, dan susun kalimat. Ucapan dinilai otomatis per kata (butuh Google Chrome dan izin mikrofon).
-- Kontrol: WASD / panah untuk jalan, Shift untuk lari, Spasi untuk lompat, E untuk bicara. Di HP pakai joystick dan tombol di layar.
+- Pilih karakter (Rani, Bima, atau Robo), jalan-jalan, lari, lompat ganda, nyetir mobil, dan main di Taman Lompat serta Menara Parkour.
+- 20 misi percakapan sehari-hari: masuk ke lingkaran kuning di depan warga, lalu pilih balasan, tirukan kalimat, dan susun kalimat. Ucapan dinilai otomatis per kata (butuh Google Chrome dan izin mikrofon).
+- Dimainkan dalam posisi landscape. Di HP, game otomatis meminta layar penuh mendatar.
+- Ilustrasi karakter dan papan iklan dibuat dengan Canva. Model 3D dan animasi berasal dari contoh three.js (Mixamo).
 
 Situs: https://larubiimipas.github.io/speak-island
