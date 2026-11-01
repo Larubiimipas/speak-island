@@ -234,6 +234,36 @@ input{-webkit-user-select:text;user-select:text}
 @media (max-height:540px) and (orientation:landscape){.xp.small2{font-size:.8rem}.kelas button{font-size:1.05rem;padding:6px 0 4px}}
 .mpCard{background:rgba(255,255,255,.96);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;max-width:460px;width:100%;box-sizing:border-box;position:relative;z-index:1}
 .mp > *{position:relative;z-index:1}
+/* popup quest ringkas: selalu muat satu layar (landscape) */
+@media (orientation:landscape) and (max-height:820px){
+ #quest,#result{align-items:center;padding-block:calc(6px + env(safe-area-inset-top,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
+ #quest .panel{max-width:min(860px,94vw);gap:6px;margin-block:0}
+ #quest .qhud .x{width:32px;height:32px}#quest .qhud .bar{height:12px}#quest .hearts svg{width:20px;height:20px}
+ #quest .scene{padding:clamp(8px,2vh,14px) clamp(10px,2vw,18px);gap:clamp(4px,1.2vh,10px);max-height:calc(100svh - 64px);overflow:hidden}
+ #quest .kind{font-size:.68rem}
+ #quest .ava{width:clamp(40px,11vh,64px);height:clamp(40px,11vh,64px);border-width:3px}
+ #quest .meRow .ava{width:clamp(36px,9vh,52px);height:clamp(36px,9vh,52px)}
+ #quest .bubble{padding:clamp(5px,1.4vh,10px) 12px;border-width:2px}
+ #quest .bubble .en{font-size:clamp(.9rem,3.6vh,1.1rem)}#quest .bubble .id{font-size:clamp(.72rem,2.6vh,.85rem);margin-top:2px}
+ #quest .tiny button{padding:5px 10px;font-size:.85rem}#quest .tiny svg{width:15px;height:15px}
+ #quest .hint{font-size:clamp(.78rem,3vh,.92rem)}
+ #quest .opts{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:8px}
+ #quest .opt{padding:clamp(6px,1.8vh,12px) 12px;font-size:clamp(.88rem,3.4vh,1rem)}
+ #quest .speak{display:grid;grid-template-columns:minmax(0,1fr) clamp(150px,30%,240px);column-gap:16px;row-gap:clamp(3px,1vh,8px);align-items:center;text-align:center}
+ #quest .speak>*{grid-column:1;min-width:0}
+ #quest .speak>.meRow{justify-content:center}
+ #quest .speak>.tiny{justify-content:center}
+ #quest .speak>.mic{grid-column:2;grid-row:1 / 3;justify-self:center;width:clamp(56px,15vh,84px);height:clamp(56px,15vh,84px);box-shadow:0 5px 0 #C2402F}
+ #quest .speak>.mic svg{width:clamp(26px,7vh,38px);height:clamp(26px,7vh,38px)}
+ #quest .speak>.mic.live{box-shadow:0 5px 0 #1E7448}
+ #quest .speak>#out{grid-column:2;grid-row:3 / 5;gap:4px;align-self:start}
+ #quest .target{font-size:clamp(1.05rem,5.2vh,1.6rem);line-height:1.15}
+ #quest .verdict{font-size:clamp(1.05rem,4.6vh,1.4rem)}#quest .meter .bar{height:12px}
+ #quest .heard{font-size:.75rem;line-height:1.2}
+ #quest .foot .btn-main{padding:8px 16px;font-size:1rem}#quest .foot .btn-soft{padding:6px 10px;font-size:.85rem}
+ #quest .slots{min-height:40px;padding:4px 0}#quest .tile{padding:6px 10px;font-size:.95rem}#quest .tiles{gap:6px}
+ #result .result{padding:12px 14px;gap:8px}#result .result h2{font-size:1.4rem}
+}
 </style>
 </head>
 <body>
@@ -625,6 +655,117 @@ const PK=[
        ["Bendera pusaka Merah Putih dijahit oleh...","Ibu Fatmawati",["R.A. Kartini","Cut Nyak Dhien","Dewi Sartika"]]],
    say:"Negara Kesatuan Republik Indonesia"}]}
 ];
+/* bank soal tambahan (pilihan ganda saja) */
+const PK_MORE=[
+ [[["Burung pada lambang negara kita adalah burung...","Garuda",["Merpati","Kakaktua"]],
+   ["Gambar bintang ada pada lambang sila ke...","Satu",["Lima","Tiga"]],
+   ["Pohon beringin melambangkan sila ke...","Tiga",["Satu","Dua"]],
+   ["Garuda Pancasila mencengkeram pita bertuliskan...","Bhinneka Tunggal Ika",["Indonesia Raya","Selamat Datang"]],
+   ["Gambar Garuda Pancasila di kelas harus kita...","Hormati dan jaga",["Coret-coret","Jatuhkan"]]],
+  [["Kepala banteng melambangkan sila ke...","Empat",["Dua","Tiga","Lima"]],
+   ["Rantai melambangkan sila ke...","Dua",["Satu","Empat","Lima"]],
+   ["Padi dan kapas melambangkan sila ke...","Lima",["Tiga","Dua","Satu"]],
+   ["Perisai di dada Garuda Pancasila berisi berapa lambang sila?","Lima",["Tiga","Empat","Enam"]],
+   ["Garis hitam tebal di tengah perisai Garuda melambangkan...","Garis khatulistiwa",["Sungai","Jalan raya","Gunung"]]],
+  [["Jumlah bulu pada pangkal ekor Garuda Pancasila adalah...","19 helai",["17 helai","8 helai","45 helai"]],
+   ["Jumlah bulu Garuda Pancasila melambangkan tanggal...","17 Agustus 1945",["1 Juni 1945","18 Agustus 1945","28 Oktober 1928"]],
+   ["Perancang lambang Garuda Pancasila adalah...","Sultan Hamid II",["Mohammad Yamin","W.R. Supratman","Sayuti Melik"]],
+   ["Mata rantai persegi pada lambang sila kedua melambangkan...","Laki-laki",["Perempuan","Persatuan","Keadilan"]],
+   ["Padi pada lambang sila kelima melambangkan...","Pangan (makanan)",["Pakaian","Persatuan","Kekuatan"]]]],
+ [[["Pancasila adalah dasar negara...","Indonesia",["Malaysia","Jepang"]],
+   ["Pancasila terdiri dari berapa sila?","Lima",["Empat","Enam"]],
+   ["Berdoa sebelum tidur sesuai dengan sila ke...","Satu",["Tiga","Lima"]],
+   ["Mengikuti upacara bendera dengan tertib sesuai dengan sila ke...","Tiga",["Satu","Dua"]],
+   ["Menjenguk teman yang sakit sesuai dengan sila ke...","Dua",["Empat","Satu"]],
+   ["Bermusyawarah dengan keluarga memilih tempat liburan sesuai dengan sila ke...","Empat",["Satu","Tiga"]]],
+  [["Bangga memakai produk dalam negeri sesuai dengan sila ke...","Tiga",["Satu","Dua","Lima"]],
+   ["Tidak memaksakan kehendak kepada orang lain sesuai dengan sila ke...","Empat",["Satu","Tiga","Lima"]],
+   ["Menyumbang untuk korban bencana alam sesuai dengan sila ke...","Dua",["Satu","Tiga","Empat"]],
+   ["Menghargai hasil karya orang lain sesuai dengan sila ke...","Lima",["Satu","Dua","Tiga"]],
+   ["Hidup hemat dan tidak boros sesuai dengan sila ke...","Lima",["Dua","Tiga","Empat"]]],
+  [["Istilah Pancasila berasal dari bahasa...","Sanskerta",["Arab","Belanda","Latin"]],
+   ["Tokoh yang mengusulkan nama Pancasila dalam sidang BPUPKI 1 Juni 1945 adalah...","Ir. Soekarno",["Mohammad Yamin","Soepomo","Moh. Hatta"]],
+   ["Piagam Jakarta disusun oleh Panitia...","Sembilan",["Lima","Tujuh","Delapan"]],
+   ["Piagam Jakarta ditandatangani pada tanggal...","22 Juni 1945",["1 Juni 1945","17 Agustus 1945","18 Agustus 1945"]],
+   ["Pancasila tercantum dalam Pembukaan UUD NRI Tahun 1945 alinea ke...","Empat",["Satu","Dua","Tiga"]]]],
+ [[["Saat masuk rumah orang lain, kita harus...","Mengetuk pintu dan memberi salam",["Langsung masuk"]],
+   ["Jika berbuat salah kepada teman, kita harus...","Meminta maaf",["Diam saja","Menyalahkan teman"]],
+   ["Sebelum menyeberang jalan, kita harus...","Melihat ke kanan dan ke kiri",["Berlari sambil bermain","Menutup mata"]],
+   ["Setelah dibantu orang lain, kita mengucapkan...","Terima kasih",["Selamat tidur","Sampai jumpa"]],
+   ["Saat naik motor, kita wajib memakai...","Helm",["Topi pesta","Kacamata renang"]]],
+  [["Lampu lalu lintas berwarna kuning artinya...","Hati-hati dan bersiap",["Berhenti","Jalan terus","Belok kiri"]],
+   ["Lampu lalu lintas berwarna hijau artinya...","Boleh jalan",["Berhenti","Mundur","Parkir"]],
+   ["Contoh aturan di sekolah adalah...","Memakai seragam sesuai jadwal",["Tidur siang di rumah","Makan malam bersama keluarga","Menonton televisi"]],
+   ["Contoh pelanggaran norma hukum adalah...","Mencuri sepeda tetangga",["Lupa mengucapkan salam","Makan sambil berbicara","Tidak menyapa teman"]],
+   ["Petugas yang mengatur lalu lintas di jalan raya adalah...","Polisi lalu lintas",["Dokter","Petani","Nelayan"]]],
+  [["Contoh norma kesusilaan adalah...","Tidak berbohong",["Berpakaian rapi ke pesta","Membayar pajak","Memakai helm"]],
+   ["Sanksi pelanggaran norma agama berupa...","Dosa",["Denda","Penjara","Dikucilkan"]],
+   ["Sanksi pelanggaran norma kesusilaan berupa...","Rasa bersalah atau menyesal",["Penjara","Denda","Teguran polisi"]],
+   ["Undang-undang dibentuk oleh DPR bersama...","Presiden",["Gubernur","Bupati","Kepala desa"]],
+   ["Peraturan perundang-undangan tertinggi di Indonesia adalah...","UUD NRI Tahun 1945",["Peraturan Daerah","Peraturan Presiden","Peraturan Desa"]]]],
+ [[["Teman yang berbeda suku tetap kita ajak...","Bermain bersama",["Bertengkar","Menjauh"]],
+   ["Kegemaran setiap orang...","Berbeda-beda",["Selalu sama","Tidak boleh berbeda"]],
+   ["Jika ada teman baru dari daerah lain, kita harus...","Menyambutnya dengan ramah",["Mengejeknya","Tidak mengajaknya bicara"]],
+   ["Baju adat, tarian, dan lagu daerah adalah contoh keberagaman...","Budaya",["Cuaca","Hewan"]],
+   ["Lagu daerah 'Ampar-Ampar Pisang' berasal dari...","Kalimantan Selatan",["Papua","Bali"]]],
+  [["Tari Jaipong berasal dari...","Jawa Barat",["Aceh","Bali","Papua"]],
+   ["Rumah adat Honai berasal dari...","Papua",["Bali","Aceh","Jawa Barat"]],
+   ["Lagu daerah 'Yamko Rambe Yamko' berasal dari...","Papua",["Aceh","Jawa Tengah","Sumatera Barat"]],
+   ["Senjata tradisional Rencong berasal dari...","Aceh",["Bali","Papua","Jawa Barat"]],
+   ["Uma Lengge adalah bangunan adat dari daerah...","Bima, Nusa Tenggara Barat",["Aceh","Papua","Sumatera Barat"]],
+   ["Agama yang diakui di Indonesia berjumlah...","Enam",["Tiga","Empat","Lima"]]],
+  [["Sikap menganggap budaya sendiri paling baik dan merendahkan budaya lain disebut...","Etnosentrisme",["Toleransi","Nasionalisme","Patriotisme"]],
+   ["Keberagaman di Indonesia terjadi antara lain karena...","Indonesia negara kepulauan yang luas",["Indonesia negara yang kecil","Penduduknya sedikit","Semua daerah berbudaya sama"]],
+   ["Upacara adat Ngaben berasal dari...","Bali",["Toraja","Aceh","Jawa Barat"]],
+   ["Rambu Solo adalah upacara adat dari suku...","Toraja",["Dayak","Sasak","Batak"]],
+   ["Kain Ulos berasal dari suku...","Batak",["Dayak","Bugis","Sasak"]]]],
+ [[["Saat teman kesulitan membawa buku, kita...","Membantunya",["Menertawakannya","Pergi saja"]],
+   ["Mengerjakan tugas kelompok bersama teman disebut...","Kerja sama",["Bermain sendiri","Bertengkar"]],
+   ["Membersihkan halaman sekolah bersama-sama disebut...","Kerja bakti",["Tidur siang","Jajan"]],
+   ["Sebelum makan bersama keluarga, kita bisa membantu...","Menata piring di meja",["Main ponsel","Pergi bermain"]],
+   ["Anak yang suka menolong disenangi...","Banyak orang",["Tidak ada orang","Dirinya sendiri saja"]]],
+  [["Contoh gotong royong di sekolah adalah...","Menghias kelas bersama untuk lomba",["Mengerjakan ulangan bersama-sama","Mencontek PR teman","Jajan sendiri"]],
+   ["Contoh gotong royong di desa adalah...","Membangun jembatan bersama warga",["Menonton TV sendiri","Tidur di rumah","Bermain gim sendiri"]],
+   ["Lawan dari sikap gotong royong adalah...","Individualisme",["Kebersamaan","Kerja sama","Tolong-menolong"]],
+   ["Dalam kerja kelompok, setiap anggota harus...","Melaksanakan tugasnya",["Menyuruh teman saja","Diam saja","Pulang duluan"]],
+   ["Gotong royong membuat hubungan warga menjadi...","Lebih rukun",["Bermusuhan","Saling curiga","Renggang"]]],
+  [["Tradisi gotong royong memindahkan rumah panggung di Sulawesi Selatan disebut...","Mappalette Bola",["Ngaben","Rambu Solo","Sasi"]],
+   ["Sistem pengairan sawah yang dikelola bersama di Bali disebut...","Subak",["Sasi","Ngaben","Kecak"]],
+   ["Rela berkorban untuk kepentingan bangsa dan negara sesuai dengan sila ke...","Tiga",["Satu","Dua","Lima"]],
+   ["Asas koperasi yang sesuai dengan semangat gotong royong adalah...","Kekeluargaan",["Persaingan bebas","Monopoli","Keuntungan pribadi"]],
+   ["Menurut Soekarno, jika Pancasila diperas menjadi satu sila (Ekasila), isinya adalah...","Gotong royong",["Ketuhanan","Persatuan","Musyawarah"]]]],
+ [[["Hak anak di rumah adalah...","Mendapat makanan bergizi",["Menyapu halaman","Mencuci piring"]],
+   ["Kewajiban anak di rumah adalah...","Membereskan tempat tidur",["Mendapat uang jajan","Dibelikan mainan"]],
+   ["Bermain adalah ... anak.","Hak",["Kewajiban","Hukuman"]],
+   ["Mengerjakan PR adalah ... siswa.","Kewajiban",["Hak","Hadiah"]],
+   ["Saat sakit, anak berhak...","Mendapat pengobatan",["Dimarahi","Disuruh bekerja"]]],
+  [["Contoh hak siswa di sekolah adalah...","Menggunakan fasilitas sekolah",["Membayar pajak","Mengatur lalu lintas","Bekerja"]],
+   ["Contoh kewajiban siswa di sekolah adalah...","Menaati tata tertib sekolah",["Mendapat nilai","Meminjam buku perpustakaan","Bermain saat istirahat"]],
+   ["Contoh hak warga di masyarakat adalah...","Mendapat rasa aman",["Ikut ronda","Kerja bakti","Membayar iuran"]],
+   ["Ikut ronda malam merupakan contoh ... warga.","Kewajiban",["Hak","Hukuman","Hadiah"]],
+   ["Hak dan kewajiban harus dilaksanakan secara...","Seimbang",["Hak saja","Kewajiban saja","Sesuka hati"]]],
+  [["Hak setiap warga negara mendapat pendidikan diatur dalam UUD NRI Tahun 1945 Pasal...","31",["27","29","33"]],
+   ["Kemerdekaan memeluk agama dijamin dalam UUD NRI Tahun 1945 Pasal...","29",["31","33","34"]],
+   ["Hari Hak Asasi Manusia sedunia diperingati setiap tanggal...","10 Desember",["1 Juni","17 Agustus","20 Mei"]],
+   ["Lembaga yang bertugas memantau pelaksanaan HAM di Indonesia adalah...","Komnas HAM",["KPU","BPK","Bank Indonesia"]],
+   ["Warga negara boleh memilih dalam pemilu jika sudah berumur...","17 tahun atau sudah/pernah kawin",["12 tahun","15 tahun","25 tahun"]]]],
+ [[["Upacara bendera di sekolah biasanya dilaksanakan setiap hari...","Senin",["Minggu","Sabtu"]],
+   ["Saat bendera dikibarkan dalam upacara, kita menyanyikan lagu...","Indonesia Raya",["Balonku","Pelangi-pelangi"]],
+   ["Presiden pertama Indonesia adalah...","Ir. Soekarno",["Moh. Hatta","Ki Hajar Dewantara"]],
+   ["Mata uang Indonesia adalah...","Rupiah",["Dolar","Ringgit"]],
+   ["Saat lagu Indonesia Raya dinyanyikan, kita harus...","Berdiri tegak dengan sikap sempurna",["Duduk sambil makan","Berlari-lari"]]],
+  [["Wakil presiden pertama Indonesia adalah...","Moh. Hatta",["Ir. Soekarno","Soeharto","B.J. Habibie"]],
+   ["Indonesia terletak di antara dua benua, yaitu...","Asia dan Australia",["Asia dan Eropa","Afrika dan Amerika","Eropa dan Australia"]],
+   ["Indonesia terletak di antara dua samudra, yaitu...","Hindia dan Pasifik",["Atlantik dan Pasifik","Hindia dan Atlantik","Arktik dan Pasifik"]],
+   ["Lagu 'Hari Merdeka' (17 Agustus tahun 45) diciptakan oleh...","H. Mutahar",["W.R. Supratman","Ibu Sud","Ismail Marzuki"]],
+   ["Hari Pahlawan diperingati setiap tanggal...","10 November",["1 Oktober","28 Oktober","21 April"]]],
+  [["Naskah proklamasi dirumuskan di rumah...","Laksamana Maeda",["Bung Karno","Bung Hatta","Sayuti Melik"]],
+   ["Proklamasi kemerdekaan dibacakan di...","Jalan Pegangsaan Timur No. 56, Jakarta",["Jalan Merdeka Barat, Jakarta","Lapangan Ikada, Jakarta","Gedung Sate, Bandung"]],
+   ["Peristiwa dibawanya Soekarno-Hatta oleh para pemuda sebelum proklamasi disebut peristiwa...","Rengasdengklok",["Bandung Lautan Api","Sumpah Pemuda","Pertempuran Surabaya"]],
+   ["Pengibar bendera pada upacara proklamasi 17 Agustus 1945 adalah...","Latief Hendraningrat dan Suhud",["Soekarno dan Hatta","Sayuti Melik dan B.M. Diah","Ki Hajar Dewantara dan Kartini"]],
+   ["Lagu Indonesia Raya pertama kali diperdengarkan pada...","Kongres Pemuda II, 28 Oktober 1928",["Proklamasi 17 Agustus 1945","Sidang BPUPKI 1945","Berdirinya Budi Utomo 1908"]]]]
+];
+PK_MORE.forEach((t,i)=>t.forEach((m,b)=>PK[i].b[b].mc.push(...m)));
 
 /* ---------- save ---------- */
 let SAVE={xp:0,coins:0,stars:{},hero:"girl",heroName:""};
@@ -1039,7 +1180,7 @@ function loadModels(onProgress){
   names.forEach(n=>L.load(MODEL_URL[n],g=>{
     const sc=g.scene;let hips=null;sc.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false}if(o.isBone&&!hips&&/Hips$/.test(o.name))hips=o});
     sc.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(sc);
-    BASE[n]={scene:sc,h:Math.max(.5,box.max.y-box.min.y),prefix:hips?hips.name.replace(/Hips$/,""):"mixamorig"};
+    BASE[n]={scene:sc,h:Math.max(.5,box.max.y-box.min.y),prefix:hips?hips.name.replace(/Hips$/,""):"mixamorig",hipY:hips?hips.position.y:0};
     prog[n]=1;report();done()},
    x=>{if(x.total){prog[n]=x.loaded/x.total;report()}},
    ()=>{if(!fail){fail=true;clearTimeout(timer);resolve(false)}}));
@@ -1047,7 +1188,11 @@ function loadModels(onProgress){
 }
 const CLIPCACHE={};
 function clipFor(kind,name){const key=kind+":"+name;if(CLIPCACHE[key])return CLIPCACHE[key];const src=CLIPS[name];if(!src)return null;
- const pre=BASE[kind].prefix;let c=src;if(pre!=="mixamorig"){c=src.clone();c.tracks.forEach(t=>t.name=t.name.replace(/^mixamorig/,pre))}return CLIPCACHE[key]=c}
+ const pre=BASE[kind].prefix,c=src.clone();if(pre!=="mixamorig")c.tracks.forEach(t=>t.name=t.name.replace(/^mixamorig/,pre));
+ /* rig tinggi pinggul berbeda-beda: skala posisi Hips agar kaki tetap di tanah */
+ const hp=c.tracks.find(t=>/Hips\.position$/.test(t.name)),ref=CLIPS.idle&&CLIPS.idle.tracks.find(t=>/Hips\.position$/.test(t.name));
+ if(hp&&ref&&BASE[kind].hipY>1){const k=BASE[kind].hipY/ref.values[1];if(Math.abs(k-1)>.02){hp.values=Float32Array.from(hp.values,v=>v*k)}}
+ return CLIPCACHE[key]=c}
 /* unified character: rigged Mixamo model when available, rounded procedural body otherwise */
 function makeChar(kind,tint,height,procSpec){
  if(MODELS_OK&&BASE[kind]){
@@ -1542,13 +1687,28 @@ function driveCar(dt){
  if(!walkable(pos.x,pos.z,C.rad*.7)){pos.x=car.x;pos.z=car.z}
  if(Math.hypot(pos.x-before.x,pos.z-before.z)>.01){car.speed*=-.25;if(Math.abs(car.speed)>2)blip("bad")}
  car.x=pos.x;car.z=pos.z;
- if(C.ride){player.root.position.set(car.x,C.seat,car.z);player.root.rotation.y=car.h;animChar(player,dt,{speed:car.type==="bike"?Math.min(4,Math.abs(car.speed)*.45):0})}
+ if(C.ride){player.root.rotation.y=car.h;const sz=car.type==="bike"?-.2:-.28;player.root.position.set(car.x+Math.sin(car.h)*sz,C.seat,car.z+Math.cos(car.h)*sz);
+  if(player.gltf){animChar(player,dt,{speed:0});ridePose(player,car,dt)}else animChar(player,dt,{speed:car.type==="bike"?Math.min(4,Math.abs(car.speed)*.45):0})}
  else player.root.position.set(car.x,0,car.z);
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.hypot(c.position.x-car.x,c.position.z-car.z)<1.4&&c.userData.y<1.5){scene.remove(c);coins.splice(i,1);SAVE.coins++;persist();updateStats();blip("coin");setTimeout(spawnCoin,20000)}}
 }
+/* pose duduk di motor/sepeda: tekuk paha & lutut, tangan ke setang, pinggul tepat di jok */
+const _rq1=new THREE.Quaternion(),_rq2=new THREE.Quaternion(),_rax=new THREE.Vector3(),_rv=new THREE.Vector3();
+function rotBone(b,ang){if(!b)return;b.parent.getWorldQuaternion(_rq1);_rq2.setFromAxisAngle(_rax,ang);const inv=_rq1.clone().invert();b.quaternion.premultiply(inv.multiply(_rq2).multiply(_rq1))}
+function ridePose(C,v,dt){
+ if(!C.rb){C.rb={};C.obj.traverse(o=>{if(o.isBone){const m=o.name.match(/(Hips|Spine|LeftUpLeg|LeftLeg|RightUpLeg|RightLeg|LeftArm|RightArm|LeftForeArm|RightForeArm|LeftShoulder|RightShoulder)$/);if(m&&!C.rb[m[1]])C.rb[m[1]]=o}})}
+ const B=C.rb,bike=v.type==="bike";C.ped=(C.ped||0)+(bike?v.speed*dt*1.6:0);
+ C.root.updateMatrixWorld(true);_rax.set(1,0,0).applyQuaternion(C.root.quaternion).normalize();
+ const pl=bike?Math.sin(C.ped)*.35:0,pr=bike?-pl:0;
+ rotBone(B.Spine,bike?.28:.18);
+ rotBone(B.LeftUpLeg,-(bike?1.15:1.45)+pl);rotBone(B.RightUpLeg,-(bike?1.15:1.45)+pr);
+ rotBone(B.LeftLeg,(bike?1.25:1.35)-pl*1.4);rotBone(B.RightLeg,(bike?1.25:1.35)-pr*1.4);
+ rotBone(B.LeftArm,-1.05);rotBone(B.RightArm,-1.05);rotBone(B.LeftForeArm,-.35);rotBone(B.RightForeArm,-.35);
+ if(C.gs)C.gs.visible=false;if(B.Hips){B.Hips.getWorldPosition(_rv);const seatTop=bike?.9:.93;C.root.position.y+=seatTop+.04-_rv.y}
+}
 function toggleCar(){
  if(paused)return;
- if(driving){driving=false;const C=car.cfg,off=C.ride?1.1:1.9,rx=Math.cos(car.h),rz=-Math.sin(car.h);
+ if(driving){driving=false;if(player.gs)player.gs.visible=true;const C=car.cfg,off=C.ride?1.1:1.9,rx=Math.cos(car.h),rz=-Math.sin(car.h);
   let px=car.x-rx*off,pz=car.z-rz*off;if(!walkable(px,pz)){px=car.x+rx*off;pz=car.z+rz*off}if(!walkable(px,pz)){px=car.x;pz=car.z}
   player.root.position.set(px,0,pz);player.root.visible=true;car.speed=0;$("jumpBtn").textContent="Lompat";$("carBtn").textContent=C.label;blip();return}
  if(car&&Math.hypot(car.x-player.root.position.x,car.z-player.root.position.z)<3.4){driving=true;player.root.visible=car.cfg.ride;nearNpc=-1;nearPk=-1;$("talkBtn").disabled=true;$("carBtn").hidden=false;$("carBtn").textContent=car.cfg.ride?"Turun":"Keluar";$("jumpBtn").textContent="Rem";blip("good")}
@@ -1632,8 +1792,8 @@ function dance(){if(paused||driving)return;dancing=dancing>0?0:9;if(dancing&&!pl
 function talk(){if(paused||driving)return;if(nearPk>=0)return startPk(nearPk);if(nearNpc>=0)startQuest(nearNpc)}
 function pkAvatar(i,mood){return `<img class="ava ${mood||""}" src="${pkPortrait(i)}" alt="${esc(PK[i].name)}" width="192" height="192">`}
 function startPk(i){setPaused(true);const P=PK[i],g=GR(),B=P.b[g.band];
- const mcs=shuffle(B.mc).slice(0,g.band===0?4:5).map(m=>({t:"m",q:m[0],ok:m[1],no:m[2]}));
- const rounds=[...mcs.slice(0,2),{t:"s",p:B.say},...mcs.slice(2)];
+ /* PPKn: soal pilihan ganda saja, tanpa ucapan */
+ const rounds=shuffle(B.mc).slice(0,g.band===0?8:10).map(m=>({t:"m",q:m[0],ok:m[1],no:m[2]}));
  Q={pk:true,i,idx:0,hearts:3,combo:0,xp:0,perfect:0,rounds};$("quest").hidden=false;$("result").hidden=true;hud();round()}
 function pkMC(r){const P=PK[Q.i],g=GR(),S=$("scene");const nOpt=g.band===0?2:g.band===1?3:4;const opts=shuffle([r.ok,...shuffle(r.no).slice(0,nOpt-1)]);
  S.innerHTML=`<div class="kind">Pelajaran PPKn · ${esc(P.topic)} · Kelas ${SAVE.kelas||"-"}</div>

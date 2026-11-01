@@ -19,4 +19,4 @@ Situs: https://larubiimipas.github.io/speak-island
   - Kelas 3–4: 3 pilihan, arti disembunyikan (bisa dibuka), lulus ≥60%.
   - Kelas 5–6: kalimat lebih panjang, tanpa tombol arti, lulus ≥72%.
 - **Motor & sepeda** — dekati lalu tekan **F** (atau tombol Naik) untuk naik/turun.
-- **Negeri Pancasila** — ikuti gerbang "Jalan ke Negeri Pancasila", seberangi jembatan ke pulau kedua, dan belajar PPKn bersama 7 guru.
+- **Negeri Pancasila** — ikuti gerbang "Jalan ke Negeri Pancasila", seberangi jembatan ke pulau kedua, dan belajar PPKn bersama 7 guru (soal pilihan ganda: 8 soal untuk kelas 1–2, 10 soal untuk kelas 3–6).
