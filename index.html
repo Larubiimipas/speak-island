@@ -224,6 +224,14 @@ input{-webkit-user-select:text;user-select:text}
  .hero img{max-width:72px}.hero{padding:6px}.picker{padding:10px 12px;gap:8px}
  .mpTitle{font-size:2.6rem}.mp::before,.mp::after{height:5vh}.duo .ava{width:80px;height:80px}.bigStars svg{width:40px;height:40px}
 }
+.kelas{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.kelas button{padding:8px 0 6px;border-radius:12px;background:#E7F3F4;font-family:var(--display);font-size:1.3rem;color:var(--ink);border:3px solid transparent;line-height:1}
+.kelas button small{display:block;font-family:var(--body);font-size:.62rem;font-weight:900;color:var(--muted);letter-spacing:.06em}
+.kelas button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1C4}
+.kelas.need{animation:shake .35s;outline:3px solid var(--coral);outline-offset:4px;border-radius:12px}
+.kelasInfo{margin:0;font-size:.82rem;color:var(--muted);font-weight:800}
+.xp.small2{font-size:1rem}
+@media (max-height:540px) and (orientation:landscape){.xp.small2{font-size:.8rem}.kelas button{font-size:1.05rem;padding:6px 0 4px}}
 .mpCard{background:rgba(255,255,255,.96);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;max-width:460px;width:100%;box-sizing:border-box;position:relative;z-index:1}
 .mp > *{position:relative;z-index:1}
 </style>
@@ -239,7 +247,8 @@ input{-webkit-user-select:text;user-select:text}
   <div class="help" id="help" hidden></div>
   <div class="topR">
     <div class="money">$<span id="coinN">0</span></div>
-    <div class="xp"><b>★</b> <span id="xpN">0</span> XP · <span id="doneN">0</span>/20</div>
+    <div class="xp"><b>★</b> <span id="xpN">0</span> XP · Inggris <span id="doneN">0</span>/20</div>
+    <div class="xp small2">Kelas <span id="kelasN">-</span> · PPKn <span id="pkN">0</span>/7</div>
     <button class="menuBtn" id="menuBtn">Menu</button>
   </div>
   <div class="loc" id="loc" style="opacity:0"></div>
@@ -261,12 +270,17 @@ input{-webkit-user-select:text;user-select:text}
     <h1 class="gtaTitle">SPEAK <br><span>ISLAND</span></h1>
     <p class="tag">Kota pulau dunia terbuka. Jalan-jalan, nyetir, lompat-lompat, dan selesaikan 20 misi ngobrol bahasa Inggris.</p>
     <div class="chunky picker">
-      <div class="lbl2">Pilih karaktermu</div>
+      <div class="lbl2">1. Kamu kelas berapa?</div>
+      <div class="kelas" id="kelasRow" role="group" aria-label="Pilih kelas">
+        <button data-k="1" aria-pressed="false"><small>KELAS</small>1</button><button data-k="2" aria-pressed="false"><small>KELAS</small>2</button><button data-k="3" aria-pressed="false"><small>KELAS</small>3</button><button data-k="4" aria-pressed="false"><small>KELAS</small>4</button><button data-k="5" aria-pressed="false"><small>KELAS</small>5</button><button data-k="6" aria-pressed="false"><small>KELAS</small>6</button>
+      </div>
+      <p class="kelasInfo" id="kelasInfo">Pilih kelasmu di SD. Soal bahasa Inggris dan PPKn akan menyesuaikan.</p>
+      <div class="lbl2">2. Pilih karaktermu</div>
       <div class="heroes" id="heroes">
         <button class="hero" data-h="girl" aria-pressed="false"><img id="pk_girl" alt="Si Toska" width="192" height="192"><span>Si Toska</span><small>Petualang putri</small></button>
         <button class="hero" data-h="boy" aria-pressed="false"><img id="pk_boy" alt="Si Hoodie" width="192" height="192"><span>Si Hoodie</span><small>Petualang putra</small></button>
       </div>
-      <label class="nameRow" for="heroName">Nama pemain<input id="heroName" maxlength="14" placeholder="Tulis namamu" autocomplete="off"></label>
+      <label class="nameRow" for="heroName">3. Nama pemain<input id="heroName" maxlength="14" placeholder="Tulis namamu" autocomplete="off"></label>
     </div>
     <button class="btn-main" id="startBtn" disabled>MEMUAT KARAKTER...</button>
     <p class="status" id="loadStatus">Menyiapkan model 3D...</p>
@@ -274,7 +288,8 @@ input{-webkit-user-select:text;user-select:text}
       <b>Cara main</b>
       <div>Jalan <kbd>W A S D</kbd>, lari <kbd>Shift</kbd>, lompat <kbd>Spasi</kbd> (tekan lagi di udara untuk lompat ganda). Di HP pakai joystick dan tombol layar.</div>
       <div>Masuk ke <b style="font-family:var(--body);font-size:1rem">lingkaran kuning</b> di depan warga lalu tekan <kbd>E</kbd> untuk memulai misi ngobrol. Ucapanmu dinilai otomatis.</div>
-      <div>Dekati mobil merah di alun-alun dan tekan <kbd>F</kbd> untuk menyetir. Coba juga Taman Lompat dan Menara Parkour!</div>
+      <div>Naik mobil, motor, atau sepeda di dekat alun-alun dengan tombol <kbd>F</kbd>. Coba juga Taman Lompat dan Menara Parkour!</div>
+      <div>Ikuti <b style="font-family:var(--body);font-size:1rem">Jalan ke Negeri Pancasila</b> lewat jembatan panjang untuk belajar PPKn bersama 7 guru.</div>
     </div>
     <p class="note" id="micNote"></p>
   </div>
@@ -299,6 +314,7 @@ input{-webkit-user-select:text;user-select:text}
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/objects/Sky.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
 <script>
@@ -473,6 +489,142 @@ const AREAS=[
   {t:"b",p:"Let's take a photo together!",a:"Ayo kita foto bersama!"},
   {t:"d",q:"Thanks for coming!",qa:"Terima kasih sudah datang!",ok:"Thanks for inviting me. See you!",okId:"Terima kasih sudah mengundangku. Sampai jumpa!",no:["Coming is my name.","Yes, I am thanks."]}]}
 ];
+/* Negeri Pancasila: 7 guru PPKn, soal bertingkat: b[0]=kelas 1-2, b[1]=kelas 3-4, b[2]=kelas 5-6 */
+const PK=[
+ {name:"Bu Sinta",topic:"Lambang Pancasila",place:"Pendopo Lambang",color:"#C0392B",fem:true,b:[
+  {mc:[["Apa lambang negara Indonesia?","Garuda Pancasila",["Burung merpati","Harimau"]],
+       ["Lambang sila pertama adalah...","Bintang",["Rantai","Padi dan kapas"]],
+       ["Lambang sila ketiga adalah...","Pohon beringin",["Bintang","Kepala banteng"]],
+       ["Ada berapa sila dalam Pancasila?","Lima",["Tiga","Tujuh"]],
+       ["Warna bendera Indonesia adalah...","Merah dan putih",["Biru dan putih","Merah dan kuning"]]],
+   say:"Garuda Pancasila"},
+  {mc:[["Lambang sila kedua adalah...","Rantai",["Pohon beringin","Bintang","Padi dan kapas"]],
+       ["Lambang sila keempat adalah...","Kepala banteng",["Rantai","Pohon beringin","Bintang"]],
+       ["Lambang sila kelima adalah...","Padi dan kapas",["Kepala banteng","Rantai","Bintang"]],
+       ["Semboyan yang dicengkeram Garuda Pancasila adalah...","Bhinneka Tunggal Ika",["Tut Wuri Handayani","Merdeka atau mati","Gotong royong"]],
+       ["Bhinneka Tunggal Ika artinya...","Berbeda-beda tetapi tetap satu",["Bersatu kita teguh","Rajin pangkal pandai","Satu nusa satu bangsa"]]],
+   say:"Berbeda-beda tetapi tetap satu jua"},
+  {mc:[["Jumlah bulu pada setiap sayap Garuda Pancasila adalah...","17 helai",["8 helai","19 helai","45 helai"]],
+       ["Jumlah bulu pada leher Garuda Pancasila adalah...","45 helai",["17 helai","8 helai","19 helai"]],
+       ["Jumlah bulu ekor Garuda Pancasila adalah 8 helai, melambangkan bulan...","Agustus",["Juni","Mei","Oktober"]],
+       ["Mata rantai pada lambang sila kedua berbentuk...","Persegi dan lingkaran",["Segitiga dan persegi","Bintang dan bulan","Lingkaran saja"]],
+       ["Semboyan Bhinneka Tunggal Ika berasal dari kitab...","Sutasoma karya Mpu Tantular",["Negarakertagama karya Mpu Prapanca","Arjunawiwaha karya Mpu Kanwa","Bharatayuda karya Mpu Sedah"]]],
+   say:"Garuda Pancasila adalah lambang negara Indonesia"}]},
+ {name:"Pak Bayu",topic:"Sila-sila Pancasila",place:"Pendopo Sila",color:"#E67E22",fem:false,b:[
+  {mc:[["Sila pertama Pancasila berbunyi...","Ketuhanan Yang Maha Esa",["Persatuan Indonesia"]],
+       ["Sila ketiga Pancasila berbunyi...","Persatuan Indonesia",["Ketuhanan Yang Maha Esa"]],
+       ["Berdoa sebelum belajar sesuai dengan sila ke...","Satu",["Tiga"]],
+       ["Menolong teman yang jatuh sesuai dengan sila ke...","Dua",["Empat"]],
+       ["Bermain bersama teman dari suku lain sesuai dengan sila ke...","Tiga",["Satu"]]],
+   say:"Ketuhanan Yang Maha Esa"},
+  {mc:[["Sila kedua Pancasila berbunyi...","Kemanusiaan yang adil dan beradab",["Persatuan Indonesia","Ketuhanan Yang Maha Esa","Keadilan sosial bagi seluruh rakyat Indonesia"]],
+       ["Sila kelima Pancasila berbunyi...","Keadilan sosial bagi seluruh rakyat Indonesia",["Persatuan Indonesia","Kemanusiaan yang adil dan beradab","Ketuhanan Yang Maha Esa"]],
+       ["Bermusyawarah memilih ketua kelas sesuai dengan sila ke...","Empat",["Dua","Lima","Satu"]],
+       ["Menghormati teman yang sedang beribadah sesuai dengan sila ke...","Satu",["Tiga","Lima","Empat"]],
+       ["Membagi makanan dengan adil kepada teman sesuai dengan sila ke...","Lima",["Satu","Tiga","Empat"]]],
+   say:"Kemanusiaan yang adil dan beradab"},
+  {mc:[["Sila keempat Pancasila berbunyi...","Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan",["Keadilan sosial bagi seluruh rakyat Indonesia","Persatuan Indonesia","Kemanusiaan yang adil dan beradab"]],
+       ["Hari Lahir Pancasila diperingati setiap tanggal...","1 Juni",["17 Agustus","1 Oktober","28 Oktober"]],
+       ["Hari Kesaktian Pancasila diperingati setiap tanggal...","1 Oktober",["1 Juni","20 Mei","10 November"]],
+       ["Pancasila disahkan sebagai dasar negara oleh PPKI pada tanggal...","18 Agustus 1945",["17 Agustus 1945","1 Juni 1945","22 Juni 1945"]],
+       ["Mengutamakan kepentingan bangsa di atas kepentingan pribadi sesuai dengan sila ke...","Tiga",["Satu","Dua","Lima"]]],
+   say:"Persatuan Indonesia"}]},
+ {name:"Bu Rara",topic:"Aturan dan Norma",place:"Pendopo Aturan",color:"#2980B9",fem:true,b:[
+  {mc:[["Setelah bermain, kita harus...","Merapikan mainan",["Membiarkan mainan berserakan"]],
+       ["Sebelum makan, kita sebaiknya...","Mencuci tangan dan berdoa",["Langsung makan sambil berlari"]],
+       ["Kita datang ke sekolah sebaiknya...","Tepat waktu",["Terlambat"]],
+       ["Saat guru sedang menjelaskan, kita harus...","Mendengarkan dengan tenang",["Mengobrol dengan teman"]],
+       ["Sampah harus dibuang ke...","Tempat sampah",["Sungai"]]],
+   say:"Aku selalu menaati aturan"},
+  {mc:[["Aturan dibuat agar kehidupan menjadi...","Tertib dan nyaman",["Ramai dan kacau","Bebas tanpa batas","Membosankan"]],
+       ["Tempat menyeberang jalan yang aman adalah...","Zebra cross",["Tengah jalan raya","Belakang bus","Tikungan jalan"]],
+       ["Lampu lalu lintas berwarna merah artinya...","Berhenti",["Jalan terus","Bersiap-siap","Belok kiri"]],
+       ["Jika melanggar aturan sekolah, kita akan...","Mendapat sanksi",["Mendapat hadiah","Dipuji guru","Tidak terjadi apa-apa"]],
+       ["Contoh aturan di rumah adalah...","Tidur siang tepat waktu",["Memakai seragam sekolah","Memakai helm di jalan","Antre di loket"]]],
+   say:"Aturan dibuat agar hidup tertib"},
+  {mc:[["Norma yang bersumber dari Tuhan disebut norma...","Agama",["Hukum","Kesopanan","Kesusilaan"]],
+       ["Norma yang bersumber dari hati nurani disebut norma...","Kesusilaan",["Agama","Hukum","Kesopanan"]],
+       ["Berbicara sopan kepada orang yang lebih tua termasuk norma...","Kesopanan",["Hukum","Agama","Kesusilaan"]],
+       ["Norma yang dibuat oleh negara dan sanksinya tegas adalah norma...","Hukum",["Kesopanan","Kesusilaan","Agama"]],
+       ["Contoh sanksi bagi pelanggar norma kesopanan adalah...","Dicemooh atau dikucilkan masyarakat",["Dipenjara","Didenda oleh pengadilan","Ditilang polisi"]]],
+   say:"Norma agama, kesusilaan, kesopanan, dan hukum"}]},
+ {name:"Pak Wayan",topic:"Keberagaman",place:"Pendopo Bhinneka",color:"#8E44AD",fem:false,b:[
+  {mc:[["Teman kita ada yang berkulit gelap dan ada yang terang. Kita harus...","Tetap berteman dengan semua",["Memilih-milih teman"]],
+       ["Ciri tubuh setiap orang...","Berbeda-beda",["Sama persis"]],
+       ["Jika teman berbeda agama, kita harus...","Saling menghormati",["Mengejeknya"]],
+       ["Indonesia memiliki banyak...","Suku dan budaya",["Satu suku saja"]],
+       ["Teman yang berbeda bahasa daerah harus kita...","Hargai",["Tertawakan"]]],
+   say:"Berbeda itu indah"},
+  {mc:[["Bhinneka Tunggal Ika mengajarkan kita untuk...","Bersatu walaupun berbeda",["Memilih teman yang sama","Hidup sendiri-sendiri","Mengejek perbedaan"]],
+       ["Tari Kecak berasal dari...","Bali",["Aceh","Papua","Jawa Barat"]],
+       ["Rumah Gadang adalah rumah adat dari...","Sumatera Barat",["Bali","Papua","Kalimantan Timur"]],
+       ["Tari Saman berasal dari...","Aceh",["Bali","Jawa Tengah","Maluku"]],
+       ["Sikap yang benar terhadap perbedaan adalah...","Toleransi",["Egois","Membeda-bedakan","Mengejek"]]],
+   say:"Bhinneka Tunggal Ika"},
+  {mc:[["Manfaat keberagaman bagi bangsa Indonesia adalah...","Memperkaya budaya bangsa",["Menimbulkan perpecahan","Membuat saling curiga","Mengurangi persatuan"]],
+       ["Contoh sikap toleransi antarumat beragama adalah...","Tidak mengganggu orang yang sedang beribadah",["Mengajak teman pindah agama","Membunyikan musik keras di dekat tempat ibadah","Mengejek cara beribadah orang lain"]],
+       ["Sumpah Pemuda diikrarkan pada tanggal...","28 Oktober 1928",["17 Agustus 1945","20 Mei 1908","1 Juni 1945"]],
+       ["Dalam Sumpah Pemuda, bahasa persatuan kita adalah bahasa...","Indonesia",["Melayu","Jawa","Inggris"]],
+       ["Cara menjaga persatuan dalam keberagaman adalah...","Menghargai perbedaan dan tidak membeda-bedakan teman",["Hanya bergaul dengan satu suku","Menganggap budaya sendiri paling baik","Menolak budaya daerah lain"]]],
+   say:"Kami putra dan putri Indonesia menjunjung bahasa persatuan bahasa Indonesia"}]},
+ {name:"Bu Ayu",topic:"Gotong Royong",place:"Pendopo Gotong Royong",color:"#27AE60",fem:true,b:[
+  {mc:[["Membersihkan kelas bersama-sama disebut...","Gotong royong",["Bermain sendiri"]],
+       ["Saat piket kelas, kita harus...","Bekerja sama",["Diam saja"]],
+       ["Contoh membantu ibu di rumah adalah...","Menyapu lantai",["Bermain gim terus"]],
+       ["Kerja bakti membuat lingkungan menjadi...","Bersih",["Kotor"]],
+       ["Pekerjaan berat jika dikerjakan bersama menjadi...","Ringan",["Lebih berat"]]],
+   say:"Ayo bergotong royong"},
+  {mc:[["Peribahasa yang sesuai dengan gotong royong adalah...","Berat sama dipikul, ringan sama dijinjing",["Air beriak tanda tak dalam","Tong kosong nyaring bunyinya","Malu bertanya sesat di jalan"]],
+       ["Manfaat kerja sama adalah...","Pekerjaan cepat selesai",["Pekerjaan jadi lama","Timbul pertengkaran","Hanya satu orang yang lelah"]],
+       ["Contoh gotong royong di lingkungan rumah adalah...","Kerja bakti membersihkan selokan",["Bermain sendiri di kamar","Menonton televisi","Tidur siang"]],
+       ["Jika tetangga terkena musibah, kita sebaiknya...","Membantu semampunya",["Pura-pura tidak tahu","Menertawakannya","Pergi menjauh"]],
+       ["Saat kerja kelompok ada pendapat yang berbeda, kita sebaiknya...","Bermusyawarah",["Bertengkar","Pulang","Diam saja"]]],
+   say:"Berat sama dipikul ringan sama dijinjing"},
+  {mc:[["Gotong royong mencerminkan sikap...","Kebersamaan dan kepedulian",["Mementingkan diri sendiri","Persaingan","Iri hati"]],
+       ["Badan usaha yang berasaskan kekeluargaan adalah...","Koperasi",["Monopoli","Pasar gelap","Perusahaan pribadi"]],
+       ["Bapak Koperasi Indonesia adalah...","Mohammad Hatta",["Ki Hajar Dewantara","Soekarno","Soepomo"]],
+       ["Musyawarah untuk mencapai mufakat sesuai dengan sila ke...","Empat",["Satu","Dua","Lima"]],
+       ["Jika hasil musyawarah tidak sesuai keinginan kita, sikap yang tepat adalah...","Menerima dan melaksanakannya dengan tanggung jawab",["Menolak dan marah","Keluar dari kelompok","Membuat keputusan sendiri"]]],
+   say:"Musyawarah untuk mencapai mufakat"}]},
+ {name:"Pak Hasan",topic:"Hak dan Kewajiban",place:"Tugu Hak dan Kewajiban",color:"#16A085",fem:false,b:[
+  {mc:[["Kewajiban anak di rumah adalah...","Membantu orang tua",["Bermain seharian"]],
+       ["Hak anak di sekolah adalah...","Mendapat pelajaran",["Membuat gaduh"]],
+       ["Kewajiban siswa di sekolah adalah...","Belajar dengan rajin",["Bolos sekolah"]],
+       ["Setiap anak berhak mendapat...","Kasih sayang",["Dimarahi terus"]],
+       ["Setelah meminjam buku teman, kewajiban kita adalah...","Mengembalikannya",["Menyimpannya"]]],
+   say:"Aku rajin belajar"},
+  {mc:[["Hak adalah...","Sesuatu yang harus kita terima",["Sesuatu yang harus kita kerjakan","Hukuman","Aturan"]],
+       ["Kewajiban adalah...","Sesuatu yang harus kita kerjakan",["Sesuatu yang harus kita terima","Hadiah","Hiburan"]],
+       ["Sikap yang benar adalah...","Melaksanakan kewajiban dulu, baru menuntut hak",["Menuntut hak saja","Melupakan kewajiban","Tidak peduli keduanya"]],
+       ["Contoh hak anak adalah...","Mendapat pendidikan",["Membayar pajak","Bekerja mencari nafkah","Menjaga kebersihan kelas"]],
+       ["Contoh kewajiban di masyarakat adalah...","Menjaga kebersihan lingkungan",["Bermain di jalan raya","Mencoret-coret tembok","Membuang sampah ke sungai"]]],
+   say:"Laksanakan kewajiban sebelum menuntut hak"},
+  {mc:[["Hak dan kewajiban warga negara diatur dalam...","UUD NRI Tahun 1945",["Peraturan sekolah","Kitab Sutasoma","Peraturan desa"]],
+       ["Contoh kewajiban warga negara adalah...","Ikut serta dalam upaya pembelaan negara",["Bebas tidak menaati hukum","Hanya menuntut hak","Tidak peduli lingkungan"]],
+       ["Hak asasi manusia adalah hak dasar yang dimiliki manusia sejak...","Lahir",["Sekolah","Dewasa","Bekerja"]],
+       ["Saat menggunakan hak, kita tidak boleh...","Melanggar hak orang lain",["Bersikap sopan","Menaati aturan","Bertanggung jawab"]],
+       ["Jika kewajiban tidak dilaksanakan, akibatnya...","Hak orang lain bisa terganggu",["Semua menjadi lebih baik","Tidak ada akibat apa pun","Kita mendapat hadiah"]]],
+   say:"Setiap warga negara memiliki hak dan kewajiban"}]},
+ {name:"Kak Dewi",topic:"Indonesiaku",place:"Tugu Merah Putih",color:"#D35400",fem:true,b:[
+  {mc:[["Nama negara kita adalah...","Indonesia",["Malaysia"]],
+       ["Lagu kebangsaan Indonesia adalah...","Indonesia Raya",["Balonku"]],
+       ["Bendera Indonesia disebut...","Sang Merah Putih",["Sang Biru Putih"]],
+       ["Bahasa persatuan kita adalah bahasa...","Indonesia",["Inggris"]],
+       ["Hari Kemerdekaan Indonesia diperingati setiap tanggal...","17 Agustus",["1 Januari"]]],
+   say:"Aku cinta Indonesia"},
+  {mc:[["Pencipta lagu Indonesia Raya adalah...","W.R. Supratman",["Ibu Sud","C. Simanjuntak","Ismail Marzuki"]],
+       ["Teks proklamasi kemerdekaan dibacakan oleh...","Ir. Soekarno",["Ki Hajar Dewantara","R.A. Kartini","Pangeran Diponegoro"]],
+       ["Indonesia adalah negara...","Kepulauan",["Tanpa laut","Gurun","Benua"]],
+       ["Merah pada bendera berarti berani, putih berarti...","Suci",["Takut","Marah","Sedih"]],
+       ["Proklamasi kemerdekaan Indonesia terjadi pada tahun...","1945",["1928","1908","1998"]]],
+   say:"Indonesia tanah airku"},
+  {mc:[["NKRI adalah singkatan dari...","Negara Kesatuan Republik Indonesia",["Negara Kepulauan Rakyat Indonesia","Negara Kerajaan Republik Indonesia","Nusantara Kesatuan Rakyat Indonesia"]],
+       ["Bentuk negara Indonesia adalah negara...","Kesatuan",["Serikat","Kerajaan","Federasi"]],
+       ["Bentuk pemerintahan Indonesia adalah...","Republik",["Monarki","Kekaisaran","Kesultanan"]],
+       ["Teks proklamasi diketik oleh...","Sayuti Melik",["Ir. Soekarno","Moh. Hatta","Ahmad Soebardjo"]],
+       ["Bendera pusaka Merah Putih dijahit oleh...","Ibu Fatmawati",["R.A. Kartini","Cut Nyak Dhien","Dewi Sartika"]]],
+   say:"Negara Kesatuan Republik Indonesia"}]}
+];
 
 /* ---------- save ---------- */
 let SAVE={xp:0,coins:0,stars:{},hero:"girl",heroName:""};
@@ -500,7 +652,7 @@ const doneCount=()=>AREAS.filter((a,i)=>SAVE.stars[i]).length;
 let voice=null;
 function pickVoice(){try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-US/i.test(v.lang)&&/(samantha|google us|aria|jenny|zira)/i.test(v.name))||vs.find(v=>/en-US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
-function say(text,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";if(voice)u.voice=voice;u.rate=rate||.92;speechSynthesis.speak(u)}catch(e){}}
+function say(text,rate,lang){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang||"en-US";if(!lang||/^en/.test(lang)){if(voice)u.voice=voice}else{const vi=speechSynthesis.getVoices().find(v=>/^id/i.test(v.lang));if(vi)u.voice=vi}u.rate=rate||.92;speechSynthesis.speak(u)}catch(e){}}
 let actx=null;
 function blip(kind){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const seq=kind==="good"?[523,659,784]:kind==="bad"?[220,165]:kind==="win"?[523,659,784,1047]:kind==="coin"?[988,1319]:kind==="jump"?[330,440]:[440];
  seq.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=kind==="bad"?"sawtooth":kind==="coin"?"square":"triangle";o.frequency.value=f;const t=actx.currentTime+i*(kind==="coin"?.06:.09);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==="coin"?.07:.16,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.2)})}catch(e){}}
@@ -512,10 +664,10 @@ const CONTR={"i'm":"i am","it's":"it is","that's":"that is","what's":"what is","
 function norm(s){return s.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' -]/g," ").split(/\s+/).filter(Boolean).flatMap(w=>(CONTR[w]||w.replace(/'/g,"")).split(" ")).map(w=>w.replace(/-/g,""))}
 function lev(a,b){const m=a.length,n=b.length;const d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
 function grade(target,heard){const t=norm(target),h=norm(heard),used=new Array(h.length).fill(false);const hits=t.map(w=>{const k=h.findIndex((x,i)=>!used[i]&&(x===w||(w.length>3&&lev(x,w)<=1)));if(k>=0){used[k]=true;return true}return false});return{score:t.length?hits.filter(Boolean).length/t.length:0,hits}}
-function listen(target,cb){
+function listen(target,cb,lang){
  if(!micOK)return cb(null);
  let rec,done=false;try{rec=new SR()}catch(e){micOK=false;return cb(null)}
- rec.lang="en-US";rec.interimResults=false;rec.maxAlternatives=4;
+ rec.lang=lang||"en-US";rec.interimResults=false;rec.maxAlternatives=4;
  rec.onresult=e=>{if(done)return;done=true;const alts=[...e.results[0]].map(a=>a.transcript);let best={score:-1};alts.forEach(a=>{const g=grade(target,a);if(g.score>best.score)best={...g,heard:a}});cb(best)};
  rec.onerror=e=>{if(done)return;done=true;if(["not-allowed","service-not-allowed","audio-capture"].includes(e.error)){micOK=false;cb(null)}else cb({score:0,hits:[],heard:""})};
  rec.onend=()=>{if(!done){done=true;cb({score:0,hits:[],heard:""})}};
@@ -770,24 +922,30 @@ const BUILD={
 let Q=null;
 function talk(){if(nearNpc<0||paused)return;startQuest(nearNpc)}
 function setPaused(v){paused=v;$("hud").hidden=v;if(v){for(const k in keys)keys[k]=false;joyVec.x=joyVec.y=0}}
-function startQuest(i){setPaused(true);const A=AREAS[i];
- Q={i,idx:0,hearts:3,combo:0,xp:0,perfect:0,rounds:[A.rounds[0],...shuffle(A.rounds.slice(1))]};
+function GR(){const k=SAVE.kelas||3;return k<=2?{band:0,n:4,opts:2,showArti:true,hideArti:false,pass:50,perfect:80,rate:.78,label:"Kelas 1–2"}
+ :k<=4?{band:1,n:5,opts:3,showArti:false,hideArti:false,pass:60,perfect:85,rate:.9,label:"Kelas 3–4"}
+ :{band:2,n:99,opts:3,showArti:false,hideArti:true,pass:72,perfect:90,rate:1,label:"Kelas 5–6"}}
+function startQuest(i){setPaused(true);const A=AREAS[i];const g=GR();
+ let rounds=[A.rounds[0],...shuffle(A.rounds.slice(1))].slice(0,g.n).map(r=>{
+  if(g.band===0&&r.t==="b"&&r.p.split(" ").length>4)return{t:"e",p:r.p,a:r.a};
+  if(g.band===2&&r.t==="e")return{t:"b",p:r.p,a:r.a};return r});
+ Q={i,idx:0,hearts:3,combo:0,xp:0,perfect:0,rounds};
  $("quest").hidden=false;$("result").hidden=true;hud();round()}
 function endQuest(){try{speechSynthesis.cancel()}catch(e){}$("quest").hidden=true;$("result").hidden=true;Q=null;setPaused(false);refreshMarkers();updateQuestCard();updateStats();$("world").focus()}
 function hud(){$("progBar").style.width=(Q.idx/Q.rounds.length*100)+"%";$("hearts").innerHTML=[0,1,2].map(k=>`<span class="${k<Q.hearts?"":"lost"}">${HEART}</span>`).join("");$("combo").textContent=Q.combo>1?"x"+Q.combo:""}
-function round(){hud();if(Q.idx>=Q.rounds.length)return finish(true);const r=Q.rounds[Q.idx];({d:dialog,e:echo,b:build})[r.t](r)}
+function round(){hud();if(Q.idx>=Q.rounds.length)return finish(true);const r=Q.rounds[Q.idx];({d:dialog,e:echo,b:build,m:pkMC,s:pkSay})[r.t](r)}
 function next(){Q.idx++;round()}
 function wrong(){Q.hearts--;Q.combo=0;blip("bad");hud();if(Q.hearts<=0){setTimeout(()=>finish(false),700);return true}return false}
 function right(){Q.combo++;Q.xp+=10+Math.min(Q.combo,5)*2;blip("good");hud()}
 
-function dialog(r){const A=AREAS[Q.i],S=$("scene");const opts=shuffle([r.ok,...r.no]);
+function dialog(r){const A=AREAS[Q.i],S=$("scene"),g=GR();const opts=shuffle([r.ok,...shuffle(r.no).slice(0,g.opts-1)]);
  S.innerHTML=`<div class="kind">Ngobrol dengan ${esc(A.npc.name)} · ${esc(A.name)}</div>
- <div class="npcRow">${avatar(Q.i)}<div class="bubble"><div class="en">${esc(r.q)}</div><div class="id" id="qa" hidden>${esc(r.qa)}</div></div></div>
- <div class="tiny"><button id="pl">${ICON.play}Dengar</button><button id="sl">${ICON.slow}Pelan</button><button id="ar">${ICON.eye}Arti</button></div>
+ <div class="npcRow">${avatar(Q.i)}<div class="bubble"><div class="en">${esc(r.q)}</div><div class="id" id="qa" ${g.showArti?"":"hidden"}>${esc(r.qa)}</div></div></div>
+ <div class="tiny"><button id="pl">${ICON.play}Dengar</button><button id="sl">${ICON.slow}Pelan</button>${g.hideArti?"":`<button id="ar">${ICON.eye}Arti</button>`}</div>
  <div class="hint">Pilih balasan yang paling pas:</div>
  <div class="opts">${opts.map((o,k)=>`<button class="chunky opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>`;
- $("pl").onclick=()=>say(r.q);$("sl").onclick=()=>say(r.q,.6);$("ar").onclick=()=>{$("qa").hidden=!$("qa").hidden};
- say(r.q);let locked=false;
+ $("pl").onclick=()=>say(r.q,g.rate);$("sl").onclick=()=>say(r.q,.6);if($("ar"))$("ar").onclick=()=>{$("qa").hidden=!$("qa").hidden};
+ say(r.q,g.rate);let locked=false;
  S.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(locked)return;const o=opts[+b.dataset.k];
   if(o===r.ok){locked=true;b.classList.add("good");right();toast(Q.combo>2?"Combo x"+Q.combo+"!":"Tepat!");setTimeout(()=>speakPhase(r.ok,r.okId,"Sekarang ucapkan balasanmu!"),650)}
   else{b.classList.add("bad");b.disabled=true;S.querySelector(".ava").outerHTML=avatar(Q.i,"sad");if(wrong())locked=true}})}
@@ -803,28 +961,28 @@ function build(r){const A=AREAS[Q.i],S=$("scene");const words=r.p.split(" ");con
  $("chk").onclick=()=>{const ans=picked.map(i=>words[i]).join(" ");
   if(norm(ans).join(" ")===norm(r.p).join(" ")){right();toast("Susunan pas!");setTimeout(()=>speakPhase(r.p,r.a,"Bagus! Sekarang ucapkan."),600)}
   else{SL.querySelectorAll(".tile").forEach(t=>t.classList.add("bad"));if(!wrong())setTimeout(()=>{picked=[];T.querySelectorAll(".tile").forEach(t=>t.classList.remove("used"));draw();toast("Coba lagi",true)},600)}}}
-function speakPhase(text,arti,head,isEcho){const S=$("scene");let tries=0;
+function speakPhase(text,arti,head,isEcho,lang){const S=$("scene");let tries=0;const g=GR();const L=lang||"en-US";
  const wordsHTML=text.split(" ").map(w=>`<span class="w">${esc(w)}</span>`).join(" ");
  S.innerHTML=`<div class="kind">${isEcho?"Tantangan gema":"Giliranmu bicara"}</div>
- <div class="speak"><div class="meRow"><div class="bubble mine"><div class="en" style="font-size:1rem">${esc(head)}</div><div class="id">Giliranmu, ${esc(heroName())}!</div></div>${heroImg()}</div>
+ <div class="speak"><div class="meRow"><div class="bubble mine"><div class="en" style="font-size:1rem">${esc(head)}</div><div class="id">Giliranmu, ${esc(heroName())}! · ${g.label} · lulus ${g.pass}%</div></div>${heroImg()}</div>
  <div class="target" id="tgt">${wordsHTML}</div><div class="hint">${esc(arti)}</div>
  <div class="tiny"><button id="pl">${ICON.play}Dengar</button><button id="sl">${ICON.slow}Pelan</button></div>
  <button class="mic" id="mic" aria-label="Tekan lalu bicara">${ICON.mic}</button>
  <div id="out" class="speak" style="width:100%"><div class="hint">Tekan mikrofon, lalu bicara.</div></div></div>`;
- $("pl").onclick=()=>say(text);$("sl").onclick=()=>say(text,.6);if(isEcho)say(text);
+ $("pl").onclick=()=>say(text,g.rate,L);$("sl").onclick=()=>say(text,.6,L);if(isEcho)say(text,g.rate,L);
  const out=$("out"),mic=$("mic");let busy=false;
  mic.onclick=()=>{if(busy)return;busy=true;try{speechSynthesis.cancel()}catch(e){}
   if(!micOK)return noMic();
   mic.classList.add("live");out.innerHTML=`<div class="verdict" style="color:var(--leaf)">Mendengarkan...</div>`;
-  listen(text,res=>{mic.classList.remove("live");busy=false;if(!res)return noMic();judge(res)})};
+  listen(text,res=>{mic.classList.remove("live");busy=false;if(!res)return noMic();judge(res)},L)};
  function judge(res){tries++;const pct=Math.round(res.score*100);
   document.querySelectorAll("#tgt .w").forEach((w,i)=>{w.classList.remove("hit","miss");w.classList.add(res.hits[i]?"hit":"miss")});
-  let v,col;if(pct>=85){v="PERFECT!";col="var(--leaf)"}else if(pct>=60){v="Bagus!";col="var(--sea)"}else{v="Hampir...";col="var(--coral)"}
+  let v,col;if(pct>=g.perfect){v="PERFECT!";col="var(--leaf)"}else if(pct>=g.pass){v="Bagus!";col="var(--sea)"}else{v="Hampir...";col="var(--coral)"}
   out.innerHTML=`<div class="verdict" style="color:${col}">${v}</div><div class="meter"><div class="bar"><i style="width:0%"></i></div></div>
   <div class="heard">Terdengar: "${esc(res.heard||"(tidak terdengar)")}" · ${pct}%</div><div class="foot" id="ft"></div>`;
   requestAnimationFrame(()=>out.querySelector(".bar>i").style.width=pct+"%");
   const ft=$("ft");
-  if(pct>=60){const g=Math.round(pct/100*15);Q.xp+=g;if(pct>=85){Q.perfect++;toast("+"+g+" XP");confetti(18)}blip("good");ft.innerHTML=`<button class="btn-main btn-green" id="go">LANJUT</button>`;$("go").onclick=next}
+  if(pct>=g.pass){const gx=Math.round(pct/100*15);Q.xp+=gx;if(pct>=g.perfect){Q.perfect++;toast("+"+gx+" XP");confetti(18)}blip("good");ft.innerHTML=`<button class="btn-main btn-green" id="go">LANJUT</button>`;$("go").onclick=next}
   else{blip("bad");ft.innerHTML=`<button class="btn-main" id="again">COBA LAGI</button>${tries>=2?'<button class="btn-soft" id="skip">Lewati</button>':""}`;
    $("again").onclick=()=>mic.click();if(tries>=2)$("skip").onclick=()=>{Q.combo=0;next()}}}
  function noMic(){busy=false;mic.disabled=true;
@@ -856,7 +1014,7 @@ $("quitQuest").onclick=endQuest;
 try{const s=JSON.parse(localStorage.getItem("speakIslandGTA")||"null");if(s&&typeof s.xp==="number")SAVE=Object.assign(SAVE,s)}catch(e){}
 if(SAVE.hero==="rani")SAVE.hero="girl";if(SAVE.hero==="bima"||SAVE.hero==="robo")SAVE.hero="boy";if(!["boy","girl"].includes(SAVE.hero))SAVE.hero="girl";
 function persist(){try{localStorage.setItem("speakIslandGTA",JSON.stringify(SAVE))}catch(e){}}
-function updateStats(){$("coinN").textContent=String(SAVE.coins*10).padStart(6,"0");$("xpN").textContent=SAVE.xp;$("doneN").textContent=doneCount()}
+function updateStats(){$("coinN").textContent=String(SAVE.coins*10).padStart(6,"0");$("xpN").textContent=SAVE.xp;$("doneN").textContent=doneCount();$("kelasN").textContent=SAVE.kelas||"-";$("pkN").textContent=Object.keys(SAVE.pk||{}).length}
 function heroName(){return SAVE.heroName||(SAVE.hero==="boy"?"Si Hoodie":"Si Toska")}
 function heroImg(){return `<img class="ava" src="${heroPortrait()}" alt="${esc(heroName())}" width="192" height="192">`}
 
@@ -949,7 +1107,17 @@ const LEAF=["#3E7D3A","#2F6E35","#4C8F44","#5A9A3F"].map(c=>new THREE.MeshStanda
    ===================================================== */
 let renderer,scene,camera,clock,sun,sky,player,npcs=[],coins=[],obstacles=[],clouds=[],water,waterBase,balloons=[],PLATS=[],traffic=[],peds=[],birds=[],stars=[],markers=[];
 let yaw=0,pitch=.3,camDist=6.5,vy=0,onGround=true,jumps=0,paused=true,nearNpc=-1,running=false,lastArea=-1,locT=0,dancing=0,dragging=false;
-let car=null,driving=false,happyT=0,FRAME=0;
+let car=null,driving=false,happyT=0,FRAME=0,pkn=[],VEH=[],nearPk=-1;
+SAVE.pk=SAVE.pk||{};
+const VCFG={car:{maxF:19,maxR:-6,acc:9,wb:2.6,rad:1.5,ride:false,label:"Mobil",seat:0},
+ motor:{maxF:22,maxR:-3,acc:14,wb:1.5,rad:.8,ride:true,label:"Motor",seat:.18},
+ bike:{maxF:9,maxR:-2,acc:6,wb:1.15,rad:.7,ride:true,label:"Sepeda",seat:.12}};
+const BR_A=Math.PI*11/12,BR_DX=Math.sin(BR_A),BR_DZ=Math.cos(BR_A),C2D=215,R2=52,C2={x:BR_DX*C2D,z:BR_DZ*C2D};
+function axisUV(x,z){return{u:x*BR_DX+z*BR_DZ,v:x*BR_DZ-z*BR_DX}}
+function walkable(x,z,m){m=m||0;if(Math.hypot(x,z)<ISLAND_R-m)return true;const q=axisUV(x,z);
+ if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<2.7-m*.55)return true;return Math.hypot(x-C2.x,z-C2.z)<R2-2-m}
+function onIsland2(x,z){return Math.hypot(x-C2.x,z-C2.z)<R2+8}
+function suggestedPk(){for(let i=0;i<PK.length;i++)if(!SAVE.pk[i])return i;return -1}
 const QUAL={pr:1,far:60,avg:16,cool:3,level:0};
 function adaptQuality(dt){QUAL.avg=QUAL.avg*.95+dt*1000*.05;QUAL.cool-=dt;if(QUAL.cool>0)return;
  if(QUAL.avg>34&&QUAL.level<3){QUAL.level++;QUAL.cool=3;
@@ -1042,11 +1210,11 @@ function buildWorld(){
  billboard(Math.sin(-Math.PI/2)*13.5,Math.cos(-Math.PI/2)*13.5,-Math.PI/2,BB_ART.ball,"PLAY. TALK. HAVE FUN!","#2FA66A");
  billboard(Math.sin(Math.PI/12)*57,Math.cos(Math.PI/12)*57,Math.PI/12+Math.PI,BB_ART.play,"JUMP AT THE PLAYGROUND!","#F39C12");
  billboard(Math.sin(Math.PI+Math.PI/12)*57,Math.cos(Math.PI+Math.PI/12)*57,Math.PI/12,BB_ART.key,"WELCOME TO SPEAK ISLAND","#2E86C1");
- buildPlayground();buildParkour();
+ buildPlayground();buildParkour();buildPancasila();
  // trees, grass, flowers
  const centers=AREAS.map((A,i)=>areaFrame(i));
  let placed=0,tries=0;
- const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
+ const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
   if(!centers.every((F,k)=>Math.hypot(x-F.x,z-F.z)>(AREAS[k].type==="field"?19:13)))return false;
   if(!centers.every(F=>Math.abs(Math.atan2(Math.sin(a-F.a),Math.cos(a-F.a)))*r>2.4||r>F.r+2))return false;
   return obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+margin)};
@@ -1076,7 +1244,11 @@ function buildWorld(){
   const C=makeChar(kind,tint,female?1.66:1.78,{skin:"#C68A5E",hair:"#222222",style:female?"long":"short",shirt:tint,pants:"#34495E",shoes:"#222222"});
   const R=k<4?45.15:52.85;scene.add(C.root);peds.push({C,R,th:Math.random()*Math.PI*2,dir:k%3?1:-1,v:1.3+Math.random()*.4,pause:0})}
  // player car
- car={m:makeCarMesh("#C0392B"),x:-7,z:13,h:Math.PI/2,speed:0,steer:0};scene.add(car.m);
+ car=addVehicle("car",makeCarMesh("#C0392B"),-7,13,Math.PI/2);
+ addVehicle("motor",makeMotorMesh("#1F6FD1"),7.5,12.5,-Math.PI/2);addVehicle("bike",makeBikeMesh("#27AE60"),9.6,15,-Math.PI/2);
+ {const a=axisUV(0,0);const w1=toWorldXY(BR_DX*62,BR_DZ*62,BR_A,4.6,0),w2=toWorldXY(BR_DX*64,BR_DZ*64,BR_A,-4.6,0);
+  addVehicle("bike",makeBikeMesh("#E67E22"),w1.x,w1.z,BR_A);addVehicle("motor",makeMotorMesh("#C0392B"),w2.x,w2.z,BR_A)}
+ mergeStatic();
  makePlayer();
  clock=new THREE.Clock();resize();addEventListener("resize",resize);
  renderer.setAnimationLoop(tick);
@@ -1123,9 +1295,129 @@ function makePlayer(){let pos=null,rot=0;if(player){pos=player.root.position.clo
 function spawnCoinAt(x,y,z){const c=mesh(G.cyl(.32,.32,.08,20),new THREE.MeshStandardMaterial({color:"#FFD24A",emissive:"#5A3E00",roughness:.25,metalness:.7}),0,0,0,null,true);c.rotation.x=Math.PI/2;
  const h=new THREE.Group();h.add(c);h.position.set(x,y,z);h.userData.y=y;scene.add(h);coins.push(h)}
 function spawnCoin(){let x,z,ok=false,t=0;while(!ok&&t<60){t++;const r=10+Math.random()*74,a=Math.random()*Math.PI*2;x=Math.sin(a)*r;z=Math.cos(a)*r;ok=obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+1.2)&&PLATS.every(p=>!insidePlat(p,x,z,.8))}spawnCoinAt(x,.95,z)}
-function refreshMarkers(){npcs.forEach(n=>{const d=!!SAVE.stars[n.i];const c=d?"#5DD39E":"#F7D23E";n.mk.material.color.set(c);n.ringM.material.color.set(c);n.chev.material.color.set(c);n.mk.material.opacity=d?.18:.38})}
+function refreshMarkers(){const paint=(n,d,base)=>{const c=d?"#5DD39E":base;n.mk.material.color.set(c);n.ringM.material.color.set(c);n.chev.material.color.set(c);n.mk.material.opacity=d?.18:.38};npcs.forEach(n=>paint(n,!!SAVE.stars[n.i],"#F7D23E"));pkn.forEach(n=>paint(n,!!SAVE.pk[n.i],"#6FB7FF"))}
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?72:58;camera.updateProjectionMatrix()}
 function suggested(){for(let i=0;i<AREAS.length;i++)if(!SAVE.stars[i])return i;return -1}
+
+/* ---------- motor & sepeda ---------- */
+function shadowPlane(w,d){const sh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({color:"#000",transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;return sh}
+function wheelGeo(r,t){const g=new THREE.TorusGeometry(r,t,8,22);g.rotateY(Math.PI/2);return g}
+function makeMotorMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.3,metalness:.4});const dark=std("#1A1A1A",.7),chrome=std("#BDC3C7",.25);
+ const wheels=[];[-.62,.62].forEach(z=>{const w=mesh(wheelGeo(.3,.09),dark,0,.36,z,g);const hub=mesh(G.cyl(.12,.12,.12,10),chrome,0,0,0,w);hub.rotation.z=Math.PI/2;wheels.push(w)});
+ mesh(RB(.34,.34,1.0,.12),paint,0,.66,0,g);mesh(RB(.38,.26,.5,.12),paint,0,.88,.22,g);mesh(RB(.32,.1,.62,.05),dark,0,.86,-.25,g);
+ const fork=mesh(G.cyl(.035,.035,.75,6),chrome,0,.7,.56,g);fork.rotation.x=-.35;
+ const bar=mesh(G.cyl(.03,.03,.72,6),dark,0,1.05,.46,g);bar.rotation.z=Math.PI/2;
+ mesh(G.sph(.09,10,8),new THREE.MeshBasicMaterial({color:"#FFF8DC"}),0,.9,.68,g,true);mesh(G.box(.1,.08,.04),new THREE.MeshBasicMaterial({color:"#E74C3C"}),0,.8,-.62,g,true);
+ const ex=mesh(G.cyl(.05,.06,.6,8),chrome,.2,.45,-.25,g);ex.rotation.x=Math.PI/2;
+ g.add(shadowPlane(.9,1.9));g.userData.wheels=wheels;return g}
+function makeBikeMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.35,metalness:.3});const dark=std("#1A1A1A",.7);
+ const wheels=[];[-.55,.55].forEach(z=>{const w=mesh(wheelGeo(.33,.03),dark,0,.36,z,g);for(let k=0;k<3;k++){const sp=mesh(G.box(.012,.62,.012),std("#BDC3C7",.3),0,0,0,w);sp.rotation.x=k*Math.PI/3}wheels.push(w)});
+ const tube=(y1,z1,y2,z2,r)=>{const len=Math.hypot(y2-y1,z2-z1);const m=mesh(G.cyl(r||.025,r||.025,len,6),paint,0,(y1+y2)/2,(z1+z2)/2,g);m.rotation.x=Math.atan2(z2-z1,y2-y1);return m};
+ tube(.36,-.55,.78,-.15);tube(.36,-.55,.4,-.05);tube(.4,-.05,.8,-.16);tube(.4,-.05,.82,.38);tube(.8,-.15,.84,.38);tube(.36,.55,.98,.4);
+ mesh(RB(.16,.06,.26,.03),dark,0,.86,-.18,g);const bar=mesh(G.cyl(.022,.022,.55,6),dark,0,1,.4,g);bar.rotation.z=Math.PI/2;
+ g.add(shadowPlane(.6,1.6));g.userData.wheels=wheels;return g}
+function addVehicle(type,m,x,z,h){scene.add(m);const v={type,cfg:VCFG[type],m,x,z,h,speed:0,steer:0};VEH.push(v);return v}
+
+/* ---------- Negeri Pancasila (pulau PPKn) ---------- */
+function i2pos(ang,r){const a=BR_A+Math.PI+ang;return{x:C2.x+Math.sin(a)*r,z:C2.z+Math.cos(a)*r,rot:a}}
+function flagTexture(){const c=document.createElement("canvas");c.width=96;c.height=64;const g=c.getContext("2d");g.fillStyle="#E11D2A";g.fillRect(0,0,96,32);g.fillStyle="#FFFFFF";g.fillRect(0,32,96,32);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+function buildPancasila(){
+ const grassM=new THREE.MeshStandardMaterial({map:imgTex("grass",30),color:"#B9D8A0",roughness:1});
+ mesh(G.cyl(R2+5,R2+9,.8,64),texStd("sand","#E9D3A0",30,30,1),C2.x,-.4,C2.z,scene,true).receiveShadow=true;
+ mesh(G.cyl(R2,R2+1.5,.8,64),grassM,C2.x,-.39,C2.z,scene,true).receiveShadow=true;
+ mesh(G.cyl(14,14,.06,48),texStd("paving","#D8CFBA",16,16,.95),C2.x,.035,C2.z,scene,true).receiveShadow=true;
+ // jalan di pulau utama
+ const u0=53.7,u1=93,pathM=texStd("paving","#CFC7B5",1,(u1-u0)/3,.95);
+ const pth=mesh(G.box(5,.06,u1-u0),pathM,BR_DX*(u0+u1)/2,.05,BR_DZ*(u0+u1)/2,scene,true);pth.rotation.y=BR_A;pth.receiveShadow=true;
+ // jembatan
+ const b0=86,b1=C2D-R2+4,L=b1-b0,mid=(b0+b1)/2;
+ const deck=new THREE.Group();deck.position.set(BR_DX*mid,0,BR_DZ*mid);deck.rotation.y=BR_A;scene.add(deck);
+ mesh(G.box(6,.4,L),texStd("wood","#B08A5A",2,L/2,.8),0,-.15,0,deck,true).receiveShadow=true;
+ [-3,3].forEach(v=>{box(.16,.12,L,"#F5F5F5",v,1,0,deck);box(.1,.08,L,"#C0392B",v,.6,0,deck);
+  for(let k=0;k<=L;k+=4){cyl(.07,.07,1,"#F5F5F5",v,.5,-L/2+k,deck,6)}
+  for(let k=6;k<L;k+=14){cyl(.35,.4,4,"#8C8577",v*.93,-2.3,-L/2+k,deck,10)}});
+ for(let k=8;k<L;k+=16){[-3.2,3.2].forEach(v=>{cyl(.07,.09,4.2,"#2C3E50",v,2.1,-L/2+k,deck,8);mesh(G.sph(.2,10,8),new THREE.MeshBasicMaterial({color:"#FFF6D8"}),v,4.3,-L/2+k,deck,true)})}
+ // gerbang
+ const gate=(u,txt,col)=>{const gp=new THREE.Group();gp.position.set(BR_DX*u,0,BR_DZ*u);gp.rotation.y=BR_A;scene.add(gp);
+  [-3.4,3.4].forEach(v=>{box(.8,5,.8,"#FFFFFF",v,2.5,0,gp);box(.86,1.2,.86,"#C0392B",v,4.4,0,gp);const w=toWorldXY(BR_DX*u,BR_DZ*u,BR_A,v,0);obstacles.push({x:w.x,z:w.z,r:.55})});
+  box(7.8,.9,.9,col,0,5.4,0,gp);const lb=labelSprite(txt,col,"#FFFFFF",448);lb.position.set(0,6.6,0);lb.scale.multiplyScalar(1.6);gp.add(lb)};
+ gate(58,"JALAN KE NEGERI PANCASILA","#C0392B");gate(b1+2,"NEGERI PANCASILA","#C0392B");
+ // monumen
+ cyl(3.2,3.6,1,"#D9D2C3",C2.x,.5,C2.z,scene,24);cyl(2.4,2.6,.6,"#C9C1B0",C2.x,1.3,C2.z,scene,24);
+ mesh(G.cyl(.55,.8,9,16),std("#F2EEE6",.6),C2.x,6,C2.z,scene);
+ const star=mesh(new THREE.OctahedronGeometry(1.1,0),new THREE.MeshStandardMaterial({color:"#F7D23E",emissive:"#7A5C00",roughness:.3,metalness:.6}),C2.x,11.4,C2.z,scene);star.scale.set(1,1.3,.45);balloons.push(star);star.userData.spin=true;
+ const lm=labelSprite("BHINNEKA TUNGGAL IKA","#8B0000","#FFFFFF",448);lm.position.set(C2.x,3.2,C2.z);lm.scale.multiplyScalar(1.4);scene.add(lm);
+ obstacles.push({x:C2.x,z:C2.z,r:3.8});
+ // tiang bendera
+ const fp=i2pos(Math.PI,7);cyl(.08,.1,11,"#E5E7E9",fp.x,5.5,fp.z,scene,8);obstacles.push({x:fp.x,z:fp.z,r:.4});
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.6,12,1),new THREE.MeshStandardMaterial({map:flagTexture(),side:THREE.DoubleSide,roughness:.8}));
+ fl.position.set(fp.x,9.9,fp.z);fl.rotation.y=fp.rot+Math.PI/2;fl.geometry.translate(1.2,0,0);scene.add(fl);FLAG=fl;FLAGBASE=Float32Array.from(fl.geometry.attributes.position.array);
+ // pendopo & guru
+ const spots=[];
+ PK.forEach((P,i)=>{let ang,r,mr,face;
+  if(i<5){ang=Math.PI/3+i*Math.PI/3;const pp=i2pos(ang,31);spots.push(pp);
+   const g=new THREE.Group();g.position.set(pp.x,0,pp.z);g.rotation.y=pp.rot+Math.PI;scene.add(g);
+   box(8,.4,7,"#D5C4A1",0,.2,0,g);[[-3.4,-3],[3.4,-3],[-3.4,3],[3.4,3]].forEach(([x,z])=>cyl(.18,.2,3.4,"#8B5A2B",x,2.1,z,g,8));
+   const roof=mesh(new THREE.ConeGeometry(1,2.6,4),texStd("tiles",P.color,5,3,.8),0,5.1,0,g);roof.rotation.y=Math.PI/4;roof.scale.set(6.4,1,5.8);
+   const lb=labelSprite(P.place,P.color,"#FFFFFF",384);lb.position.set(0,7.2,0);lb.scale.multiplyScalar(1.4);g.add(lb);
+   obstacles.push({x:pp.x,z:pp.z,r:4.4});r=25;mr=22.2;face=pp.rot+Math.PI}
+  else{ang=i===5?-.6:.6;r=9.5;mr=12.2;face=i2pos(ang,r).rot;
+   const sp=i2pos(ang,r+.1),g=new THREE.Group();g.position.set(sp.x,0,sp.z);scene.add(g);cyl(.06,.06,2.6,"#7F8C8D",0,1.3,0,g,6);
+   const lb=labelSprite(P.place,P.color,"#FFFFFF",384);lb.position.set(0,3.1,0);g.add(lb)}
+  const w=i2pos(ang,r),mw=i2pos(ang,mr);
+  const kind=P.fem?"woman":"guy";const C=makeChar(kind,null,TARGET_H[kind],{skin:"#C68A5E",hair:"#1E1410",style:P.fem?"bun":"short",shirt:P.color,pants:"#34495E",shoes:"#222222"});
+  C.root.position.set(w.x,0,w.z);C.root.rotation.y=face;scene.add(C.root);
+  const tag=labelSprite(P.name,"rgba(0,0,0,.7)","#FFFFFF",224);tag.position.y=C.headY+.55;C.root.add(tag);
+  const chev=mesh(new THREE.ConeGeometry(.22,.42,4),new THREE.MeshBasicMaterial({color:"#6FB7FF"}),0,C.headY+1.05,0,C.root,true);chev.rotation.x=Math.PI;
+  const mk=new THREE.Mesh(new THREE.CylinderGeometry(.85,.85,1.1,36,1,true),new THREE.MeshBasicMaterial({color:"#6FB7FF",transparent:true,opacity:.38,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));mk.position.set(mw.x,.55,mw.z);scene.add(mk);
+  const ringM=new THREE.Mesh(new THREE.RingGeometry(.7,.88,36),new THREE.MeshBasicMaterial({color:"#6FB7FF",transparent:true,opacity:.8,depthWrite:false}));ringM.rotation.x=-Math.PI/2;ringM.position.set(mw.x,.06,mw.z);scene.add(ringM);
+  obstacles.push({x:w.x,z:w.z,r:.45});pkn.push({i,pk:true,C,chev,mk,ringM,x:w.x,z:w.z,mx:mw.x,mz:mw.z,base:face})});
+ // pohon & koin
+ let n=0,t=0;while(n<24&&t<800){t++;const ang=Math.random()*Math.PI*2,r=37+Math.random()*11;if(Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)))<.4)continue;const q=i2pos(ang,r);
+  if(spots.some(sp=>Math.hypot(sp.x-q.x,sp.z-q.z)<8))continue;treeAt(scene,q.x,q.z,.9+Math.random()*.5);obstacles.push({x:q.x,z:q.z,r:.55});n++}
+ for(let k=0;k<10;k++){const q=i2pos(Math.random()*Math.PI*2,15+Math.random()*18);if(obstacles.every(o=>Math.hypot(q.x-o.x,q.z-o.z)>o.r+1.2))spawnCoinAt(q.x,.95,q.z)}
+ for(let k=0;k<6;k++)spawnCoinAt(BR_DX*(95+k*12),.95,BR_DZ*(95+k*12));
+}
+let FLAG=null,FLAGBASE=null;
+const PORTRAIT={};let PR=null;
+function renderPortrait(key,C){
+ if(PORTRAIT[key])return PORTRAIT[key];
+ try{
+  if(!PR){const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.setSize(192,192);r.outputEncoding=THREE.sRGBEncoding;
+   const s=new THREE.Scene();s.add(new THREE.HemisphereLight("#FFFFFF","#806050",1.2));const d=new THREE.DirectionalLight("#FFF4E0",1.3);d.position.set(1.4,2.4,3);s.add(d);
+   PR={r,s,c:new THREE.PerspectiveCamera(26,1,.05,30)}}
+  PR.s.add(C.root);let hy=C.headY;
+  if(C.gltf){C.mixer.update(.4);C.root.updateMatrixWorld(true);if(C.head){const v=new THREE.Vector3();C.head.getWorldPosition(v);hy=v.y+.08}}
+  else if(C.head)C.head.rotation.y=.25;
+  PR.c.position.set(.22,hy+.02,1.0);PR.c.lookAt(0,hy-.05,0);
+  PR.r.render(PR.s,PR.c);PORTRAIT[key]=PR.r.domElement.toDataURL("image/png");PR.s.remove(C.root);
+ }catch(e){PORTRAIT[key]=HERO_ART.girl}
+ return PORTRAIT[key];
+}
+function pkPortrait(i){const k="pk"+i;if(PORTRAIT[k])return PORTRAIT[k];const P=PK[i],kind=P.fem?"woman":"guy";
+ return renderPortrait(k,makeChar(kind,null,TARGET_H[kind],{skin:"#C68A5E",hair:"#1E1410",style:P.fem?"bun":"short",shirt:P.color,pants:"#34495E",shoes:"#222222"}))}
+
+/* ---------- gabungkan objek diam agar ringan ---------- */
+function mergeStatic(){
+ if(!THREE.BufferGeometryUtils||!THREE.BufferGeometryUtils.mergeBufferGeometries)return;
+ const skip=new Set([water,sky,FLAG,...balloons,...coins,...stars.map(x=>x.m),...PLATS.filter(p=>p.mesh).map(p=>p.mesh),...VEH.map(v=>v.m),...traffic.map(T=>T.m),
+  ...npcs.flatMap(n=>[n.C.root,n.mk,n.ringM]),...pkn.flatMap(n=>[n.C.root,n.mk,n.ringM]),...peds.map(P=>P.C.root),...clouds,...birds.map(b=>b.g)].filter(Boolean));
+ const isSkipped=o=>{for(let q=o;q;q=q.parent){if(skip.has(q))return true}return false};
+ scene.updateMatrixWorld(true);
+ const groups=new Map(),victims=[];const CH=48;const v=new THREE.Vector3();
+ scene.traverse(o=>{if(!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||Array.isArray(o.material)||!o.geometry||!o.visible||isSkipped(o))return;
+  const g=o.geometry;if(!g.attributes.position||!g.attributes.normal)return;
+  o.getWorldPosition(v);const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");
+  let G2=groups.get(key);if(!G2){G2={mat:o.material,cast:o.castShadow,recv:o.receiveShadow,list:[]};groups.set(key,G2)}
+  const c=g.clone();for(const n in c.attributes)if(!["position","normal","uv"].includes(n))c.deleteAttribute(n);c.morphAttributes={};c.clearGroups();c.applyMatrix4(o.matrixWorld);G2.list.push(c);victims.push(o)});
+ let made=0;groups.forEach(G2=>{if(G2.list.length<2){G2.list.forEach(c=>c.dispose());G2.skipped=true;return}
+  const m=THREE.BufferGeometryUtils.mergeBufferGeometries(G2.list,false);G2.list.forEach(c=>c.dispose());if(!m){G2.failed=true;return}
+  const me=new THREE.Mesh(m,G2.mat);me.castShadow=G2.cast;me.receiveShadow=G2.recv;me.matrixAutoUpdate=false;scene.add(me);G2.done=true;made++});
+ // hapus mesh asli hanya yang berhasil digabung
+ const okKeys=new Set();groups.forEach((G2,k)=>{if(G2.done)okKeys.add(k)});
+ victims.forEach(o=>{o.getWorldPosition(v);const g=o.geometry;const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");if(okKeys.has(key)&&o.parent)o.parent.remove(o)});
+ window.MERGED=made;
+}
 
 /* ---------- platform physics ---------- */
 function insidePlat(p,x,z,pad){return p.cyl?Math.hypot(x-p.x,z-p.z)<p.r+pad:Math.abs(x-p.x)<p.hw+pad&&Math.abs(z-p.z)<p.hd+pad}
@@ -1145,15 +1437,20 @@ function tick(){
  birds.forEach(B=>{const a=t*.18+B.f*2.1+B.b*.05,R=48+B.f*14;B.g.position.set(Math.sin(a)*R+Math.sin(B.b)*2.2,24+B.f*5+Math.sin(t+B.b)*.6,Math.cos(a)*R+Math.cos(B.b*1.7)*2.2);B.g.rotation.y=a+Math.PI/2;const fl=Math.sin(t*9+B.ph)*.6;B.L.rotation.z=fl;B.R.rotation.z=-fl});
  coins.forEach(c=>{c.rotation.y+=dt*3;c.position.y=c.userData.y+Math.sin(t*3+c.position.x)*.12});
  stars.forEach(s=>{if(!s.got){s.m.rotation.y+=dt*2;s.m.position.y=s.y+Math.sin(t*2)*.15}});
- balloons.forEach(b=>{if(b.userData.float!==undefined)b.position.y+=Math.sin(t*1.5+b.userData.float)*.002;if(b.userData.boat){b.rotation.z=Math.sin(t*1.2)*.04;b.position.y=-.1+Math.sin(t*1.5)*.08}});
+ balloons.forEach(b=>{if(b.userData.spin)b.rotation.y+=dt;if(b.userData.float!==undefined)b.position.y+=Math.sin(t*1.5+b.userData.float)*.002;if(b.userData.boat){b.rotation.z=Math.sin(t*1.2)*.04;b.position.y=-.1+Math.sin(t*1.5)*.08}});
  const pp=driving?tmpV.set(car.x,0,car.z).clone():player.root.position;
  // NPCs
  FRAME++;npcs.forEach(n=>{const d=Math.hypot(pp.x-n.x,pp.z-n.z);const near=d<9&&!driving;n.C.root.visible=d<QUAL.far;if(d>=QUAL.far)return;
   const want=near?Math.atan2(pp.x-n.x,pp.z-n.z):n.base;
   n.C.root.rotation.y+=Math.atan2(Math.sin(want-n.C.root.rotation.y),Math.cos(want-n.C.root.rotation.y))*Math.min(1,dt*4);
-  n.acc=(n.acc||0)+dt;const step=d<25?1:d<45?2:4;if((FRAME+n.i)%step===0){animChar(n.C,n.acc,{speed:0,wave:near&&d>2.6&&d<7,talk:(Q&&Q.i===n.i)||d<=2.6});n.acc=0}
+  n.acc=(n.acc||0)+dt;const step=d<25?1:d<45?2:4;if((FRAME+n.i)%step===0){animChar(n.C,n.acc,{speed:0,wave:near&&d>2.6&&d<7,talk:(Q&&!Q.pk&&Q.i===n.i)||d<=2.6});n.acc=0}
   n.chev.position.y=n.C.headY+1.05+Math.sin(t*3+n.i)*.12;n.chev.rotation.y+=dt*2;
   n.mk.scale.y=1+Math.sin(t*3+n.i)*.06});
+ pkn.forEach(n=>{const d=Math.hypot(pp.x-n.x,pp.z-n.z);const near=d<9&&!driving;n.C.root.visible=d<QUAL.far;if(d>=QUAL.far)return;
+  const want=near?Math.atan2(pp.x-n.x,pp.z-n.z):n.base;n.C.root.rotation.y+=Math.atan2(Math.sin(want-n.C.root.rotation.y),Math.cos(want-n.C.root.rotation.y))*Math.min(1,dt*4);
+  n.acc=(n.acc||0)+dt;const step=d<25?1:d<45?2:4;if((FRAME+n.i)%step===0){animChar(n.C,n.acc,{speed:0,wave:near&&d>2.6&&d<7,talk:(Q&&Q.pk&&Q.i===n.i)||d<=2.6});n.acc=0}
+  n.chev.position.y=n.C.headY+1.05+Math.sin(t*3+n.i)*.12;n.chev.rotation.y+=dt*2;n.mk.scale.y=1+Math.sin(t*3+n.i)*.06});
+ if(FLAG&&Math.hypot(pp.x-C2.x,pp.z-C2.z)<90){const fa=FLAG.geometry.attributes.position.array;for(let k=0;k<fa.length;k+=3){const x=FLAGBASE[k];fa[k+2]=Math.sin(x*2.2-t*4)*.12*x/2.4}FLAG.geometry.attributes.position.needsUpdate=true}
  // pedestrians
  peds.forEach(P=>{const pos=P.C.root.position;const ahead=Math.hypot(pp.x-pos.x,pp.z-pos.z)<1.6;
   if(P.pause>0){P.pause-=dt}else if(!ahead){P.th+=P.dir*P.v*dt/P.R}
@@ -1164,13 +1461,15 @@ function tick(){
  // traffic
  traffic.forEach(T=>{const x=Math.sin(T.th)*T.lane,z=Math.cos(T.th)*T.lane;
   const fx=T.dir>0?Math.cos(T.th):-Math.cos(T.th),fz=T.dir>0?-Math.sin(T.th):Math.sin(T.th);
-  let block=false;const tg=[pp];if(!driving)tg.push(car);for(const q of tg){const dx=q.x-x,dz=q.z-z,d=Math.hypot(dx,dz);if(d<7&&(dx*fx+dz*fz)>0&&Math.abs(dx*fz-dz*fx)<2)block=true}
+  let block=false;const tg=[pp,...VEH.filter(v=>!(driving&&v===car))];for(const q of tg){const dx=q.x-x,dz=q.z-z,d=Math.hypot(dx,dz);if(d<7&&(dx*fx+dz*fz)>0&&Math.abs(dx*fz-dz*fx)<2)block=true}
   traffic.forEach(U=>{if(U!==T&&U.lane===T.lane){const d=Math.atan2(Math.sin(U.th-T.th),Math.cos(U.th-T.th))*T.dir;if(d>0&&d*T.lane<9)block=true}});
   T.cur=lerp(T.cur||T.v,block?0:T.v,Math.min(1,dt*(block?4:1)));T.th+=T.dir*T.cur*dt/T.lane;
   T.m.position.set(Math.sin(T.th)*T.lane,0,Math.cos(T.th)*T.lane);T.m.rotation.y=Math.atan2(fx,fz)});
  if(!paused){if(driving)driveCar(dt);else movePlayer(dt)}else if(!driving)animChar(player,dt,{speed:0});
  if(dancing>0){dancing-=dt}
- car.m.position.set(car.x,0,car.z);car.m.rotation.y=car.h;
+ VEH.forEach(v=>{v.m.position.set(v.x,0,v.z);v.m.rotation.y=v.h;
+  if(v.cfg.ride){const lean=(driving&&v===car)?-v.steer*Math.min(1,Math.abs(v.speed)/8)*.55:0;v.m.rotation.z=lerp(v.m.rotation.z,lean,.12)}
+  if(v.m.userData.wheels&&v.speed)v.m.userData.wheels.forEach(w=>w.rotation.x+=v.speed*dt/.33)});
  // camera
  const target=driving?{x:car.x,y:0,z:car.z}:player.root.position;
  if(driving&&!dragging){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
@@ -1186,9 +1485,16 @@ function tick(){
  sun.position.set(target.x+SUNDIR.x*70,target.y+SUNDIR.y*70,target.z+SUNDIR.z*70);sun.target.position.set(target.x,0,target.z);
  // location name
  if(!paused){let best=-1,bd=15;npcs.forEach(n=>{const d=Math.hypot(n.x-target.x,n.z-target.z);if(d<bd){bd=d;best=n.i}});
-  const pg=Math.hypot(target.x,target.z-19)<8?"pg":Math.hypot(target.x,target.z+19)<7?"pk":null;const key=best>=0?best:pg;
+  let pkb=-1,pbd=12;pkn.forEach(n=>{const d=Math.hypot(n.x-target.x,n.z-target.z);if(d<pbd){pbd=d;pkb=n.i}});
+  const q=axisUV(target.x,target.z);const onBr=q.u>88&&q.u<C2D-R2+2&&Math.abs(q.v)<6,onIs=onIsland2(target.x,target.z);
+  const pg=Math.hypot(target.x,target.z-19)<8?"pg":Math.hypot(target.x,target.z+19)<7?"pk":null;
+  const key=best>=0?best:pkb>=0?"p"+pkb:onBr?"br":onIs?"is":pg;
   if(key!==lastArea){lastArea=key;const el=$("loc");
-   if(best>=0){el.innerHTML=`<b>${esc(AREAS[best].name)}</b><span>${esc(AREAS[best].topic)}</span>`}else if(pg==="pg"){el.innerHTML="<b>Taman Lompat</b><span>Trampolin & tangga balok</span>"}else if(pg==="pk"){el.innerHTML="<b>Menara Parkour</b><span>Naik sampai puncak!</span>"}
+   if(best>=0){el.innerHTML=`<b>${esc(AREAS[best].name)}</b><span>${esc(AREAS[best].topic)}</span>`}
+   else if(pkb>=0){el.innerHTML=`<b>${esc(PK[pkb].place)}</b><span>PPKn · ${esc(PK[pkb].topic)}</span>`}
+   else if(onBr){el.innerHTML="<b>Jembatan Garuda</b><span>Jalan ke Negeri Pancasila</span>"}
+   else if(onIs){el.innerHTML="<b>Negeri Pancasila</b><span>Belajar PPKn bersama 7 guru</span>"}
+   else if(pg==="pg"){el.innerHTML="<b>Taman Lompat</b><span>Trampolin & tangga balok</span>"}else if(pg==="pk"){el.innerHTML="<b>Menara Parkour</b><span>Naik sampai puncak!</span>"}
    if(key!==null&&key!==undefined){el.style.opacity=1;locT=2.6}}}
  if(locT>0){locT-=dt;if(locT<=0)$("loc").style.opacity=0}
  updateHelp();updateObjective(target);if(FRAME%2===0)drawRadar(target);adaptQuality(dt);
@@ -1200,13 +1506,13 @@ function movePlayer(dt){
  const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
  const run=running||keys.ShiftLeft||keys.ShiftRight||Math.hypot(joyVec.x,joyVec.y)>.92;
  const sp=(run?7.6:2.3)*len;const mx=fx*iz+rx*ix,mz=fz*iz+rz*ix;
- const g=player.root,pos=g.position;
+ const g=player.root,pos=g.position;const ox=pos.x,oz=pos.z;
  pos.x+=mx*sp*dt;pos.z+=mz*sp*dt;
  if(len>.1){dancing=0;const want=Math.atan2(mx,mz);g.rotation.y+=Math.atan2(Math.sin(want-g.rotation.y),Math.cos(want-g.rotation.y))*Math.min(1,dt*12)}
  pushOutCircles(pos,PRAD,obstacles);
- pushOutCircles(pos,PRAD,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.6})).concat([{x:car.x,z:car.z,r:1.6}],peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.35}))));
+ pushOutCircles(pos,PRAD,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.6})).concat(VEH.map(v=>({x:v.x,z:v.z,r:v.cfg.rad+.1})),peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.35}))));
  pushOutPlats(pos,pos.y,PRAD);
- const r=Math.hypot(pos.x,pos.z);if(r>ISLAND_R){pos.x*=ISLAND_R/r;pos.z*=ISLAND_R/r}
+ if(!walkable(pos.x,pos.z)){if(walkable(pos.x,oz))pos.z=oz;else if(walkable(ox,pos.z))pos.x=ox;else{pos.x=ox;pos.z=oz}}
  vy-=24*dt;pos.y+=vy*dt;const fl=floorAt(pos.x,pos.z,pos.y);
  if(pos.y<=fl.f){if(fl.pl&&fl.pl.bounce&&vy<-1.5){pos.y=fl.f;vy=fl.pl.bounce;onGround=false;jumps=1;blip("jump");if(fl.pl.mesh){fl.pl.mesh.scale.y=.3;setTimeout(()=>fl.pl.mesh.scale.y=1,120)}}
   else{pos.y=fl.f;vy=0;onGround=true;jumps=0}}else if(pos.y>fl.f+.05)onGround=false;
@@ -1215,30 +1521,37 @@ function movePlayer(dt){
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.hypot(c.position.x-pos.x,c.position.z-pos.z)<1.05&&Math.abs(c.position.y-(pos.y+.9))<1.2){scene.remove(c);coins.splice(i,1);SAVE.coins++;persist();updateStats();blip("coin");if(c.userData.y<1.5)setTimeout(spawnCoin,20000)}}
  stars.forEach(s=>{if(!s.got&&Math.hypot(s.x-pos.x,s.z-pos.z)<1.2&&Math.abs(s.y-(pos.y+.9))<1.4){s.got=true;s.m.visible=false;SAVE.xp+=30;persist();updateStats();blip("win");confetti(30);toast("Bintang puncak! +30 XP");setTimeout(()=>{s.got=false;s.m.visible=true},60000)}});
  let best=-1,bd=99;npcs.forEach(n=>{const dm=Math.hypot(n.mx-pos.x,n.mz-pos.z),dn=Math.hypot(n.x-pos.x,n.z-pos.z);if((dm<1.2||dn<2.4)&&dn<bd){bd=dn;best=n.i}});
- if(best!==nearNpc){nearNpc=best;const tb=$("talkBtn");tb.disabled=best<0;tb.classList.toggle("ready",best>=0)}
- $("carBtn").hidden=Math.hypot(car.x-pos.x,car.z-pos.z)>3.4;
+ let bp=-1,bpd=99;pkn.forEach(n=>{const dm=Math.hypot(n.mx-pos.x,n.mz-pos.z),dn=Math.hypot(n.x-pos.x,n.z-pos.z);if((dm<1.2||dn<2.4)&&dn<bpd){bpd=dn;bp=n.i}});
+ if(bp>=0&&bpd<bd)best=-1;else bp=-1;
+ if(best!==nearNpc||bp!==nearPk){nearNpc=best;nearPk=bp;const tb=$("talkBtn");const any=best>=0||bp>=0;tb.disabled=!any;tb.classList.toggle("ready",any)}
+ let nv=null,nd=3.4;VEH.forEach(v=>{const d=Math.hypot(v.x-pos.x,v.z-pos.z);if(d<nd){nd=d;nv=v}});
+ if(nv)car=nv;$("carBtn").hidden=!nv;if(nv)$("carBtn").textContent=nv.cfg.label;
 }
 function driveCar(dt){
- const {ix,iz}=inputVec();
- const maxF=19,maxR=-6;
- if(iz>.05)car.speed+=(car.speed<0?22:9)*iz*dt;else if(iz<-.05)car.speed-=(car.speed>0?20:6)*(-iz)*dt;else car.speed*=Math.pow(.35,dt);
+ const {ix,iz}=inputVec();const C=car.cfg;
+ if(iz>.05)car.speed+=(car.speed<0?C.acc*2.4:C.acc)*iz*dt;else if(iz<-.05)car.speed-=(car.speed>0?C.acc*2.2:C.acc*.7)*(-iz)*dt;else car.speed*=Math.pow(.35,dt);
  if(keys.Space)car.speed*=Math.pow(.05,dt);
- car.speed=Math.max(maxR,Math.min(maxF,car.speed));
+ car.speed=Math.max(C.maxR,Math.min(C.maxF,car.speed));
  car.steer=lerp(car.steer,-ix*.55,Math.min(1,dt*6));
- car.h+=car.speed/2.6*Math.tan(car.steer)*dt;
+ car.h+=car.speed/C.wb*Math.tan(car.steer)*dt;
  const pos={x:car.x+Math.sin(car.h)*car.speed*dt,z:car.z+Math.cos(car.h)*car.speed*dt};
  const before={x:pos.x,z:pos.z};
- pushOutCircles(pos,1.5,obstacles);pushOutCircles(pos,1.5,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.6})));pushOutCircles(pos,1.2,npcs.map(n=>({x:n.x,z:n.z,r:.5})).concat(peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.5}))));
- pushOutPlats(pos,0,1.4);
- const r=Math.hypot(pos.x,pos.z);if(r>ISLAND_R-1){pos.x*=(ISLAND_R-1)/r;pos.z*=(ISLAND_R-1)/r}
+ pushOutCircles(pos,C.rad,obstacles);pushOutCircles(pos,C.rad,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.6})));
+ pushOutCircles(pos,C.rad*.8,npcs.concat(pkn).map(n=>({x:n.x,z:n.z,r:.5})).concat(peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.5})),VEH.filter(v=>v!==car).map(v=>({x:v.x,z:v.z,r:v.cfg.rad}))));
+ pushOutPlats(pos,0,C.rad);
+ if(!walkable(pos.x,pos.z,C.rad*.7)){pos.x=car.x;pos.z=car.z}
  if(Math.hypot(pos.x-before.x,pos.z-before.z)>.01){car.speed*=-.25;if(Math.abs(car.speed)>2)blip("bad")}
  car.x=pos.x;car.z=pos.z;
- player.root.position.set(car.x,0,car.z);
+ if(C.ride){player.root.position.set(car.x,C.seat,car.z);player.root.rotation.y=car.h;animChar(player,dt,{speed:car.type==="bike"?Math.min(4,Math.abs(car.speed)*.45):0})}
+ else player.root.position.set(car.x,0,car.z);
+ for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.hypot(c.position.x-car.x,c.position.z-car.z)<1.4&&c.userData.y<1.5){scene.remove(c);coins.splice(i,1);SAVE.coins++;persist();updateStats();blip("coin");setTimeout(spawnCoin,20000)}}
 }
 function toggleCar(){
  if(paused)return;
- if(driving){driving=false;const rx=Math.cos(car.h),rz=-Math.sin(car.h);player.root.position.set(car.x-rx*1.9,0,car.z-rz*1.9);player.root.visible=true;car.speed=0;$("jumpBtn").textContent="Lompat";$("carBtn").textContent="Mobil";blip();return}
- if(Math.hypot(car.x-player.root.position.x,car.z-player.root.position.z)<3.4){driving=true;player.root.visible=false;nearNpc=-1;$("talkBtn").disabled=true;$("carBtn").hidden=false;$("carBtn").textContent="Keluar";$("jumpBtn").textContent="Rem";blip("good")}
+ if(driving){driving=false;const C=car.cfg,off=C.ride?1.1:1.9,rx=Math.cos(car.h),rz=-Math.sin(car.h);
+  let px=car.x-rx*off,pz=car.z-rz*off;if(!walkable(px,pz)){px=car.x+rx*off;pz=car.z+rz*off}if(!walkable(px,pz)){px=car.x;pz=car.z}
+  player.root.position.set(px,0,pz);player.root.visible=true;car.speed=0;$("jumpBtn").textContent="Lompat";$("carBtn").textContent=C.label;blip();return}
+ if(car&&Math.hypot(car.x-player.root.position.x,car.z-player.root.position.z)<3.4){driving=true;player.root.visible=car.cfg.ride;nearNpc=-1;nearPk=-1;$("talkBtn").disabled=true;$("carBtn").hidden=false;$("carBtn").textContent=car.cfg.ride?"Turun":"Keluar";$("jumpBtn").textContent="Rem";blip("good")}
 }
 function jump(){if(paused)return;if(driving){keys.Space=true;setTimeout(()=>keys.Space=false,400);return}
  if(onGround){vy=8.2;onGround=false;jumps=1;blip("jump")}else if(jumps<2){vy=7.4;jumps=2;blip("jump")}}
@@ -1247,14 +1560,19 @@ function jump(){if(paused)return;if(driving){keys.Space=true;setTimeout(()=>keys
 let helpKey="";
 function updateHelp(){const h=$("help");let k="",html="";
  if(paused){h.hidden=true;return}
- if(driving){k="drive";html="Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · Keluar <kbd>F</kbd>"}
+ if(driving){k="drive"+car.type;html=`${esc(car.cfg.label)}: Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · ${car.cfg.ride?"Turun":"Keluar"} <kbd>F</kbd>`}
  else if(nearNpc>=0){k="npc"+nearNpc;html=`Tekan <kbd>E</kbd> untuk ngobrol dengan <b style="color:#F7D23E">${esc(AREAS[nearNpc].npc.name)}</b>`}
- else if(!$("carBtn").hidden){k="car";html="Tekan <kbd>F</kbd> untuk masuk ke mobil"}
+ else if(nearPk>=0){k="pk"+nearPk;html=`Tekan <kbd>E</kbd> untuk belajar PPKn bersama <b style="color:#6FB7FF">${esc(PK[nearPk].name)}</b>`}
+ else if(!$("carBtn").hidden){k="car"+car.type;html=`Tekan <kbd>F</kbd> untuk naik ${esc(car.cfg.label.toLowerCase())}`}
  if(k!==helpKey){helpKey=k;h.hidden=!k;h.innerHTML=html}}
 let objKey="";
-function updateObjective(tg){const si=suggested();const el=$("objective");
- let html;if(si<0)html=`Semua misi selesai! <span class="small">Jelajahi kota, nyetir, atau ulangi misi favoritmu.</span>`;
- else{const n=npcs[si];const d=Math.round(Math.hypot(n.x-tg.x,n.z-tg.z));html=`Temui <span class="y">${esc(AREAS[si].npc.name)}</span> di <span class="y">${esc(AREAS[si].name)}</span>.<span class="small">${esc(AREAS[si].topic)} · ${d} m</span>`}
+function updateObjective(tg){const el=$("objective");let html;const q=axisUV(tg.x,tg.z);
+ if(onIsland2(tg.x,tg.z)||(q.u>86&&Math.abs(q.v)<7)){const pi=suggestedPk();
+  if(pi<0)html=`Semua pelajaran PPKn selesai! <span class="small">Kembali lewat Jembatan Garuda atau ulangi pelajaran favoritmu.</span>`;
+  else{const n=pkn[pi];const d=Math.round(Math.hypot(n.x-tg.x,n.z-tg.z));html=`Belajar PPKn dengan <span class="y">${esc(PK[pi].name)}</span> di <span class="y">${esc(PK[pi].place)}</span>.<span class="small">${esc(PK[pi].topic)} · ${d} m</span>`}}
+ else{const si=suggested();
+  if(si<0){const d=Math.round(Math.hypot(BR_DX*58-tg.x,BR_DZ*58-tg.z));html=`Semua misi bahasa Inggris selesai! <span class="small">Ayo ke Negeri Pancasila untuk belajar PPKn · gerbang ${d} m</span>`}
+  else{const n=npcs[si];const d=Math.round(Math.hypot(n.x-tg.x,n.z-tg.z));html=`Temui <span class="y">${esc(AREAS[si].npc.name)}</span> di <span class="y">${esc(AREAS[si].name)}</span>.<span class="small">${esc(AREAS[si].topic)} · ${d} m</span>`}}
  if(html!==objKey){objKey=html;el.innerHTML=html}}
 function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.width,c=W/2,s=W/2/60;
  g.save();g.clearRect(0,0,W,W);g.beginPath();g.arc(c,c,c,0,7);g.clip();
@@ -1264,13 +1582,19 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
  g.strokeStyle="#6B6E73";g.lineWidth=6*s;g.beginPath();g.arc(0,0,49*s,0,7);g.stroke();
  g.strokeStyle="#9A9384";g.lineWidth=3*s;AREAS.forEach((A,i)=>{const F=areaFrame(i);const r0=A.ring==="in"?10:53.7,r1=F.r-4.5;g.beginPath();g.moveTo(Math.sin(F.a)*r0*s,Math.cos(F.a)*r0*s);g.lineTo(Math.sin(F.a)*r1*s,Math.cos(F.a)*r1*s);g.stroke()});
  g.fillStyle="#CFC6B2";g.beginPath();g.arc(0,0,10*s,0,7);g.fill();
+ g.strokeStyle="#B9A57C";g.lineWidth=5*s;g.beginPath();g.moveTo(BR_DX*53.7*s,BR_DZ*53.7*s);g.lineTo(BR_DX*(C2D-R2)*s,BR_DZ*(C2D-R2)*s);g.stroke();
+ g.fillStyle="#E9D49A";g.beginPath();g.arc(C2.x*s,C2.z*s,(R2+6)*s,0,7);g.fill();g.fillStyle="#3E7B3A";g.beginPath();g.arc(C2.x*s,C2.z*s,R2*s,0,7);g.fill();
+ g.fillStyle="#CFC6B2";g.beginPath();g.arc(C2.x*s,C2.z*s,14*s,0,7);g.fill();
+ const pki=suggestedPk();pkn.forEach(n=>{g.fillStyle=SAVE.pk[n.i]?"#5DD39E":"#6FB7FF";g.strokeStyle="#000";g.lineWidth=3;g.beginPath();g.arc(n.x*s,n.z*s,n.i===pki?10:6,0,7);g.fill();g.stroke()});
  g.fillStyle="#E67E22";g.beginPath();g.arc(0,19*s,7.6*s,0,7);g.fill();g.fillStyle="#7F8C8D";g.beginPath();g.arc(0,-19*s,6.5*s,0,7);g.fill();
  const si=suggested();
  npcs.forEach(n=>{const done=!!SAVE.stars[n.i];g.fillStyle=done?"#5DD39E":"#F7D23E";g.strokeStyle="#000";g.lineWidth=3;g.beginPath();g.arc(n.x*s,n.z*s,n.i===si?11:7,0,7);g.fill();g.stroke()});
- g.fillStyle="#E74C3C";g.fillRect(car.x*s-6,car.z*s-6,12,12);
+ VEH.forEach(v=>{g.fillStyle=v.type==="car"?"#E74C3C":v.type==="motor"?"#2E86C1":"#27AE60";g.fillRect(v.x*s-5,v.z*s-5,10,10)});
  g.restore();
  // waypoint edge arrow for suggested mission
- if(si>=0){const n=npcs[si];const dx=n.x-tg.x,dz=n.z-tg.z;const ang=Math.atan2(dx,dz)-yaw;const d=Math.hypot(dx,dz)*s;
+ const qq=axisUV(tg.x,tg.z),onI2=onIsland2(tg.x,tg.z)||(qq.u>86&&Math.abs(qq.v)<7);
+ let wp=null;if(onI2){const pi=suggestedPk();if(pi>=0)wp=pkn[pi]}else if(si>=0)wp=npcs[si];else wp={x:BR_DX*58,z:BR_DZ*58};
+ if(wp){const n=wp;const dx=n.x-tg.x,dz=n.z-tg.z;const ang=Math.atan2(dx,dz)-yaw;const d=Math.hypot(dx,dz)*s;
   if(d>c-14){g.save();g.translate(c,c);g.rotate(-ang+Math.PI);g.translate(0,-(c-16));g.fillStyle="#F7D23E";g.strokeStyle="#000";g.lineWidth=3;g.beginPath();g.moveTo(0,-12);g.lineTo(10,8);g.lineTo(-10,8);g.closePath();g.fill();g.stroke();g.restore()}}
  // player arrow
  const heading=driving?car.h:player.root.rotation.y;
@@ -1280,7 +1604,7 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
 /* ---------- input ---------- */
 addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;keys[e.code]=true;
  if(e.code==="Space"){e.preventDefault();if(!driving&&!e.repeat)jump()}
- if(e.code==="KeyE"&&!paused&&!driving&&nearNpc>=0)talk();
+ if(e.code==="KeyE"&&!paused&&!driving&&(nearNpc>=0||nearPk>=0))talk();
  if(e.code==="KeyF"&&!e.repeat)toggleCar();
  if(e.code==="KeyG"&&!paused&&!driving&&!e.repeat)dance();
  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)&&!paused)e.preventDefault()});
@@ -1305,10 +1629,27 @@ $("talkBtn").addEventListener("click",()=>talk());
 function dance(){if(paused||driving)return;dancing=dancing>0?0:9;if(dancing&&!player.gltf)toast("Joget!",true)}
 
 /* ---------- quest hooks (GTA style) ---------- */
-function talk(){if(nearNpc<0||paused||driving)return;startQuest(nearNpc)}
+function talk(){if(paused||driving)return;if(nearPk>=0)return startPk(nearPk);if(nearNpc>=0)startQuest(nearNpc)}
+function pkAvatar(i,mood){return `<img class="ava ${mood||""}" src="${pkPortrait(i)}" alt="${esc(PK[i].name)}" width="192" height="192">`}
+function startPk(i){setPaused(true);const P=PK[i],g=GR(),B=P.b[g.band];
+ const mcs=shuffle(B.mc).slice(0,g.band===0?4:5).map(m=>({t:"m",q:m[0],ok:m[1],no:m[2]}));
+ const rounds=[...mcs.slice(0,2),{t:"s",p:B.say},...mcs.slice(2)];
+ Q={pk:true,i,idx:0,hearts:3,combo:0,xp:0,perfect:0,rounds};$("quest").hidden=false;$("result").hidden=true;hud();round()}
+function pkMC(r){const P=PK[Q.i],g=GR(),S=$("scene");const nOpt=g.band===0?2:g.band===1?3:4;const opts=shuffle([r.ok,...shuffle(r.no).slice(0,nOpt-1)]);
+ S.innerHTML=`<div class="kind">Pelajaran PPKn · ${esc(P.topic)} · Kelas ${SAVE.kelas||"-"}</div>
+ <div class="npcRow">${pkAvatar(Q.i)}<div class="bubble"><div class="en">${esc(r.q)}</div><div class="id">${esc(P.name)}</div></div></div>
+ <div class="tiny"><button id="pl">${ICON.play}Dengar</button></div>
+ <div class="hint">Pilih jawaban yang benar:</div>
+ <div class="opts">${opts.map((o,k)=>`<button class="chunky opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>`;
+ $("pl").onclick=()=>say(r.q,g.rate,"id-ID");say(r.q,g.rate,"id-ID");let locked=false;
+ S.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(locked)return;const o=opts[+b.dataset.k];
+  if(o===r.ok){locked=true;b.classList.add("good");right();toast(Q.combo>2?"Combo x"+Q.combo+"!":"Benar!");setTimeout(next,750)}
+  else{b.classList.add("bad");b.disabled=true;S.querySelector(".ava").outerHTML=pkAvatar(Q.i,"sad");if(wrong())locked=true}})}
+function pkSay(r){speakPhase(r.p,"Ucapkan dengan lantang dalam bahasa Indonesia.",`${PK[Q.i].name}: ayo ucapkan bersama!`,true,"id-ID")}
 function setPaused(v){paused=v;$("hud").hidden=v;if(v){for(const k in keys)keys[k]=false;joyVec.x=joyVec.y=0;$("help").hidden=true;helpKey=""}}
 function endQuest(){try{speechSynthesis.cancel()}catch(e){}$("quest").hidden=true;$("result").hidden=true;Q=null;setPaused(false);refreshMarkers();updateStats();objKey="";$("world").focus()}
 function finish(win){Q.idx=Math.min(Q.idx,Q.rounds.length);hud();
+ if(Q.pk)return finishPk(win);
  const stars=win?Q.hearts:0,i=Q.i;
  if(win){Q.xp+=20;SAVE.stars[i]=Math.max(SAVE.stars[i]||0,stars);SAVE.coins+=5}
  SAVE.xp+=Q.xp;persist();const si=suggested();
@@ -1324,12 +1665,32 @@ function finish(win){Q.idx=Math.min(Q.idx,Q.rounds.length);hud();
  $("quest").hidden=true;R.hidden=false;if(win){blip("win");confetti(60)}
  $("rBack").onclick=()=>{endQuest();if(win){happyT=3.5}};$("rRetry").onclick=()=>startQuest(i)}
 
+function finishPk(win){const i=Q.i,stars=win?Q.hearts:0,P=PK[i];
+ if(win){Q.xp+=20;SAVE.pk[i]=Math.max(SAVE.pk[i]||0,stars);SAVE.coins+=5}
+ SAVE.xp+=Q.xp;persist();const ni=suggestedPk();const R=$("result");
+ R.innerHTML=win?`<div class="mpTitle">PELAJARAN SELESAI!</div><div class="mpSub">PPKn · +${Q.xp} XP · ${Object.keys(SAVE.pk).length}/${PK.length} GURU</div>
+  <div class="mpCard"><div class="duo">${pkAvatar(i,"wow")}${heroImg()}</div>
+  <div class="bigStars">${[0,1,2].map(k=>`<span>${STAR(k<stars)}</span>`).join("")}</div>
+  <p class="hint" style="margin:0;text-align:center">${ni>=0?`Berikutnya: belajar <b>${esc(PK[ni].topic)}</b> bersama ${esc(PK[ni].name)} di ${esc(PK[ni].place)}.`:"Semua pelajaran PPKn di Negeri Pancasila sudah selesai. Hebat!"}</p>
+  <div class="foot"><button class="btn-main btn-green" id="rBack">LANJUT</button><button class="btn-soft" id="rRetry">Ulangi pelajaran</button></div></div>`
+ :`<div class="mpTitle fail">COBA LAGI, YA!</div><div class="mpSub">Nyawa habis. XP +${Q.xp} tetap tersimpan.</div>
+  <div class="mpCard"><div class="duo">${pkAvatar(i,"sad")}</div><p class="hint" style="margin:0;text-align:center">${esc(P.name)} percaya kamu pasti bisa. Ulangi pelajaran ${esc(P.topic)}.</p>
+  <div class="foot"><button class="btn-main" id="rRetry">COBA LAGI</button><button class="btn-soft" id="rBack">Kembali jelajah</button></div></div>`;
+ $("quest").hidden=true;R.hidden=false;if(win){blip("win");confetti(60)}
+ $("rBack").onclick=()=>{endQuest();if(win){happyT=3.5}};$("rRetry").onclick=()=>startPk(i)}
+
 /* ---------- start ---------- */
 $("keyart").style.backgroundImage=`url(${BB_ART.key})`;
 function syncPick(){document.querySelectorAll(".hero").forEach(b=>b.setAttribute("aria-pressed",b.dataset.h===SAVE.hero))}
 document.querySelectorAll(".hero").forEach(b=>b.onclick=()=>{SAVE.hero=b.dataset.h;persist();syncPick();blip()});
 $("heroName").value=SAVE.heroName;$("heroName").oninput=e=>{SAVE.heroName=e.target.value.trim();persist()};
 syncPick();
+const KELAS_INFO=["","Kelas 1–2: kalimat pendek, 2 pilihan jawaban, arti bahasa Indonesia ditampilkan, ucapan lulus mulai 50%.","Kelas 1–2: kalimat pendek, 2 pilihan jawaban, arti bahasa Indonesia ditampilkan, ucapan lulus mulai 50%.",
+ "Kelas 3–4: 5 soal per misi, 3 pilihan jawaban, arti bisa dibuka, ucapan lulus mulai 60%.","Kelas 3–4: 5 soal per misi, 3 pilihan jawaban, arti bisa dibuka, ucapan lulus mulai 60%.",
+ "Kelas 5–6: semua soal, tantangan gema jadi susun kalimat, tanpa tombol arti, ucapan lulus mulai 72%, PPKn 4 pilihan.","Kelas 5–6: semua soal, tantangan gema jadi susun kalimat, tanpa tombol arti, ucapan lulus mulai 72%, PPKn 4 pilihan."];
+function syncKelas(){document.querySelectorAll("#kelasRow button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.k===SAVE.kelas));if(SAVE.kelas)$("kelasInfo").textContent=KELAS_INFO[SAVE.kelas]}
+document.querySelectorAll("#kelasRow button").forEach(b=>b.onclick=()=>{SAVE.kelas=+b.dataset.k;persist();syncKelas();$("kelasRow").classList.remove("need");blip()});
+syncKelas();
 $("micNote").textContent=SR?"Ucapanmu dinilai otomatis per kata. Izinkan mikrofon saat Chrome memintanya.":"Browser ini belum bisa menilai ucapan. Buka game di Google Chrome agar ucapanmu dinilai otomatis.";
 $("pk_girl").src=GEMINI_HERO.girl;$("pk_boy").src=GEMINI_HERO.boy;
 let built=false,ready=false;
@@ -1338,7 +1699,9 @@ function setReady(ok){ready=true;const b=$("startBtn");b.disabled=false;b.textCo
 }
 if(!window.THREE){$("loadStatus").textContent="Pustaka 3D gagal dimuat. Periksa koneksi internet lalu muat ulang halaman."}
 else loadModels(p=>{$("loadStatus").textContent=`Memuat karakter 3D... ${Math.round(p*100)}%`}).then(setReady);
-$("startBtn").onclick=()=>{if(!ready)return;blip();goLandscape();
+$("startBtn").onclick=()=>{if(!ready)return;
+ if(!SAVE.kelas){const kr=$("kelasRow");kr.classList.remove("need");void kr.offsetWidth;kr.classList.add("need");kr.scrollIntoView({block:"center",behavior:"smooth"});toast("Pilih kelasmu dulu!",true);blip("bad");return}
+ blip();goLandscape();
  if(!built){const L=document.createElement("div");L.className="loading";L.textContent="Membangun kota...";document.body.appendChild(L);
   setTimeout(()=>{try{buildWorld();built=true}catch(e){L.remove();console.error(e);document.body.insertAdjacentHTML("beforeend",'<div class="fail3d"><p>Perangkat ini belum mendukung grafis 3D (WebGL). Coba buka di Chrome versi terbaru.</p></div>');return}
    L.remove();go()},40)}
