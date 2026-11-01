@@ -8,3 +8,7 @@ Game kota pulau 3D dunia terbuka (gaya GTA, ramah anak) untuk latihan berbicara 
 - Ilustrasi karakter dan papan iklan dibuat dengan Canva. Model 3D dan animasi berasal dari contoh three.js (Mixamo).
 
 Situs: https://larubiimipas.github.io/speak-island
+
+## Karakter
+- Pemain: Si Toska dan Si Hoodie. Potret dibuat dengan Gemini dari foto, model 3D dan animasi dari Mixamo (folder `models/`).
+- Warga kota memakai model Mixamo dengan animasi idle, jalan, lari, lompat, bicara, melambai, senang, dan joget.
