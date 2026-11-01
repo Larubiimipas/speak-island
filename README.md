@@ -10,7 +10,7 @@ Game kota pulau 3D dunia terbuka (gaya GTA, ramah anak) untuk latihan berbicara 
 Situs: https://larubiimipas.github.io/speak-island
 
 ## Karakter
-- Pemain: Si Toska dan Si Hoodie. Potret dibuat dengan Gemini dari foto, model 3D dan animasi dari Mixamo (folder `models/`).
+- Pemain: Ziya dan Hisyam. Potret dibuat dengan Gemini dari foto, model 3D dan animasi dari Mixamo (folder `models/`).
 - Warga kota memakai model Mixamo dengan animasi idle, jalan, lari, lompat, bicara, melambai, senang, dan joget.
 
 ## Fitur baru
@@ -20,3 +20,4 @@ Situs: https://larubiimipas.github.io/speak-island
   - Kelas 5–6: kalimat lebih panjang, tanpa tombol arti, lulus ≥72%.
 - **Motor & sepeda** — dekati lalu tekan **F** (atau tombol Naik) untuk naik/turun.
 - **Negeri Pancasila** — ikuti gerbang "Jalan ke Negeri Pancasila", seberangi jembatan ke pulau kedua, dan belajar PPKn bersama 7 guru (soal pilihan ganda: 8 soal untuk kelas 1–2, 10 soal untuk kelas 3–6).
+- **Kios mini game** — 3 kios di pulau utama (Bahasa Inggris) dan 3 kios di Negeri Pancasila (PPKn): *Tembak Balon*, *Mancing Kata*, *Pukul Tikus*. Soal mengikuti kelas; jawaban benar menambah uang dan rekor poin tersimpan.
