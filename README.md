@@ -27,3 +27,8 @@ Situs: https://larubiimipas.github.io/speak-island
 - **Berenang** — jalan ke laut dari pantai untuk berenang; **Memancing** di ujung dermaga (lempar, tunggu "!", tahan tombol untuk menarik), koleksi 10 jenis tangkapan.
 - **Ayunan**, **tiang bendera yang bisa dipanjat** (kota, Negeri Pancasila, puncak IPAS) dengan bendera berkibar, dan **hewan yang bisa dielus** (kucing, anjing, ayam, kambing, sapi).
 - Tekstur foto realistis dan gambar ikan dibuat dengan Canva; bank soal IPAS & fakta ikan diperiksa dengan Gemini.
+- **Pose realistis**: duduk di bangku ayunan, memeluk tiang saat memanjat, berenang gaya bebas (mengapung tegak saat diam).
+- **Menyelam** (tombol Selam/Naik) dengan **bar napas**; dasar laut berisi terumbu karang, kawanan ikan, penyu, ubur-ubur, rumput laut (nama Inggris muncul saat dilihat).
+- **Sayap terbang** di lemari PAKAIAN TERBANG (puncak Pulau IPAS): tahan KEPAK untuk naik, ikuti cincin emas ke Negeri Pancasila.
+- **Pangkas Rambut** (gaya & warna rambut) dan **Toko Baju** (atasan/bawahan termasuk batik, seragam SD, pramuka, jersey) dibeli dengan uang di kanan atas; **Pasar Ikan** di dermaga membeli tangkapan.
+- **Peta dunia** (ketuk radar atau tekan M): bisa digeser & di-zoom, dengan nama pulau dan lokasi.
