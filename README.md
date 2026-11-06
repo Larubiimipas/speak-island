@@ -22,3 +22,8 @@ Situs: https://larubiimipas.github.io/speak-island
 - **Negeri Pancasila** — ikuti gerbang "Jalan ke Negeri Pancasila", seberangi jembatan ke pulau kedua, dan belajar PPKn bersama 7 guru (soal pilihan ganda: 8 soal untuk kelas 1–2, 10 soal untuk kelas 3–6).
 - **Kios mini game** — 3 kios di pulau utama (Bahasa Inggris) dan 3 kios di Negeri Pancasila (PPKn): *Tembak Balon*, *Mancing Kata*, *Pukul Tikus*. Soal mengikuti kelas; jawaban benar menambah uang dan rekor poin tersimpan.
 - **Pulau Matematika** — ikuti gerbang biru "Jalan ke Pulau Matematika" (antara Pelabuhan dan Rumah Nenek), seberangi Jembatan Angka. 10 tahap di atas lava: baca soal di papan, lalu lewati jembatan papan dengan jawaban benar. Salah pilih, papan runtuh dan pemain kembali ke checkpoint dengan soal baru. Soal mengikuti kelas (kelas 1: + − sampai 20 … kelas 6: bilangan bulat negatif, pangkat tiga, operasi campuran).
+- **Laut & speedboat** — Dermaga Speedboat di barat daya kota (antara Hotel Ombak dan Pelabuhan). Naik dengan F, berlayar keliling laut, turun di pantai mana saja.
+- **Pulau IPAS** — pulau gunung di timur laut; jalan tanah melingkar naik ke puncak dengan 8 gerbang soal IPAS (sesuai kelas). Puncak: peti harta.
+- **Berenang** — jalan ke laut dari pantai untuk berenang; **Memancing** di ujung dermaga (lempar, tunggu "!", tahan tombol untuk menarik), koleksi 10 jenis tangkapan.
+- **Ayunan**, **tiang bendera yang bisa dipanjat** (kota, Negeri Pancasila, puncak IPAS) dengan bendera berkibar, dan **hewan yang bisa dielus** (kucing, anjing, ayam, kambing, sapi).
+- Tekstur foto realistis dan gambar ikan dibuat dengan Canva; bank soal IPAS & fakta ikan diperiksa dengan Gemini.
