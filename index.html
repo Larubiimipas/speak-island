@@ -2180,33 +2180,40 @@ function initShopUI(){const sb=document.createElement("div");sb.id="shopBox";sb.
  addEventListener("keydown",e=>{if(e.code==="KeyM"&&!e.repeat){if(BMAP.open)closeMap();else if(!paused)openMap()}if(e.code==="Escape"){if(BMAP.open)closeMap();else if(SHOP.open)closeShop()}})}
 
 /* ================= MAIN BERSAMA (2 pemain, PeerJS / WebRTC) ================= */
-const MP={peer:null,conn:null,code:"",host:false,friend:null,sendT:0,status:"off",lib:false};
+const MP={cli:null,code:"",host:false,friend:null,sendT:0,status:"off",lib:false};
 const MP_PHRASES=["Hello! 👋","How are you?","I'm fine, thank you!","Let's play together!","Follow me!","Wait for me!","Good job! 👍","Thank you!","Where are you?","See you later!"];
-function mpLoadLib(cb){if(window.Peer)return cb();if(MP.loading){MP.loading.push(cb);return}MP.loading=[cb];const s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
- s.onload=()=>{MP.loading.forEach(f=>f());MP.loading=null};s.onerror=()=>{MP.loading=null;mpStatus("Gagal memuat modul main bersama. Periksa internet lalu coba lagi.")};document.head.appendChild(s)}
-function mpId(code){return "speakisland-v1-"+code}
+const MP_BROKERS=["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt"];
+function mpLoadLib(cb){if(window.mqtt)return cb();if(MP.loading){MP.loading.push(cb);return}MP.loading=[cb];const s=document.createElement("script");s.src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js";
+ s.onload=()=>{const L=MP.loading;MP.loading=null;L.forEach(f=>f())};s.onerror=()=>{MP.loading=null;mpStatus("Gagal memuat modul main bersama. Periksa internet lalu coba lagi.")};document.head.appendChild(s)}
+function mpTopic(code){return "speakisland/v2/room/"+code}
 function mpStatus(t){const el=$("mpStatus");if(el)el.innerHTML=t}
-function mpHost(){mpLoadLib(()=>{mpClose(true);const code=String(1000+Math.floor(Math.random()*9000));MP.code=code;MP.host=true;MP.status="wait";
- const p=new Peer(mpId(code));MP.peer=p;mpStatus(`Membuat ruang...`);
- p.on("open",()=>{renderMp()});p.on("connection",c=>{if(MP.conn&&MP.conn.open){c.on("open",()=>{c.send({t:"full"});setTimeout(()=>c.close(),300)});return}mpBind(c)});
- p.on("error",e=>{if(e.type==="unavailable-id"){mpHost()}else mpStatus("Koneksi bermasalah: "+esc(e.type||"error")+". Coba lagi.")});renderMp()})}
+MP.me=Math.random().toString(36).slice(2,10);
+function mpConnect(code,onReady,bi){bi=bi||0;const url=MP_BROKERS[bi];let done=false;
+ const cli=mqtt.connect(url,{clientId:"si_"+MP.me+"_"+Math.random().toString(36).slice(2,6),clean:true,connectTimeout:7000,reconnectPeriod:2500,keepalive:30});MP.cli=cli;
+ cli.on("connect",()=>{if(done){cli.subscribe(mpTopic(code));return}done=true;cli.subscribe(mpTopic(code),{qos:0},()=>onReady())});
+ cli.on("message",(t,buf)=>{let o;try{o=JSON.parse(buf.toString())}catch(e){return}if(!o||o.id===MP.me)return;if(MP.friend&&o.id!==MP.friend.id&&o.t!=="hello")return;mpRecv(o)});
+ cli.on("error",()=>{});
+ setTimeout(()=>{if(!done){try{cli.end(true)}catch(e){}if(bi+1<MP_BROKERS.length){mpStatus("Mencoba server lain...");mpConnect(code,onReady,bi+1)}else mpStatus("Tidak bisa terhubung ke server. Periksa paket data / internet, lalu coba lagi.")}},8000)}
+function mpHost(){mpLoadLib(()=>{mpClose(true);const code=String(1000+Math.floor(Math.random()*9000));MP.code=code;MP.host=true;MP.status="conn";renderMp();mpStatus("Menyiapkan ruang...");
+ mpConnect(code,()=>{MP.status="wait";renderMp()})})}
 function mpJoin(code){code=(code||"").replace(/\D/g,"");if(code.length!==4){mpStatus("Masukkan 4 angka kode ruang dari temanmu.");return}
- mpLoadLib(()=>{mpClose(true);MP.code=code;MP.host=false;MP.status="join";const p=new Peer();MP.peer=p;mpStatus("Menghubungkan ke ruang "+code+"...");
-  p.on("open",()=>{const c=p.connect(mpId(code),{reliable:true});mpBind(c);setTimeout(()=>{if(MP.status==="join"){mpStatus("Ruang "+code+" tidak menjawab. Pastikan temanmu sudah menekan <b>Buat Ruang</b>.")}},12000)});
-  p.on("error",e=>{if(e.type==="peer-unavailable")mpStatus(`Kode <b>${code}</b> tidak ditemukan. Cek lagi kodenya.`);else mpStatus("Koneksi bermasalah: "+esc(e.type||"error"))});renderMp()})}
-function mpBind(c){MP.conn=c;c.on("open",()=>{MP.status="on";mpSend({t:"hello",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef(),kelas:SAVE.kelas});toast("Terhubung! Tunggu temanmu muncul");blip("win");renderMp()});
- c.on("data",mpRecv);c.on("close",()=>{if(MP.friend){toast(`${MP.friend.name} keluar dari permainan`,true)}mpDropFriend();MP.status=MP.host?"wait":"off";renderMp()});c.on("error",()=>{})}
-function mpSend(o){if(MP.conn&&MP.conn.open){try{MP.conn.send(o)}catch(e){}}}
-function mpClose(silent){try{MP.conn&&MP.conn.close()}catch(e){}try{MP.peer&&MP.peer.destroy()}catch(e){}MP.conn=null;MP.peer=null;MP.status="off";mpDropFriend();if(!silent)renderMp()}
+ mpLoadLib(()=>{mpClose(true);MP.code=code;MP.host=false;MP.status="join";renderMp();mpStatus("Menghubungkan ke ruang "+code+"...");
+  mpConnect(code,()=>{mpSend({t:"hello",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef(),kelas:SAVE.kelas,join:1});
+   let tries=0;const iv=setInterval(()=>{if(MP.status!=="join"){clearInterval(iv);return}if(++tries>5){clearInterval(iv);mpStatus(`Ruang <b>${code}</b> tidak menjawab. Pastikan temanmu sudah menekan <b>Buat Ruang</b> dan kodenya sama.`);return}
+    mpSend({t:"hello",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef(),kelas:SAVE.kelas,join:1})},2500)})})}
+function mpSend(o){if(MP.cli&&MP.cli.connected&&MP.code){o.id=MP.me;try{MP.cli.publish(mpTopic(MP.code),JSON.stringify(o),{qos:0})}catch(e){}}}
+function mpClose(silent){if(MP.friend||MP.status==="on")mpSend({t:"bye"});try{MP.cli&&MP.cli.end(true)}catch(e){}MP.cli=null;MP.status="off";mpDropFriend();if(!silent)renderMp()}
+function mpConnected(){MP.status="on";MP.lastHear=performance.now();toast("Terhubung dengan temanmu!");blip("win");renderMp()}
 function mpDropFriend(){const F=MP.friend;if(!F)return;scene.remove(F.C.root);if(F.C.acc)scene.remove(F.C.acc);if(F.tag)scene.remove(F.tag);if(F.veh)scene.remove(F.veh);if(F.bub)scene.remove(F.bub);MP.friend=null;updateMpChip()}
 function mpMakeFriend(m){mpDropFriend();const hero=m.hero==="boy"?"boy":"girl",M=HERO_MODEL[hero];const C=makeChar(M.kind,M.tint,heroHeight(hero),heroSpecFor(hero));
  C.root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});scene.add(C.root);const tag=labelSprite("👥 "+(m.name||"Teman"),"#7E57C2","#FFFFFF",320);scene.add(tag);
  const F={C,name:m.name||"Teman",hero,tag,x:0,y:0,z:0,h:0,tx:0,ty:0,tz:0,th:0,sp:0,rx:0,drv:null,veh:null,vehType:"",bub:null,bubT:0,emote:"",emT:0,seen:false};MP.friend=F;
  if(m.look)setTimeout(()=>applyLookTo(C,m.look),300);updateMpChip();toast(`${F.name} bergabung! Ketuk 👥 untuk menyapa`);say("Hello "+F.name,GR().rate,"en-US")}
 function mpRecv(m){if(!m||!m.t)return;const F=MP.friend;
- if(m.t==="full"){mpStatus("Ruang sudah penuh (maksimal 2 orang).");return}
- if(m.t==="hello"){mpMakeFriend(m);if(MP.host)mpSend({t:"hello2",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef()});renderMp();return}
- if(m.t==="hello2"){if(!MP.friend)mpMakeFriend(m);renderMp();return}
+ MP.lastHear=performance.now();
+ if(m.t==="hello"){if(!MP.host)return;if(F&&F.id!==m.id){return}if(!F){mpMakeFriend(m);MP.friend.id=m.id;mpConnected()}mpSend({t:"hello2",to:m.id,name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef()});return}
+ if(m.t==="hello2"){if(MP.host||m.to!==MP.me)return;if(!F){mpMakeFriend(m);MP.friend.id=m.id;mpConnected()}return}
+ if(m.t==="bye"){if(F){toast(`${F.name} keluar dari permainan`,true);mpDropFriend();MP.status=MP.host?"wait":"off";renderMp()}return}
  if(!F)return;
  if(m.t==="s"){F.tx=m.p[0];F.ty=m.p[1];F.tz=m.p[2];F.th=m.h;F.sp=m.sp;F.rx=m.rx||0;F.drv=m.d||null;F.sw=m.sw;if(!F.seen){F.seen=true;F.x=F.tx;F.y=F.ty;F.z=F.tz;F.h=F.th}return}
  if(m.t==="look"){applyLookTo(F.C,m.look);return}
@@ -2215,10 +2222,10 @@ function mpRecv(m){if(!m||!m.t)return;const F=MP.friend;
 function mpBubble(F,text){if(F.bub)scene.remove(F.bub);F.bub=labelSprite(text,"#FFFFFF","#1E2A2E",420);F.bub.scale.multiplyScalar(1.1);scene.add(F.bub);F.bubT=4}
 let MY_BUB=null,MY_BUBT=0;function myBubble(text){if(MY_BUB)scene.remove(MY_BUB);MY_BUB=labelSprite(text,"#FFF8E1","#1E2A2E",420);MY_BUB.scale.multiplyScalar(1.1);scene.add(MY_BUB);MY_BUBT=4}
 function mpTick(dt){if(MY_BUB){MY_BUBT-=dt;const p=player.root.position;MY_BUB.position.set(p.x,p.y+(TARGET_H[player.kind]||1.3)*1.9,p.z);if(MY_BUBT<=0){scene.remove(MY_BUB);MY_BUB=null}}
- if(MP.status!=="on")return;MP.sendT-=dt;
- if(MP.sendT<=0){MP.sendT=.1;const p=driving?{x:car.x,y:0,z:car.z}:player.root.position;
+ if(MP.status!=="on")return;if(MP.friend&&performance.now()-(MP.lastHear||0)>12000){toast(`Koneksi dengan ${MP.friend.name} terputus`,true);mpDropFriend();MP.status=MP.host?"wait":"off";renderMp();return}MP.sendT-=dt;
+ if(MP.sendT<=0){MP.sendT=.18;const p=driving?{x:car.x,y:0,z:car.z}:player.root.position;
   mpSend({t:"s",p:[+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2)],h:+(driving?car.h:player.root.rotation.y).toFixed(3),sp:+(driving?Math.abs(car.speed):(MP.lastSp||0)).toFixed(2),rx:+(player.root.rotation.x||0).toFixed(2),sw:SWIM?1:0,d:driving?car.type:null})}
- const F=MP.friend;if(!F)return;const k=Math.min(1,dt*8);F.x+=(F.tx-F.x)*k;F.y+=(F.ty-F.y)*k;F.z+=(F.tz-F.z)*k;F.h+=Math.atan2(Math.sin(F.th-F.h),Math.cos(F.th-F.h))*k;
+ const F=MP.friend;if(!F)return;const k=Math.min(1,dt*6);F.x+=(F.tx-F.x)*k;F.y+=(F.ty-F.y)*k;F.z+=(F.tz-F.z)*k;F.h+=Math.atan2(Math.sin(F.th-F.h),Math.cos(F.th-F.h))*k;
  const R=F.C.root;
  if(F.drv){if(F.vehType!==F.drv){if(F.veh)scene.remove(F.veh);F.vehType=F.drv;F.veh=F.drv==="boat"?makeBoatMesh():F.drv==="motor"?makeMotorMesh("#8E44AD"):F.drv==="bike"?makeBikeMesh("#8E44AD"):makeCarMesh("#8E44AD");scene.add(F.veh)}
   F.veh.visible=true;F.veh.position.set(F.x,F.drv==="boat"?-.5:0,F.z);F.veh.rotation.y=F.h;R.visible=F.drv!=="car";R.position.set(F.x,F.drv==="boat"?.25:F.drv==="car"?0:.45,F.z);R.rotation.set(0,F.h,0);animChar(F.C,dt,{speed:0})}
@@ -2235,6 +2242,7 @@ function renderMp(){const el=$("mpBox");if(!el)return;const F=MP.friend;let body
  if(MP.status==="off")body=`<p class="mpP">Main berdua dengan teman di perangkat lain. Satu orang membuat ruang, temannya bergabung dengan kode 4 angka.</p>
   <button class="btn-main btn-green" id="mpHostB">BUAT RUANG</button><div class="mpOr">atau</div>
   <div class="mpJoinRow"><input id="mpCode" inputmode="numeric" maxlength="4" placeholder="Kode 4 angka" aria-label="Kode ruang"><button class="btn-main" id="mpJoinB">GABUNG</button></div>`;
+ else if(!F&&MP.status==="conn")body=`<p class="mpP">Menyiapkan ruang…</p><button class="btn-soft" id="mpOffB">Batal</button>`;
  else if(!F)body=MP.host?`<p class="mpP">Bagikan kode ini ke temanmu:</p><div class="mpCode">${MP.code||"…"}</div><p class="mpP small">Temanmu buka Speak Island, tekan <b>👥 Main Bersama</b> → masukkan kode → <b>Gabung</b>.</p><button class="btn-soft" id="mpOffB">Batal</button>`
   :`<p class="mpP">Menghubungkan ke ruang <b>${esc(MP.code)}</b>…</p><button class="btn-soft" id="mpOffB">Batal</button>`;
  else body=`<p class="mpP">Kamu bermain bersama <b>${esc(F.name)}</b> (ruang ${esc(MP.code)}).</p>
