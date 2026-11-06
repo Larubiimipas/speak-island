@@ -325,6 +325,8 @@ input{-webkit-user-select:text;user-select:text}
 .mpCode{font-family:var(--gta);font-size:3.4rem;text-align:center;letter-spacing:.2em;color:#5E35B1}.mpStat{font-size:.85rem;color:#C0392B;min-height:1em;text-align:center}
 .mpLbl{font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}.mpPh{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;max-height:32vh;overflow:auto}.mpPh .opt{padding:8px;font-size:.88rem}
 .mpAct{display:flex;flex-wrap:wrap;gap:6px}.mpAct .btn-soft{flex:1;padding:8px;font-size:.88rem}.mpOut{align-self:center}
+#njTimer{position:fixed;left:50%;top:calc(92px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:12;background:rgba(0,0,0,.6);color:#FFEB3B;font-family:var(--gta);font-size:1.6rem;padding:4px 14px;border-radius:12px}#njTimer[hidden]{display:none}
+#mgType{display:block;width:100%;box-sizing:border-box;font-size:1.4rem;font-weight:800;text-align:center;padding:10px;border-radius:12px;border:3px solid #5E35B1;outline:none;letter-spacing:.06em}#mgType[hidden]{display:none}#mgType.bad{border-color:#E53935;animation:wshake .3s}
 </style>
 </head>
 <body>
@@ -1242,7 +1244,8 @@ const MG_WORDS=[
 const MG_GAMES={
  balon:{name:"Tembak Balon",verb:"Tembak balon",bg:"#9ED8F5"},
  pancing:{name:"Mancing Kata",verb:"Pancing ikan",bg:"#2A8FB8"},
- tikus:{name:"Pukul Tikus",verb:"Pukul tikus",bg:"#7FC36A"}};
+ tikus:{name:"Pukul Tikus",verb:"Pukul tikus",bg:"#7FC36A"},
+ ketik:{name:"Ketik Cepat",verb:"Ketik kata",bg:"#283E7A"}};
 let MG=null,_mgf="";function MGFONT(){return _mgf||(_mgf=getComputedStyle(document.body).fontFamily||"sans-serif")}const KIOSKS=[];let nearKiosk=-1;
 function mgBand(){return GR().band}
 function mgQuestions(subj,n){const band=mgBand(),nOpt=band===2?4:3;const out=[];
@@ -1253,7 +1256,7 @@ function mgQuestions(subj,n){const band=mgBand(),nOpt=band===2?4:3;const out=[];
   shuffle(all).slice(0,n).forEach(m=>out.push({listen:false,prompt:m[0],ok:m[1],opts:shuffle([m[1],...shuffle(m[2]).slice(0,nOpt-1)])}))}
  return out}
 function mgHearts(){return [0,1,2].map(k=>`<span class="${k<MG.lives?"":"lost"}">${HEART}</span>`).join("")}
-function startMG(k){const K=KIOSKS[k];if(!K)return;setPaused(true);
+function startMG(k){const K=KIOSKS[k];if(!K)return;if(K.game==="ketik")return startTyping(K);setPaused(true);
  const G=MG_GAMES[K.game];SAVE.mg=SAVE.mg||{};
  MG={K,G,game:K.game,subj:K.subj,band:mgBand(),qs:mgQuestions(K.subj,10),qi:-1,score:0,lives:3,combo:0,correct:0,objs:[],parts:[],pops:[],t:0,lock:0,shake:0,hook:null,hammer:null,ptr:null,last:performance.now(),W:0,H:0};
  $("mgTitle").textContent=G.name+(K.subj==="en"?" · Bahasa Inggris":" · PPKn");
@@ -1382,7 +1385,7 @@ function mgEnd(win){const id=MG.K.id;SAVE.mg=SAVE.mg||{};const best=Math.max(SAV
   <div class="statRow"><div class="stat"><b>${MG.correct}/${MG.qs.length}</b><br>benar</div><div class="stat"><b>${MG.score}</b><br>poin${newBest?" · rekor!":""}</div><div class="stat"><b>+$${coins*10}</b>${xp?`<br>+${xp} XP`:"<br>uang"}</div></div>
   <div class="foot"><button class="btn-main btn-green" id="mgAgain">MAIN LAGI</button><button class="btn-soft" id="mgBack">Kembali ke kota</button></div></div>`;
  $("mgEnd").hidden=false;$("mgAgain").onclick=()=>{const k=KIOSKS.indexOf(MG.K);closeMG();startMG(k)};$("mgBack").onclick=closeMG}
-function closeMG(){try{speechSynthesis.cancel()}catch(e){}MG=null;$("mg").hidden=true;setPaused(false);updateStats();$("world").focus()}
+function closeMG(){if(typeof TG!=="undefined"&&TG){TG=null;const i=$("mgType");if(i){i.hidden=true;i.blur()}}try{speechSynthesis.cancel()}catch(e){}MG=null;$("mg").hidden=true;setPaused(false);updateStats();$("world").focus()}
 const STARSVG=`<svg viewBox="0 0 24 24" width="48" height="48"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#FFD23F" stroke="#7A5A00" stroke-width="1.3"/></svg>`;
 (function(){const cv=$("mgCv");cv.addEventListener("pointerdown",e=>{e.preventDefault();mgTap(e)});cv.addEventListener("pointermove",e=>{if(MG)MG.ptr=mgPoint(e)});
  $("mgX").onclick=()=>{if(MG)closeMG()};$("mgSay").onclick=()=>{if(MG&&MG.q)say(MG.subj==="en"?MG.q.ok:MG.q.prompt,MG.subj==="en"?GR().rate:GR().rate,MG.subj==="en"?"en-US":"id-ID")};
@@ -1400,6 +1403,7 @@ function makeKiosk(game,subj,x,z,rot,color,id){const G=MG_GAMES[game];const g=ne
  if(game==="balon"){["#FF5A5F","#FFB400","#3DB7E4","#7ED957","#B57CFF","#FF5A5F","#3DB7E4"].forEach((c,k)=>{const b=mesh(new THREE.SphereGeometry(.2,12,10),std(c,.4),-1.2+k*.4,2.1+(k%2)*.35,-.5,g);b.scale.y=1.2})}
  else if(game==="pancing"){mesh(THREE_CYL(.55,.5,.28,20),std("#2E86C1",.3),0,1.2,.6,g);[-.9,.9].forEach(px=>{const r=mesh(THREE_CYL(.02,.03,1.6,6),wood,px,1.7,.35,g);r.rotation.z=px>0?-.5:.5});
   ["#FF8C42","#FFD23F","#EE4266"].forEach((c,k)=>{const f=mesh(new THREE.SphereGeometry(.13,10,8),std(c,.5),-.25+k*.25,1.36,.6,g);f.scale.set(1.6,.8,.8)})}
+ else if(game==="ketik"){mesh(RB(1.6,.08,.6,.03),pbr("#263238",.4,.3),0,1.1,.6,g);for(let r=0;r<3;r++)for(let c=0;c<10;c++)mesh(RB(.12,.05,.12,.02),pbr("#ECEFF1",.5),-.7+c*.155+r*.04,1.16,.42+r*.16,g,true);mesh(RB(1.2,.8,.06,.03),pbr("#1A237E",.3,.2),0,1.75,.2,g)}
  else{[-.9,0,.9].forEach(px=>{mesh(THREE_CYL(.3,.32,.06,16),std("#3B2A1A",.9),px,1.1,.7,g);mesh(new THREE.SphereGeometry(.22,12,10,0,Math.PI*2,0,Math.PI/2),std("#8E6B4A",.8),px,1.1,.7,g)});
   const hm=mesh(G_BOX(.4,.2,.2),std("#C0392B",.5),1.2,2.0,-.45,g);mesh(THREE_CYL(.03,.03,.7,6),wood,1.2,1.65,-.45,g)}
  const fx=x+Math.sin(rot)*2.2,fz=z+Math.cos(rot)*2.2,col="#FF8FD1";
@@ -1576,7 +1580,7 @@ function i3T(r,a){/* tinggi medan untuk mesh & kamera */
  return 0}
 function onIpas(x,z){return i3pol(x,z).r<I3.B+10}
 /* ---------- laut ---------- */
-function landAt(x,z){const r0=Math.hypot(x,z);if(r0<ISLAND_R)return true;if(onDock(x,z))return true;
+function landAt(x,z){const r0=Math.hypot(x,z);if(r0<ISLAND_R)return true;if(x>NJ.x0-1&&x<NJ.x1+2&&Math.abs(z)<NJ.zw+2)return true;if(onDock(x,z))return true;
  if(Math.hypot(x-C2.x,z-C2.z)<R2-2)return true;{const q=axisUV(x,z);if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<3.4)return true}
  if(onMathBridge(x,z))return true;{const q=mUV(x,z);if(q.u>MU0-3&&q.u<mU(MATH_N)+MS.end+3&&Math.abs(q.v)<MS.inner+3)return true}
  {const p=i3pol(x,z);if(p.r<I3.B)return true}if(onPier3(x,z))return true;return false}
@@ -1590,7 +1594,7 @@ function pbr(c,r,m,extra){return new THREE.MeshStandardMaterial(Object.assign({c
 const GEMTEX={};function gemTex(key,rep){const src=(window.REAL_TEX||{})[key];if(!src)return null;const k=key+rep;if(GEMTEX[k])return GEMTEX[k];const t=new THREE.TextureLoader().load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return GEMTEX[k]=t}
 /* ---------- bangun semuanya ---------- */
 function buildWorld2(){
- initShopUI();initMp();buildShops();realismUp();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();
+ initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();
  W2.ripple=new THREE.Mesh(new THREE.RingGeometry(.45,.75,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.5,depthWrite:false}));W2.ripple.rotation.x=-Math.PI/2;W2.ripple.visible=false;scene.add(W2.ripple);W2.dyn.push(W2.ripple)}
 function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.material.uniforms){const pm=new THREE.PMREMGenerator(renderer);const s2=new THREE.Scene();const sk=sky.clone();sk.material=sky.material;s2.add(sk);
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
@@ -1709,18 +1713,18 @@ const IPAS_Q=[
   ["Gerhana matahari terjadi saat posisi bulan berada di antara...","Matahari dan bumi",["Bumi dan Mars","Bumi dan bintang"]]]];
 function ipasQ(){const b=GR().band;const pool=IPAS_Q[b];const used=new Set(W2.gates.map(g=>g.q&&g.q[0]));const avail=pool.filter(q=>!used.has(q[0]));const q=(avail.length?avail:pool)[Math.floor(Math.random()*(avail.length||pool.length))];return q}
 function ipasReset(){W2.gates.forEach(g=>{g.open=false;g.q=null;g.lift=0;g.bar.rotation.z=0;g.obs.forEach(o=>{if(!obstacles.includes(o))obstacles.push(o)})});W2.ipasRun={done:false,rewarded:false};if(W2.chest)W2.chest.lid.rotation.x=0}
-function openGateQuiz(G){setPaused(true);if(!G.q)G.q=ipasQ();const el=$("ipasBox");const b=GR().band,n=b===2?3:b===0?2:3;
+function openGateQuiz(G){setPaused(true);const QF=G.qf||ipasQ;if(!G.q)G.q=QF();const el=$("ipasBox");const b=GR().band,n=b===2?3:b===0?2:3;
  const q=G.q,opts=shuffle([q[1],...shuffle(q[2].slice()).slice(0,n-1)]);
- el.innerHTML=`<div class="mgCard ipasCard"><div class="mgVerb">GERBANG ${G.i+1}/${I3.N} · IPAS ${GR().label}</div><div class="ipasQ">${esc(q[0])}</div>
+ el.innerHTML=`<div class="mgCard ipasCard"><div class="mgVerb">${G.head?G.head():`GERBANG ${G.i+1}/${I3.N} · IPAS ${GR().label}`}</div><div class="ipasQ">${esc(q[0])}</div>
   <div class="ipasOpts">${opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div><div class="ipasFb" id="ipasFb"></div>
   <div class="foot"><button class="btn-soft" id="ipasClose">Nanti dulu</button><button class="btn-soft" id="ipasRead">🔊 Bacakan</button></div></div>`;
  el.hidden=false;say(q[0],GR().rate,"id-ID");
  $("ipasRead").onclick=()=>say(q[0],GR().rate,"id-ID");$("ipasClose").onclick=()=>{el.hidden=true;setPaused(false)};
  el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
    G.open=true;G.obs.forEach(o=>{const k=obstacles.indexOf(o);if(k>=0)obstacles.splice(k,1)});SAVE.coins+=2;persist();updateStats();
-   setTimeout(()=>{el.hidden=true;setPaused(false);const left=W2.gates.filter(g=>!g.open).length;toast(left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:"Semua gerbang terbuka! Naik ke puncak!")},900)}
+   setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
   else{bt.classList.add("wrong");blip("bad");$("ipasFb").innerHTML=`<b style="color:#C0392B">Belum tepat.</b> Jawaban benar: <b>${esc(q[1])}</b>. Coba soal lain!`;el.querySelectorAll(".opt").forEach(x=>x.disabled=true);
-   setTimeout(()=>{G.q=ipasQ();openGateQuiz(G)},1800)}})}
+   setTimeout(()=>{G.q=QF();openGateQuiz(G)},1800)}})}
 /* ---------- hewan ---------- */
 const ANIMALS={cat:{id:"Kucing",en:"cat",snd:"Meong!",body:"#E6913C",belly:"#F7E2C6",h:.32,len:.5,legs:4,spd:1.1},
  dog:{id:"Anjing",en:"dog",snd:"Guk guk!",body:"#8D5B3A",belly:"#E8D2B6",h:.45,len:.75,legs:4,spd:1.6},
@@ -1786,13 +1790,15 @@ function world2Update(dt,t,pp){
   const wk=v.m.userData.wake;if(wk){wk.material.opacity=Math.min(.85,sp/14);wk.material.map.offset.y=(wk.material.map.offset.y-dt*sp*.05)%1}});
  // riak saat berenang
  if(W2.ripple){W2.ripple.visible=SWIM&&!driving;if(SWIM){W2.ripple.position.set(player.root.position.x,-.4,player.root.position.z);const s=1+((t*1.2)%1)*.8;W2.ripple.scale.setScalar(s);W2.ripple.material.opacity=.45*(1-((t*1.2)%1))}}
- seaUpdate(dt,t,pp);mpTick(dt);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
+ seaUpdate(dt,t,pp);cloudUpdate(dt,t,pp);mpTick(dt);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
  // peti puncak
  if(W2.chest){const want=W2.ipasRun.rewarded?-1.2:0;W2.chest.lid.rotation.x+=(want-W2.chest.lid.rotation.x)*Math.min(1,dt*3)}
 }
 /* ---------- interaksi dekat ---------- */
 function findNearAct(pos){if(SWIM||driving)return null;let best=null,bd=99;const cand=(type,ref,d,label)=>{if(d<bd){bd=d;best={type,ref,label}}};
- W2.poles.forEach(P=>{const d=Math.hypot(P.x-pos.x,P.z-pos.z);if(d<1.35&&Math.abs(pos.y-(P.y0||0))<1.5)cand("climb",P,d,"Panjat")});
+ W2.poles.forEach(P=>{const d=Math.hypot(P.x-pos.x,P.z-pos.z);if(d<(P.nr||1.35)&&Math.abs(pos.y-(P.y0||0))<1.5)cand("climb",P,d,"Panjat");if(P.bean&&pos.y>P.h-4&&d<(P.nr||1.35)+.6)cand("climbdown",P,d,"Turun")});
+ (CL.gates||[]).forEach(G=>{if(G.open)return;const d=Math.hypot(G.x-pos.x,G.z-pos.z);if(d<3.4&&Math.abs(pos.y-G.h)<2)cand("gate",G,d,"Jawab")});
+ if(CL.umb){const d=Math.hypot(CL.umb.x-pos.x,CL.umb.z-pos.z);if(d<1.8&&pos.y>CL.Y-1)cand("umbrella",CL.umb,d,"Payung")}
  W2.swings.forEach(S=>{const d=Math.hypot(S.x-pos.x,S.z-pos.z);if(d<1.3)cand("swing",S,d,"Ayun")});
  W2.spots.forEach(S=>{const d=Math.hypot(S.x-pos.x,S.z-pos.z);if(d<1.7)cand("fish",S,d,"Mancing")});
  W2.animals.forEach(a=>{if(!a.m.visible)return;const d=Math.hypot(a.x-pos.x,a.z-pos.z);if(d<1.5+a.A.len*.4)cand("pet",a,d,"Elus")});
@@ -1804,6 +1810,8 @@ function startAct(n){if(!n)return;const pos=player.root.position;
  if(n.type==="gate")return openGateQuiz(n.ref);
  if(n.type==="pet"){const a=n.ref;a.happy=1.8;ACT={type:"pet",a,t:1.6};player.root.rotation.y=Math.atan2(a.x-pos.x,a.z-pos.z);for(let k=0;k<4;k++)setTimeout(()=>heartAt(a.x+(Math.random()-.5)*.4,a.m.position.y+a.A.h*2,a.z+(Math.random()-.5)*.4),k*250);
   SAVE.pets=(SAVE.pets||0)+1;persist();blip("coin");toast(`${a.A.snd} ${a.A.id} senang dielus. ${a.A.id} = “${a.A.en}”`);setTimeout(()=>say(a.A.en,GR().rate,"en-US"),400);return}
+ if(n.type==="climbdown"){const P=n.ref;ACT={type:"climb",P,y:P.h-2.15,ph:0,a:Math.atan2(pos.x-P.x,pos.z-P.z)};blip("jump");return}
+ if(n.type==="umbrella"){return umbStart()}
  if(n.type==="climb"){const P=n.ref;ACT={type:"climb",P,y:(P.y0||0),ph:0};const a=Math.atan2(pos.x-P.x,pos.z-P.z);ACT.a=a;blip("jump");return}
  if(n.type==="swing"){const S=n.ref;ACT={type:"swing",S};S.vel=S.vel||0;blip("jump");return}
  if(n.type==="fish"){fishStart(n.ref)}
@@ -1813,17 +1821,19 @@ function actJump(){if(!ACT)return;const pos=player.root.position;
  if(ACT.type==="climb"){const P=ACT.P;pos.x=P.x+Math.sin(ACT.a)*.9;pos.z=P.z+Math.cos(ACT.a)*.9;vy=2;onGround=false;endAct();return}
  if(ACT.type==="swing"){const S=ACT.S;pos.set(S.x,S.seatY+.2,S.z+Math.sin(S.ang)*S.L+.9);vy=2;onGround=false;endAct();return}
  if(ACT.type==="fish"){fishStop();return}
- if(ACT.type==="fly"){return}}
+ if(ACT.type==="fly"){return}
+ if(ACT.type==="umb"){return}}
 function endAct(){ACT=null;player.root.rotation.x=0;player.root.rotation.z=0;if(player.gs)player.gs.visible=true;$("jumpBtn").textContent="Lompat";const tb=$("talkBtn");tb.textContent="Bicara";tb.classList.remove("play","pulse");tb.disabled=true}
 function bonesOf(C){if(!C.rb){C.rb={};C.obj&&C.obj.traverse(o=>{if(o.isBone){const m=o.name.match(/(Hips|Spine|LeftUpLeg|LeftLeg|RightUpLeg|RightLeg|LeftArm|RightArm|LeftForeArm|RightForeArm|LeftShoulder|RightShoulder|RightHand|Head)$/);if(m&&!C.rb[m[1]])C.rb[m[1]]=o}})}return C.rb}
 function actUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec(),t=clock.elapsedTime;
  if(ACT.type==="pet"){ACT.t-=dt;animChar(player,dt,{speed:0,talk:true});if(ACT.t<=0)endAct();return}
  if(ACT.type==="climb"){const P=ACT.P,y0=P.y0||0,top=y0+P.h-2.1;const climbUp=keys.KeyW||keys.ArrowUp||joyVec.y>.3,down=keys.KeyS||keys.ArrowDown||joyVec.y<-.3;
-  let mv=0;if(climbUp)mv=1.5;else if(down)mv=-2.2;ACT.y=Math.max(y0,Math.min(top,ACT.y+mv*dt));if(mv)ACT.ph+=dt*7*Math.sign(mv);
-  const hug=.2*(player.scale||1);pos.set(P.x+Math.sin(ACT.a)*hug,ACT.y,P.z+Math.cos(ACT.a)*hug);player.root.rotation.y=ACT.a+Math.PI;vy=0;onGround=true;
+  let mv=0;if(climbUp)mv=P.bean?3.4:1.5;else if(down)mv=P.bean?-4:-2.2;if(P.bean&&mv)ACT.a+=mv*dt*.13;ACT.y=Math.max(y0,Math.min(top,ACT.y+mv*dt));if(mv)ACT.ph+=dt*7*Math.sign(mv);
+  const hug=P.bean?P.hug:.2*(player.scale||1);pos.set(P.x+Math.sin(ACT.a)*hug,ACT.y,P.z+Math.cos(ACT.a)*hug);player.root.rotation.y=ACT.a+Math.PI;vy=0;onGround=true;
   animChar(player,dt,{speed:0});if(player.gltf)hugPose(ACT.ph,!!mv)
   if(player.gs)player.gs.visible=false;
-  if(ACT.y>=top-.01&&!P.topped){P.topped=true;SAVE.xp+=10;persist();updateStats();blip("win");confetti(25);toast("Kamu sampai di puncak tiang! Hormat bendera Merah Putih! +10 XP")}
+  if(P.bean){if(ACT.y>=top-.01&&climbUp){beanTop(P);return}if(ACT.y<=y0+.001&&down){endAct();return}}
+  else if(ACT.y>=top-.01&&!P.topped){P.topped=true;SAVE.xp+=10;persist();updateStats();blip("win");confetti(25);toast("Kamu sampai di puncak tiang! Hormat bendera Merah Putih! +10 XP")}
   if(ACT.y<=y0+.001&&down&&!climbUp){}
   return}
  if(ACT.type==="swing"){const S=ACT.S;const push=(keys.KeyW||keys.ArrowUp||joyVec.y>.3)?1:0,brake=(keys.KeyS||keys.ArrowDown||joyVec.y<-.3)?1:0;
@@ -1835,7 +1845,8 @@ function actUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec(),t=clock
    if(B.Hips){B.Hips.getWorldPosition(_rv);pos.y+=_v3.y+.1-_rv.y}}
   if(player.gs)player.gs.visible=false;return}
  if(ACT.type==="fish"){fishUpdate(dt);return}
- if(ACT.type==="fly"){flyUpdate(dt);return}}
+ if(ACT.type==="fly"){flyUpdate(dt);return}
+ if(ACT.type==="umb"){umbUpdate(dt);return}}
 /* ---------- berenang ---------- */
 function swimPose(dt,sp,pos){const t=clock.elapsedTime,deep=shoreDepth(pos.x,pos.z);const bob=Math.sin(t*2.2)*.04;
  if(deep<.55&&W2.dive<.05){pos.y=-deep*.9;animChar(player,dt,{speed:sp});return}
@@ -1919,7 +1930,7 @@ function reelLose(){REEL=null;blip("bad");$("reel").innerHTML=`<div class="reelC
  $("reelAgain").onclick=()=>{reelClose();if(ACT){ACT.phase="cast";ACT.t=.6;W2.bobber.visible=false}};$("reelDone").onclick=()=>fishStop()}
 function reelClose(noPause){REEL=null;$("reel").hidden=true;if(paused&&$("ipasBox").hidden&&!MG&&$("quest").hidden)setPaused(false)}
 /* ---------- objektif & label ---------- */
-function w2Objective(tg){if(driving&&car&&car.type==="boat"){const d=Math.round(Math.hypot(C3.x-tg.x,C3.z-tg.z)-I3.B);return d>4?`Berlayar dengan speedboat. <span class="small">Pulau IPAS (gunung) di arah timur laut · ${d} m. Dekati pantai lalu tekan F untuk turun.</span>`:`Tekan <span class="y">F</span> untuk turun di Pulau IPAS.`}
+function w2Objective(tg){{const c=cloudObjective(tg)||ninjaObjective(tg);if(c)return c}if(ACT&&ACT.type==="climb"&&ACT.P.bean)return`Memanjat pohon kacang ajaib… <span class="y">${Math.round(ACT.y)} / ${CL.Y} m</span><span class="small">Tahan W / joystick ke atas</span>`;if(ACT&&ACT.type==="umb")return`Turun dengan payung · ketinggian ${Math.round(tg.y)} m`;if(driving&&car&&car.type==="boat"){const d=Math.round(Math.hypot(C3.x-tg.x,C3.z-tg.z)-I3.B);return d>4?`Berlayar dengan speedboat. <span class="small">Pulau IPAS (gunung) di arah timur laut · ${d} m. Dekati pantai lalu tekan F untuk turun.</span>`:`Tekan <span class="y">F</span> untuk turun di Pulau IPAS.`}
  if(W2.fly){const d=Math.round(Math.hypot(C2.x-tg.x,C2.z-tg.z));return`Terbang ke <span class="y">Negeri Pancasila</span>! Tahan <b>KEPAK</b> untuk naik, ikuti cincin emas.<span class="small">${d} m · Ketinggian ${Math.round(tg.y)} m</span>`}
  if(SWIM&&W2.dive>.5)return`Menyelam! <span class="small">Perhatikan bar napas. Lihat ikan, penyu & terumbu karang · tekan NAIK untuk ke permukaan</span>`;
  if(SWIM)return`Kamu sedang berenang! <span class="small">Gerakkan joystick untuk berenang, kembali ke pantai untuk berjalan.</span>`;
@@ -1927,7 +1938,7 @@ function w2Objective(tg){if(driving&&car&&car.type==="boat"){const d=Math.round(
   if(!left.length&&0){}
   const g=left[0];const d=Math.round(Math.hypot(g.x-tg.x,g.z-tg.z));return`Daki jalan gunung. <span class="y">Gerbang ${g.i+1}/${I3.N}</span>: dekati lalu jawab soal IPAS.<span class="small">${d} m · Soal mengikuti kelasmu</span>`}
  return null}
-function w2Loc(tg){if(driving&&car&&car.type==="boat")return["boat","<b>Laut Biru</b><span>Berlayar dengan speedboat</span>"];if(SWIM)return["swim","<b>Laut</b><span>Berenang</span>"];
+function w2Loc(tg){if(inNinja(tg.x,tg.z))return["ninja","<b>Arena Ninja</b><span>Lintasan halang rintang</span>"];if(tg.y>CL.Y-6)return["cloud","<b>Negeri Awan</b><span>Dunia Bahasa Indonesia</span>"];if(driving&&car&&car.type==="boat")return["boat","<b>Laut Biru</b><span>Berlayar dengan speedboat</span>"];if(SWIM)return["swim","<b>Laut</b><span>Berenang</span>"];
  if(onIpas(tg.x,tg.z))return["ipas","<b>Pulau IPAS</b><span>Gunung pengetahuan alam & sosial</span>"];if(onDock(tg.x,tg.z))return["dock","<b>Dermaga Speedboat</b><span>Naik speedboat · Mancing di ujung dermaga</span>"];return null}
 function w2Summit(pos){if(!onIpas(pos.x,pos.z))return;const p=i3pol(pos.x,pos.z);
  if(p.r<I3.R1+1&&pos.y>I3.H-1&&!W2.ipasRun.rewarded&&W2.gates.every(g=>g.open)){W2.ipasRun.rewarded=true;SAVE.ipas=(SAVE.ipas||0)+1;SAVE.xp+=60;SAVE.coins+=6;persist();updateStats();blip("win");confetti(60);toast("Puncak IPAS! Peti harta terbuka: +60 XP · +$60")}}
@@ -2132,7 +2143,7 @@ function shopCamera(dt){if(!SHOP.cam||!player)return false;const p=player.root.p
 const BMAP={open:false,cx:0,cz:0,sc:1.6,drag:null,pinch:null};
 const MAP_LABELS=()=>[[0,0,"KOTA SPEAK ISLAND",1],[C2.x,C2.z,"NEGERI PANCASILA",1],[C3.x,C3.z,"PULAU IPAS",1],[mW(mU(5),0).x,mW(mU(5),0).z,"PULAU MATEMATIKA",1],
  [BR_DX*140,BR_DZ*140,"Jembatan Garuda",2],[mW(100,0).x,mW(100,0).z,"Jembatan Angka",2],[dkW(DK_U1,0).x,dkW(DK_U1,0).z,"Dermaga Speedboat",2],[dkW(DK_U0-4.5,-4).x,dkW(DK_U0-4.5,-4).z,"Pasar Ikan",3],
- [0,19,"Taman Lompat",3],[0,-19,"Menara Parkour",3],[10.6,10.6,"Pangkas Rambut",3],[10.6,-10.6,"Toko Baju",3],[-11.5,19.5,"Ayunan",3],[-6.5,4,"Tiang Bendera",3],[C3.x,C3.z+0.001,"Puncak & Pakaian Terbang",3]];
+ [0,19,"Taman Lompat",3],[0,-19,"Menara Parkour",3],[10.6,10.6,"Pangkas Rambut",3],[10.6,-10.6,"Toko Baju",3],[-11.5,19.5,"Ayunan",3],[-6.5,4,"Tiang Bendera",3],[C3.x,C3.z+0.001,"Puncak & Pakaian Terbang",3],[CL.c.x,CL.c.z,"NEGERI AWAN (atas awan)",1],[125,0,"Arena Ninja",2],[BEAN.x,BEAN.z,"Pohon Kacang Ajaib",2]];
 function openMap(){BMAP.open=true;const p=player.root.position;BMAP.cx=p.x;BMAP.cz=p.z;$("bigMap").hidden=false;setPaused(true);resizeMap();drawBigMap()}
 function closeMap(){BMAP.open=false;$("bigMap").hidden=true;setPaused(false)}
 function resizeMap(){const cv=$("bmCv"),r=cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);cv.width=r.width*d;cv.height=r.height*d;BMAP.dpr=d}
@@ -2141,6 +2152,8 @@ function drawBigMap(){if(!BMAP.open)return;const cv=$("bmCv"),g=cv.getContext("2
  const sea=g.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.max(W,H));sea.addColorStop(0,"#2E8BC0");sea.addColorStop(1,"#145374");g.fillStyle=sea;g.fillRect(0,0,W,H);
  const circ=(x,z,r,c)=>{g.fillStyle=c;g.beginPath();g.arc(X(x),Y(z),Math.max(.5,r*s),0,7);g.fill()};
  W2.reefs.forEach(R=>circ(R.c.x,R.c.z,12,"rgba(120,230,220,.35)"));
+ g.fillStyle="#455A64";g.fillRect(X(NJ.x0),Y(-4),(157-NJ.x0)*s,8*s);g.fillStyle="#FDD835";g.fillRect(X(97),Y(-1),60*s,2*s);
+ g.globalAlpha=.8;circ(CL.c.x,CL.c.z,CL.R,"#FFFFFF");CL.isl.forEach(I=>circ(I.x,I.z,I.r,"#FFFFFF"));g.strokeStyle="#F48FB1";g.lineWidth=Math.max(1,3*s);CL.isl.forEach(I=>{g.beginPath();g.moveTo(X(CL.c.x),Y(CL.c.z));g.lineTo(X(I.x),Y(I.z));g.stroke()});g.globalAlpha=1;
  circ(0,0,92,"#E9D49A");circ(0,0,85,"#4E8F3E");g.strokeStyle="#6B6E73";g.lineWidth=6*s;g.beginPath();g.arc(X(0),Y(0),49*s,0,7);g.stroke();circ(0,0,10,"#CFC6B2");
  g.strokeStyle="#9A9384";g.lineWidth=3*s;AREAS.forEach((A,i)=>{const F=areaFrame(i);const r0=A.ring==="in"?10:53.7,r1=F.r-4.5;g.beginPath();g.moveTo(X(Math.sin(F.a)*r0),Y(Math.cos(F.a)*r0));g.lineTo(X(Math.sin(F.a)*r1),Y(Math.cos(F.a)*r1));g.stroke()});
  g.strokeStyle="#B9A57C";g.lineWidth=5*s;g.beginPath();g.moveTo(X(BR_DX*53.7),Y(BR_DZ*53.7));g.lineTo(X(BR_DX*(C2D-R2)),Y(BR_DZ*(C2D-R2)));g.stroke();
@@ -2262,6 +2275,192 @@ function mpSendState(){if(MP.status!=="on"||!player)return;const p=driving?{x:ca
  mpSend({t:"s",p:[+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2)],h:+(driving?car.h:player.root.rotation.y).toFixed(3),sp:+(driving?Math.abs(car.speed):(MP.lastSp||0)).toFixed(2),rx:+(player.root.rotation.x||0).toFixed(2),sw:SWIM?1:0,d:driving?car.type:null})}
 setInterval(mpSendState,200);
 
+/* ================= NEGERI AWAN (Bahasa Indonesia) + POHON KACANG ================= */
+const BEAN_A=Math.PI*75/180,BEAN={x:Math.sin(BEAN_A)*72,z:Math.cos(BEAN_A)*72};
+const CL={Y:60,c:{x:Math.sin(BEAN_A)*90,z:Math.cos(BEAN_A)*90},R:22,isl:[],gates:[],crystals:[],got:0,egg:null,giant:null,umb:null,done:false};
+CL.isl=[[46,0],[-46,0],[0,46],[0,-46]].map(([dx,dz],i)=>({i,x:CL.c.x+dx,z:CL.c.z+dz,r:10,dx:Math.sign(dx),dz:Math.sign(dz)}));
+function cloudWalk(x,z){const dx=x-CL.c.x,dz=z-CL.c.z;if(Math.hypot(dx,dz)<CL.R-.6)return true;
+ for(const I of CL.isl){if(Math.hypot(x-I.x,z-I.z)<I.r-.6)return true;
+  if(I.dx){const a=Math.min(CL.c.x+I.dx*(CL.R-2),I.x-I.dx*(I.r-2)),b=Math.max(CL.c.x+I.dx*(CL.R-2),I.x-I.dx*(I.r-2));if(x>a&&x<b&&Math.abs(dz)<1.8)return true}
+  else{const a=Math.min(CL.c.z+I.dz*(CL.R-2),I.z-I.dz*(I.r-2)),b=Math.max(CL.c.z+I.dz*(CL.R-2),I.z-I.dz*(I.r-2));if(z>a&&z<b&&Math.abs(dx)<1.8)return true}}
+ return false}
+const BINDO_Q=[
+ [["Huruf vokal adalah...","A, I, U, E, O",["B, C, D, F","K, L, M, N"]],["Kata “bola” terdiri dari berapa suku kata?","Dua",["Tiga","Satu"]],["Lawan kata “besar” adalah...","Kecil",["Tinggi","Gemuk"]],
+  ["Lawan kata “panas” adalah...","Dingin",["Hangat","Terang"]],["Huruf pertama nama orang ditulis dengan huruf...","Kapital (huruf besar)",["Kecil","Miring"]],["Kalimat tanya diakhiri dengan tanda...","Tanda tanya (?)",["Titik (.)","Koma (,)"]],
+  ["Ucapan yang tepat saat menerima hadiah adalah...","Terima kasih",["Selamat tidur","Permisi"]],["Adik minum ... susu.","segelas",["sebuah","seekor"]],["Tiga ... kucing bermain di halaman.","ekor",["buah","lembar"]],
+  ["Huruf setelah D adalah...","E",["C","F"]],["Lawan kata “rajin” adalah...","Malas",["Pintar","Cepat"]],["“Selamat pagi” diucapkan pada waktu...","Pagi hari",["Malam hari","Sore hari"]],
+  ["Persamaan kata “pintar” adalah...","Pandai",["Bodoh","Lambat"]],["Kalimat permintaan yang sopan adalah...","Tolong ambilkan buku itu.",["Ambil buku itu sekarang!","Buku itu."]],["Kata “kucing” terdiri dari berapa huruf?","Enam",["Lima","Tujuh"]],
+  ["Kata yang ditulis dengan benar adalah...","Sekolah",["Sekola","Skolah"]]],
+ [["Sinonim kata “gembira” adalah...","Senang",["Sedih","Marah"]],["Antonim kata “jujur” adalah...","Bohong",["Benar","Setia"]],["Kata baku yang benar adalah...","Apotek",["Apotik","Apoteik"]],
+  ["Kata baku yang benar adalah...","Nasihat",["Nasehat","Nasiat"]],["Gagasan utama dalam paragraf disebut juga...","Ide pokok",["Kesimpulan","Judul"]],["Kalimat ajakan biasanya memakai kata...","Ayo",["Jangan","Mengapa"]],
+  ["Penulisan huruf kapital yang benar adalah...","Saya tinggal di Bima.",["saya tinggal di bima.","Saya Tinggal Di Bima."]],["Kata “berlari” mendapat awalan...","ber-",["me-","di-"]],["Puisi lama yang terdiri atas sampiran dan isi disebut...","Pantun",["Dongeng","Surat"]],
+  ["Dalam pantun, baris pertama dan kedua disebut...","Sampiran",["Isi","Judul"]],["Cerita rakyat tentang asal-usul suatu tempat disebut...","Legenda",["Fabel","Biografi"]],["Cerita dengan tokoh binatang yang berperilaku seperti manusia disebut...","Fabel",["Legenda","Mite"]],
+  ["Kata tanya untuk menanyakan tempat adalah...","Di mana",["Kapan","Siapa"]],["Tanda baca untuk memisahkan perincian adalah...","Koma (,)",["Titik (.)","Tanda seru (!)"]],["“Wah, indah sekali pemandangan itu!” adalah kalimat...","Seru",["Tanya","Perintah"]],
+  ["Sinonim kata “indah” adalah...","Elok",["Jelek","Kotor"]]],
+ [["Kata baku yang benar adalah...","Praktik",["Praktek","Praktik-kan"]],["Kata baku yang benar adalah...","Kualitas",["Kwalitas","Kualitet"]],["Kata baku yang benar adalah...","Risiko",["Resiko","Risico"]],
+  ["Paragraf dengan kalimat utama di awal disebut paragraf...","Deduktif",["Induktif","Campuran"]],["Paragraf dengan kalimat utama di akhir disebut paragraf...","Induktif",["Deduktif","Naratif"]],["Teks yang bertujuan meyakinkan atau membujuk pembaca disebut teks...","Persuasi",["Narasi","Deskripsi"]],
+  ["Teks yang menggambarkan suatu objek secara rinci disebut teks...","Deskripsi",["Eksposisi","Persuasi"]],["Majas pada “angin berbisik di telingaku” adalah...","Personifikasi",["Hiperbola","Litotes"]],["Majas yang melebih-lebihkan disebut...","Hiperbola",["Personifikasi","Metafora"]],
+  ["Kata “pemandangan” mendapat imbuhan...","pe-an",["me-kan","ber-an"]],["Kalimat langsung ditandai dengan...","Tanda petik (“ ”)",["Tanda kurung ( )","Tanda hubung (-)"]],["Unsur cerita yang menunjukkan tempat dan waktu disebut...","Latar",["Alur","Amanat"]],
+  ["Pesan moral dalam cerita disebut...","Amanat",["Tema","Tokoh"]],["Penulisan judul yang benar adalah...","Kancil dan Buaya",["Kancil Dan Buaya","kancil dan buaya"]],["Bentuk pasif dari “mengirim” adalah...","Dikirim",["Kirimkan","Pengiriman"]],
+  ["Bahasa Indonesia diikrarkan sebagai bahasa persatuan pada peristiwa...","Sumpah Pemuda 1928",["Proklamasi 1945","Kebangkitan Nasional 1908"]]]];
+function bindoQ(){const pool=BINDO_Q[GR().band];const used=new Set(CL.gates.map(g=>g.q&&g.q[0]));const av=pool.filter(q=>!used.has(q[0]));const P=av.length?av:pool;return P[Math.floor(Math.random()*P.length)]}
+const PANTUN=[["Pergi ke pasar membeli kain,","Kain dipotong dibuat baju.","Ayo belajar sambil bermain,","Supaya pintar dan maju."],
+ ["Burung camar terbang tinggi,","Hinggap sebentar di atas batu.","Rajin membaca setiap hari,","Pasti bertambah banyak ilmu."],
+ ["Buah mangga buah delima,","Dipetik ibu di kebun kami.","Bahasa Indonesia bahasa kita,","Mari dijaga dan dicintai."],
+ ["Jalan-jalan ke kota Bima,","Jangan lupa membeli madu.","Berbahasa santun kepada sesama,","Hati senang hidup pun padu."]];
+function cloudMat(){return new THREE.MeshStandardMaterial({color:"#FFFFFF",roughness:1,emissive:"#EEF4FF",emissiveIntensity:.62})}
+function puff(g,cx,cz,R,n,y,mat){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*R,s=1.6+Math.random()*2.6;const m=mesh(G.sph(s,14,10),mat,cx+Math.sin(a)*r,y-s*.45+Math.random()*.3,cz+Math.cos(a)*r,g,true);m.scale.y=.55;m.castShadow=false;m.receiveShadow=true}}
+function buildCloudWorld(){const g=new THREE.Group();scene.add(g);CL.g=g;const cm=cloudMat(),Y=CL.Y;
+ // pohon kacang
+ const stalkM=pbr("#4E9A2E",.7),leafM=new THREE.MeshStandardMaterial({color:"#62B83A",roughness:.75,side:THREE.DoubleSide});const H=Y+4;
+ for(let s=0;s<3;s++){const pts=[];for(let k=0;k<=40;k++){const y=k/40*H,a=s*2.09+y*.18;pts.push(new THREE.Vector3(BEAN.x+Math.sin(a)*.45,y-1,BEAN.z+Math.cos(a)*.45))}
+  const tube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),160,.42,10),stalkM);tube.castShadow=true;g.add(tube)}
+ const leaf=new THREE.Shape();leaf.moveTo(0,0);leaf.bezierCurveTo(.9,.4,1.1,1.4,0,2.1);leaf.bezierCurveTo(-1.1,1.4,-.9,.4,0,0);const lg=new THREE.ShapeGeometry(leaf,10);
+ for(let y=2.5;y<H-2;y+=2.6){const a=y*.9;const l=new THREE.Mesh(lg,leafM);l.position.set(BEAN.x+Math.sin(a)*.8,y,BEAN.z+Math.cos(a)*.8);l.rotation.set(-.9,a,0);l.scale.setScalar(.9+Math.random()*.6);l.castShadow=true;g.add(l)}
+ for(let k=0;k<6;k++){const a=k*1.05;const pts=[new THREE.Vector3(BEAN.x,.6,BEAN.z),new THREE.Vector3(BEAN.x+Math.sin(a)*1.6,.3,BEAN.z+Math.cos(a)*1.6),new THREE.Vector3(BEAN.x+Math.sin(a)*2.8,-.2,BEAN.z+Math.cos(a)*2.8)];g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),12,.28,8),stalkM))}
+ for(let y=8;y<H-6;y+=11){const a=y*.7;const pod=mesh(G.cap(.18,.9),pbr("#7BC043",.6),BEAN.x+Math.sin(a)*1.1,y,BEAN.z+Math.cos(a)*1.1,g);pod.rotation.z=.5}
+ obstacles.push({x:BEAN.x,z:BEAN.z,r:1.05});W2.poles.push({x:BEAN.x,z:BEAN.z,h:Y+2.1,bean:true,hug:1.25,nr:2.5,g,y0:0});
+ const sg=labelSprite("POHON KACANG AJAIB · Panjat ke Negeri Awan","#2E7D32","#FFFFFF",520);sg.position.set(BEAN.x-Math.sin(BEAN_A)*3,4,BEAN.z-Math.cos(BEAN_A)*3);sg.scale.multiplyScalar(.85);sg.position.y=3.2;g.add(sg);
+ // awan utama & pulau awan
+ puff(g,CL.c.x,CL.c.z,CL.R-2,46,Y,cm);const top=mesh(new THREE.CylinderGeometry(CL.R,CL.R-3,1.2,48),cm,CL.c.x,Y-.6,CL.c.z,g,true);top.castShadow=false;
+ CL.isl.forEach((I,i)=>{puff(g,I.x,I.z,I.r-1.5,16,Y,cm);const t=mesh(new THREE.CylinderGeometry(I.r,I.r-2,1.1,32),cm,I.x,Y-.55,I.z,g,true);t.castShadow=false;
+  // jembatan pelangi
+  const len=46-CL.R-I.r+4,mx=CL.c.x+I.dx*(CL.R+len/2-2),mz=CL.c.z+I.dz*(CL.R+len/2-2);const rb=new THREE.Group();rb.position.set(mx,Y-.12,mz);rb.rotation.y=I.dx?Math.PI/2:0;g.add(rb);
+  ["#E53935","#FB8C00","#FDD835","#43A047","#1E88E5","#8E24AA"].forEach((c,k)=>mesh(G.box(.6,.18,len),new THREE.MeshStandardMaterial({color:c,roughness:.5,emissive:c,emissiveIntensity:.15}),-1.5+k*.6,0,0,rb,true));
+  [-1.9,1.9].forEach(x=>{mesh(G.box(.08,.08,len),pbr("#FFFFFF",.4),x,.95,0,rb,true);for(let z=-len/2;z<=len/2;z+=3)mesh(G.cyl(.05,.05,.95,6),pbr("#FFFFFF",.4),x,.48,z,rb,true)});
+  // gerbang kata di pangkal jembatan
+  const gx=CL.c.x+I.dx*(CL.R-1.2),gz=CL.c.z+I.dz*(CL.R-1.2);const gg=new THREE.Group();gg.position.set(gx,Y,gz);gg.rotation.y=I.dx?Math.PI/2:0;g.add(gg);
+  const gold=pbr("#E3B341",.3,.8);[-1,1].forEach(s=>mesh(G.cyl(.15,.18,3.4,14),gold,s*2.2,1.7,0,gg));const arc=mesh(new THREE.TorusGeometry(2.2,.14,10,24,Math.PI),gold,0,3.3,0,gg);
+  const sign=labelSprite(`GERBANG KATA ${i+1}`,"#6A1B9A","#FFFFFF",300);sign.position.set(0,4.4,0);gg.add(sign);
+  const bar=new THREE.Group();bar.position.set(-2.2,1.05,0);gg.add(bar);mesh(G.cyl(.09,.09,4.4,10),pbr("#8E24AA",.5),2.2,0,0,bar).rotation.z=Math.PI/2;
+  const obs=[-1.3,0,1.3].map(o=>({x:gx+(I.dx?0:o),z:gz+(I.dx?o:0),r:.95}));obs.forEach(o=>obstacles.push(o));
+  const G0={i,x:gx,z:gz,h:Y,gg,bar,obs,open:false,q:null,lift:0,qf:bindoQ,list:CL.gates,head:()=>`GERBANG KATA ${i+1}/4 · Bahasa Indonesia ${GR().label}`,doneMsg:"Semua gerbang kata terbuka! Kumpulkan 4 Kristal Kata!"};CL.gates.push(G0);W2.dyn.push(bar);
+  // kristal + papan pantun
+  const cr=mesh(new THREE.OctahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:["#4FC3F7","#F06292","#AED581","#FFD54F"][i],emissive:["#0288D1","#C2185B","#689F38","#FFA000"][i],emissiveIntensity:.6,roughness:.2,metalness:.2}),I.x,Y+1.7,I.z,g);
+  mesh(G.cyl(.5,.65,1,16),pbr("#ECEFF1",.6),I.x,Y+.5,I.z,g);CL.crystals.push({i,x:I.x,z:I.z,m:cr,got:false});W2.dyn.push(cr);obstacles.push({x:I.x,z:I.z,r:.8});
+  const bx=I.x+(I.dx?I.dx*-0:4),bz=I.z+(I.dz?0:0)+(I.dx?4:0);const board=new THREE.Mesh(new THREE.PlaneGeometry(4,2.6),new THREE.MeshStandardMaterial({map:pantunTex(PANTUN[i]),roughness:.9,side:THREE.DoubleSide}));
+  const bgp=new THREE.Group();bgp.position.set(I.x+(I.dz?4:0),Y,I.z+(I.dx?4:0));bgp.lookAt(CL.c.x,Y,CL.c.z);g.add(bgp);board.position.set(0,1.9,0);bgp.add(board);mesh(RB(4.2,2.8,.1,.04),pbr("#8D6E4A",.8),0,1.9,-.07,bgp);[-1.8,1.8].forEach(x=>mesh(G.cyl(.06,.06,1.6,8),pbr("#8D6E4A",.8),x,.6,-.07,bgp))});
+ // istana raksasa
+ const ca=new THREE.Group();ca.position.set(CL.c.x,Y,CL.c.z);g.add(ca);const stone=texStd("rock","#B9B2A6",3,3,.95),roof=pbr("#5E35B1",.6);
+ mesh(RB(9,6,7,.2),stone,0,3,0,ca);[[-4.5,-3.5],[4.5,-3.5],[-4.5,3.5],[4.5,3.5]].forEach(([x,z])=>{mesh(G.cyl(1.2,1.3,8,20),stone,x,4,z,ca);mesh(new THREE.ConeGeometry(1.6,3,20),roof,x,9.5,z,ca)});
+ mesh(new THREE.ConeGeometry(4.2,4,4),roof,0,8,0,ca).rotation.y=Math.PI/4;const door=mesh(RB(2.4,3.4,.3,.1),pbr("#6D4C2F",.7),0,1.7,3.55,ca);
+ const lb=labelSprite("ISTANA RAKSASA","#5E35B1","#FFFFFF",360);lb.position.set(0,12.5,0);lb.scale.multiplyScalar(1.6);ca.add(lb);
+ const face=Math.atan2(BEAN.x-CL.c.x,BEAN.z-CL.c.z);ca.rotation.y=face;obstacles.push({x:CL.c.x,z:CL.c.z,r:6.2});
+ const ex=CL.c.x+Math.sin(face)*6.2,ez=CL.c.z+Math.cos(face)*6.2;const egg=new THREE.Group();egg.position.set(ex,Y,ez);g.add(egg);mesh(G.cyl(.7,.8,.8,20),pbr("#ECEFF1",.6),0,.4,0,egg);
+ const eg=mesh(G.sph(.45,20,16),pbr("#FFD700",.15,1),0,1.35,0,egg);eg.scale.y=1.3;const cage=mesh(new THREE.CylinderGeometry(.75,.75,1.6,16,1,true),new THREE.MeshStandardMaterial({color:"#90CAF9",transparent:true,opacity:.35,side:THREE.DoubleSide}),0,1.6,0,egg);
+ CL.egg={x:ex,z:ez,m:eg,cage};W2.dyn.push(eg,cage);obstacles.push({x:ex,z:ez,r:.9});
+ // raksasa baik hati
+ if(BASE.guy){const gi=makeChar("guy",null,4.2,null);gi.root.position.set(CL.c.x+Math.sin(face+.7)*8.5,Y,CL.c.z+Math.cos(face+.7)*8.5);gi.root.rotation.y=face;scene.add(gi.root);CL.giant=gi;obstacles.push({x:gi.root.position.x,z:gi.root.position.z,r:1.3});
+  const gl=labelSprite("Raksasa Baik Hati","#8D6E63","#FFFFFF",300);gl.position.set(gi.root.position.x,Y+5.4,gi.root.position.z);scene.add(gl)}
+ // payung terbang
+ const ua=face+.75,ux=CL.c.x+Math.sin(ua)*(CL.R-3),uz=CL.c.z+Math.cos(ua)*(CL.R-3);const um=new THREE.Group();um.position.set(ux,Y,uz);g.add(um);
+ mesh(G.cyl(.04,.04,1.8,8),pbr("#444",.4,.6),0,.9,0,um);mesh(new THREE.ConeGeometry(1.1,.5,12,1,true),new THREE.MeshStandardMaterial({color:"#E91E63",side:THREE.DoubleSide,roughness:.6}),0,1.95,0,um);
+ const ul=labelSprite("PAYUNG TERBANG · turun ke darat","#E91E63","#FFFFFF",400);ul.position.set(0,3,0);um.add(ul);CL.umb={x:ux,z:uz,h:ua}}
+function pantunTex(lines){const c=document.createElement("canvas");c.width=1024;c.height=660;const g=c.getContext("2d");g.fillStyle="#FFF8E1";g.fillRect(0,0,1024,660);g.strokeStyle="#8D6E4A";g.lineWidth=14;g.strokeRect(10,10,1004,640);
+ g.fillStyle="#6A1B9A";g.font=`900 64px ${MGFONT()}`;g.textAlign="center";g.fillText("PANTUN",512,100);g.fillStyle="#3E2723";g.font=`700 50px ${MGFONT()}`;lines.forEach((l,k)=>g.fillText(l,512,210+k*105));
+ const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+function beanTop(P){endAct();const pos=player.root.position;const a=Math.atan2(CL.c.x-BEAN.x,CL.c.z-BEAN.z);pos.set(BEAN.x+Math.sin(a)*2.4,CL.Y,BEAN.z+Math.cos(a)*2.4);player.root.rotation.y=a;yaw=a+Math.PI;vy=0;
+ blip("win");if(!CL.visited){CL.visited=true;confetti(30);toast("Selamat datang di NEGERI AWAN! Buka 4 Gerbang Kata & kumpulkan Kristal Kata")}}
+function cloudUpdate(dt,t,pp){if(!CL.g)return;CL.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want){G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*1.5);G.bar.rotation.z=G.lift*Math.PI/2*.95}});
+ const hi=pp.y>CL.Y-5;CL.crystals.forEach(C=>{C.m.rotation.y+=dt*1.5;C.m.position.y=CL.Y+1.7+Math.sin(t*2+C.i)*.15;if(!C.got&&hi&&Math.hypot(pp.x-C.x,pp.z-C.z)<3){C.got=true;C.m.visible=false;CL.got++;SAVE.coins+=3;persist();updateStats();blip("win");confetti(20);
+   toast(CL.got<4?`Kristal Kata ${CL.got}/4 didapat! +$30`:"4 Kristal Kata terkumpul! Buka Telur Emas di depan istana!")}});
+ if(CL.egg){CL.egg.m.rotation.y+=dt;if(!CL.done&&CL.got>=4){CL.egg.cage.visible=false;if(hi&&Math.hypot(pp.x-CL.egg.x,pp.z-CL.egg.z)<2.2){CL.done=true;SAVE.cloud=(SAVE.cloud||0)+1;SAVE.xp+=80;SAVE.coins+=8;persist();updateStats();blip("win");confetti(70);toast("TELUR EMAS! Kamu menaklukkan Negeri Awan: +80 XP · +$80")}}}
+ if(CL.giant&&Math.hypot(pp.x-CL.giant.root.position.x,pp.z-CL.giant.root.position.z)<60)animChar(CL.giant,dt,{speed:0,wave:Math.hypot(pp.x-CL.giant.root.position.x,pp.z-CL.giant.root.position.z)<9&&hi})}
+/* payung terbang: turun perlahan sambil diarahkan */
+function umbStart(){ACT={type:"umb",h:CL.umb.h,v:0};const pos=player.root.position;pos.set(CL.umb.x+Math.sin(CL.umb.h)*2.5,CL.Y,CL.umb.z+Math.cos(CL.umb.h)*2.5);
+ if(!W2.umbMesh){const u=new THREE.Group();mesh(G.cyl(.03,.03,1.4,6),pbr("#444",.4,.6),0,.7,0,u);mesh(new THREE.ConeGeometry(1.1,.5,12,1,true),new THREE.MeshStandardMaterial({color:"#E91E63",side:THREE.DoubleSide,roughness:.6}),0,1.45,0,u);W2.umbMesh=u;scene.add(u)}
+ W2.umbMesh.visible=true;$("jumpBtn").textContent="Payung";toast("Payung terbuka! Arahkan dengan joystick, kamu turun pelan-pelan");blip("jump")}
+function umbUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec();ACT.h-=ix*1.6*dt;const sp=4+Math.max(0,iz)*3;pos.x+=Math.sin(ACT.h)*sp*dt;pos.z+=Math.cos(ACT.h)*sp*dt;pos.y-=3.2*dt;
+ player.root.rotation.y=ACT.h;animChar(player,dt,{speed:0});if(player.gltf){const B=bonesOf(player);player.root.updateMatrixWorld(true);setAxis(1,0,0);rotBone(B.RightArm,-2.9);rotBone(B.RightForeArm,-.2);rotBone(B.LeftUpLeg,Math.sin(clock.elapsedTime*3)*.2);rotBone(B.RightUpLeg,-Math.sin(clock.elapsedTime*3)*.2)}
+ const hh=(TARGET_H[player.kind]||1.3);W2.umbMesh.position.set(pos.x,pos.y+hh*.95,pos.z);
+ let ground=0;if(onIpas(pos.x,pos.z)){const q=i3pol(pos.x,pos.z);ground=Math.max(0,i3T(q.r,q.a))}
+ if(pos.y<=ground+.02){W2.umbMesh.visible=false;$("jumpBtn").textContent="Lompat";if(walkable(pos.x,pos.z)&&!inMath(pos.x,pos.z)){pos.y=ground;ACT=null;toast("Mendarat dengan selamat!")}
+  else{ACT=null;SWIM=true;pos.y=-.9;toast("Byur! Kamu mendarat di laut. Berenanglah ke pantai")}}}
+function cloudObjective(tg){if(tg.y<CL.Y-6)return null;const left=CL.gates.filter(g=>!g.open).length;
+ if(CL.done)return`Negeri Awan selesai! <span class="small">Turun lewat pohon kacang atau pakai PAYUNG TERBANG di sisi belakang istana.</span>`;
+ if(CL.got>=4)return`<span class="y">Telur Emas</span> sudah bisa diambil di depan istana!`;
+ return`<span class="y">Negeri Awan</span> · Buka Gerbang Kata (${4-left}/4) lalu ambil Kristal Kata (${CL.got}/4).<span class="small">Soal Bahasa Indonesia sesuai kelasmu</span>`}
+
+/* ================= ARENA NINJA (lintasan halang rintang di atas air) ================= */
+const NJ={x0:89,x1:166,zw:7,plats:[],movers:[],arm:null,armAng:0,cps:[93,113,129,145],cp:0,t0:0,run:false,best:0,doneT:0};
+function inNinja(x,z){return x>NJ.x0+.5&&x<NJ.x1&&Math.abs(z)<NJ.zw}
+function buildNinja(){const g=new THREE.Group();scene.add(g);NJ.g=g;
+ const pad=c=>pbr(c,.55,.05),steel=pbr("#B0BEC5",.3,.8),blue=pad("#1E88E5"),red=pad("#E53935"),yel=pad("#FDD835"),wood=texStd("wood","#9C7B55",1,2,.85);
+ const P=(x0,x1,z0,z1,top,mat,mv)=>{const hw=(z1-z0)/2,hd=(x1-x0)/2,cx=(x0+x1)/2,cz=(z0+z1)/2;const m=mesh(RB(x1-x0,.5,z1-z0,.08),mat,cx,top-.25,cz,g);m.receiveShadow=true;
+  const legH=top+2.4;[[x0+.3,z0+.3],[x1-.3,z0+.3],[x0+.3,z1-.3],[x1-.3,z1-.3]].forEach(([x,z])=>{if(!mv)mesh(G.cyl(.09,.09,legH,8),steel,x,top-.5-legH/2,z,g,true)});
+  const pl=plat({x:cx,z:cz,hw:hd,hd:hw,top,bottom:top-.5});pl.nj=1;NJ.plats.push(pl);return{m,pl,cx,cz}};
+ // NB: plat() memakai hw untuk sumbu x dan hd untuk sumbu z
+ P(89,97,-4,4,.05,wood);P(111,115,-3,3,.6,blue);P(127,131,-3,3,.6,red);P(143,147,-3,3,.6,yel);
+ [99,101.6,104.2,106.8,109.4].forEach((x,k)=>{const z=k%2?1.1:-1.1;P(x-.75,x+.75,z-.75,z+.75,.6,k%2?red:yel)});
+ P(115,127,-.6,.6,.6,steel);
+ const hub=new THREE.Group();hub.position.set(121,.6,0);g.add(hub);mesh(G.cyl(.25,.3,1.6,16),pbr("#37474F",.4,.6),0,.8,0,hub,true);
+ const arm=new THREE.Group();arm.position.y=1.25;hub.add(arm);mesh(G.cap(.22,5.2),pad("#FF7043"),0,0,0,arm).rotation.z=Math.PI/2;NJ.arm={arm,x:121,z:0,len:2.8};W2.dyn.push(arm);
+ [0,1,2].forEach(k=>{const x=133+k*4;const r=P(x-1.25,x+1.25,-1.25,1.25,.6,[blue,red,yel][k],true);NJ.movers.push({...r,x,ph:k*2.1,amp:2.6,sp:1.1+k*.25,z:0});W2.dyn.push(r.m)});
+ const ramp=new THREE.Shape();ramp.moveTo(0,0);ramp.quadraticCurveTo(1.6,0,1.9,2.0);ramp.lineTo(2.2,2.0);ramp.lineTo(2.2,0);const rg=new THREE.ExtrudeGeometry(ramp,{depth:4,bevelEnabled:false});rg.translate(0,0,-2);
+ const rm=new THREE.Mesh(rg,pad("#8E24AA"));rm.position.set(147,.6,0);rm.castShadow=rm.receiveShadow=true;g.add(rm);
+ plat({x:147.4,z:0,hw:.4,hd:2,top:1.05,bottom:.6}).nj=1;plat({x:148.15,z:0,hw:.35,hd:2,top:1.6,bottom:.6}).nj=1;plat({x:148.85,z:0,hw:.3,hd:2,top:2.6,bottom:.6}).nj=1;P(149.1,157,-3,3,2.6,blue);
+ const tw=new THREE.Group();tw.position.set(155.5,2.6,0);g.add(tw);[-1.4,1.4].forEach(z=>mesh(G.cyl(.12,.12,3.4,10),steel,0,1.7,z,tw));mesh(G.box(.3,.3,3.1),steel,0,3.4,0,tw);
+ const btn=mesh(G.cyl(.35,.35,.25,24),pbr("#D50000",.3),0,1.1,-1.4,tw);NJ.btn=btn;
+ const fin=labelSprite("FINISH","#D50000","#FFFFFF",256);fin.position.set(0,4.4,0);fin.scale.multiplyScalar(1.4);tw.add(fin);
+ const ar=new THREE.Group();ar.position.set(96.4,0,0);g.add(ar);[-4,4].forEach(z=>mesh(G.cyl(.2,.2,4.2,12),pbr("#263238",.5,.4),0,2.1,z,ar));mesh(RB(.5,.9,8.6,.1),pbr("#263238",.5,.4),0,4.3,0,ar);
+ const st=labelSprite("ARENA NINJA · Lintasan Halang Rintang","#263238","#FFEB3B",520);st.position.set(0,5.6,0);st.scale.multiplyScalar(1.5);ar.add(st);
+ [[107,-5.5,"Batu Loncat"],[121,-5.5,"Palang Berputar"],[137,-5.5,"Pijakan Bergerak"],[150,-5.5,"Tembok Lengkung"]].forEach(([x,z,t])=>{const s=labelSprite(t,"#37474F","#FFFFFF",256);s.position.set(x,2.2,z);g.add(s)});
+ NJ.cps.forEach((x,i)=>{if(!i)return;const f=mesh(G.cyl(.04,.04,1.6,6),steel,x,1.4,-2.6,g,true);const fl=mesh(G.box(.02,.4,.6),pbr("#43A047",.6),x,2,-2.3,g,true)});
+ const tmr=document.createElement("div");tmr.id="njTimer";tmr.hidden=true;document.body.appendChild(tmr)}
+function njRespawn(msg){if(!NJ.run)NJ.cp=0;const x=NJ.cps[NJ.cp];player.root.position.set(x,.6,0);vy=0;yaw=-Math.PI/2;player.root.rotation.y=Math.PI/2;if(msg)toast(msg,true);blip("bad")}
+function ninjaUpdate(dt,t,pp,fl){NJ.armAng+=dt*1.6;if(NJ.arm)NJ.arm.arm.rotation.y=NJ.armAng;
+ NJ.movers.forEach(M=>{const nz=Math.sin(t*M.sp+M.ph)*M.amp,dz=nz-M.z;M.z=nz;M.m.position.z=nz;M.pl.z=nz;
+  if(fl&&fl.pl===M.pl&&onGround&&!ACT)pp.z+=dz});
+ if(!inNinja(pp.x,pp.z)){if(NJ.run&&pp.x<NJ.x0){NJ.run=false;$("njTimer").hidden=true}return}
+ if(pp.x<96.8)NJ.armed=true;
+ if(!NJ.run&&NJ.armed&&pp.x>97&&pp.y>-.3){NJ.armed=false;NJ.run=true;NJ.t0=performance.now();NJ.cp=0;$("njTimer").hidden=false;blip("coin");toast("Mulai! Lewati semua rintangan secepat mungkin")}
+ if(NJ.run){const s=(performance.now()-NJ.t0)/1000;$("njTimer").textContent="⏱ "+s.toFixed(1)+" s";
+  NJ.cps.forEach((x,i)=>{if(i>NJ.cp&&pp.x>x-1.5&&pp.x<x+1.5&&pp.y>.4){NJ.cp=i;toast(`Checkpoint ${i}/${NJ.cps.length-1}`);blip("coin")}});
+  if(NJ.arm){const lx=pp.x-NJ.arm.x,lz=pp.z-NJ.arm.z,d=Math.hypot(lx,lz);if(d<NJ.arm.len&&pp.y<1.9&&pp.y>.2){const pa=Math.atan2(lz,lx),aa=-NJ.armAng;let df=Math.abs(Math.atan2(Math.sin(pa-aa),Math.cos(pa-aa)));df=Math.min(df,Math.PI-df);if(df<.22){pp.z+=(pp.z>=0?1:-1)*1.6;vy=4;toast("Bam! Kena palang!",true);blip("bad")}}}
+  if(pp.x>154&&pp.y>2.4){NJ.run=false;const s2=(performance.now()-NJ.t0)/1000;SAVE.ninja=SAVE.ninja||{best:0,n:0};const first=!SAVE.ninja.n;SAVE.ninja.n++;const nb=!SAVE.ninja.best||s2<SAVE.ninja.best;if(nb)SAVE.ninja.best=s2;
+   const coins=s2<35?8:s2<55?5:3;SAVE.coins+=coins;if(first)SAVE.xp+=30;persist();updateStats();blip("win");confetti(60);if(NJ.btn)NJ.btn.position.y=1.0;
+   toast(`FINISH! Waktu ${s2.toFixed(1)} s${nb?" · REKOR BARU!":""} · +$${coins*10}${first?" · +30 XP":""}`);$("njTimer").textContent=`🏁 ${s2.toFixed(1)} s · Rekor ${SAVE.ninja.best.toFixed(1)} s`;setTimeout(()=>{if(!NJ.run)$("njTimer").hidden=true;if(NJ.btn)NJ.btn.position.y=1.1},5000)}}
+ if(pp.y<-.6){NJ.run&&0;njRespawn("Byur! Jatuh ke air. Coba lagi dari checkpoint")}}
+function ninjaObjective(tg){if(!inNinja(tg.x,tg.z))return null;const best=SAVE.ninja&&SAVE.ninja.best;return`<span class="y">Arena Ninja</span> · Lompat, hindari palang, sampai ke tombol FINISH!<span class="small">Lompat 2× di udara untuk tembok tinggi${best?` · Rekor ${best.toFixed(1)} s`:""}</span>`}
+/* ================= KETIK CEPAT (mini game mengetik) ================= */
+const TYPE_WORDS=[["bola","buku","ikan","roti","susu","kuda","sapi","meja","topi","nasi","batu","kayu","air","api","mata","kaki","dua","satu","lari","baju","pagi","awan","bunga","pohon","rumah"],
+ ["cat","dog","fish","bird","apple","book","ball","house","milk","egg","tree","star","red","blue","green","happy","water","rice","sun","moon","door","hand","shoes","chair","table"],
+ ["school","teacher","friend","family","market","kitchen","beautiful","breakfast","mountain","river","morning","tomorrow","vegetables","fisherman","pelangi","sekolah","perpustakaan","matahari","pengetahuan","indonesia","gembira","bersama"]];
+let TG=null;
+function startTyping(K){setPaused(true);const band=GR().band;TG={K,band,words:[],score:0,typed:0,miss:0,lives:3,t:0,dur:60,spawn:0,last:performance.now(),chars:0};
+ $("mgTitle").textContent="Ketik Cepat · latihan mengetik";$("mgEnd").hidden=true;$("mg").hidden=false;$("mg").dataset.game="ketik";$("mgVerb").textContent="KETIK KATA YANG JATUH SEBELUM SAMPAI KE TANAH!";$("mgPrompt").textContent="Ketik di kotak bawah ⌨️";$("mgSay").hidden=true;
+ let inp=$("mgType");if(!inp){inp=document.createElement("input");inp.id="mgType";inp.autocomplete="off";inp.autocapitalize="off";inp.spellcheck=false;inp.setAttribute("aria-label","Ketik kata");inp.placeholder="ketik di sini…";$("mg").appendChild(inp);
+  inp.addEventListener("input",()=>tgInput(inp));inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();tgInput(inp,true)}})}
+ inp.hidden=false;inp.value="";setTimeout(()=>inp.focus(),100);MG={typing:true,K};mgResize();TG.W=MG.W;TG.H=MG.H;TG.dpr=MG.dpr;$("mgLives").innerHTML=[0,1,2].map(()=>`<span>${HEART}</span>`).join("");$("mgScore").textContent="0";requestAnimationFrame(tgLoop)}
+function tgSpawn(){const pool=TYPE_WORDS[TG.band];let w;for(let k=0;k<10;k++){w=pool[Math.floor(Math.random()*pool.length)];if(!TG.words.some(o=>o.w===w))break}
+ const W=MG.W;TG.words.push({w,x:60+Math.random()*(W-120),y:-20,v:(22+TG.band*8)*(1+TG.t/90),hit:0,col:["#FFB300","#4FC3F7","#AED581","#F48FB1","#CE93D8"][Math.floor(Math.random()*5)]})}
+function tgInput(inp,enter){if(!TG)return;const v=inp.value.trim().toLowerCase();const o=TG.words.find(o=>!o.hit&&o.w===v);
+ if(o){o.hit=1;TG.score+=o.w.length*2;TG.typed++;TG.chars+=o.w.length;inp.value="";blip("good");mgBurstAt(o.x,o.y,o.col);$("mgScore").textContent=TG.score;if(TG.band>0)say(o.w,1,/^[a-z]+$/.test(o.w)&&TYPE_WORDS[1].concat(TYPE_WORDS[2].slice(0,14)).includes(o.w)?"en-US":"id-ID")}
+ else if(enter&&v){TG.miss++;blip("bad");inp.classList.add("bad");setTimeout(()=>inp.classList.remove("bad"),300);inp.value=""}}
+const TG_PARTS=[];function mgBurstAt(x,y,c){for(let k=0;k<16;k++){const a=Math.random()*6.28,s=80+Math.random()*180;TG_PARTS.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-100,l:.7,c})}}
+function tgLoop(now){if(!TG)return;const dt=Math.min(.05,(now-TG.last)/1000);TG.last=now;TG.t+=dt;const W=MG.W,H=MG.H,cv=$("mgCv"),g=cv.getContext("2d");g.setTransform(MG.dpr,0,0,MG.dpr,0,0);
+ TG.spawn-=dt;if(TG.spawn<=0){tgSpawn();TG.spawn=Math.max(1.1,(2.6-TG.band*.4)-TG.t/60)}
+ const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,"#0D1B3E");gr.addColorStop(1,"#283E7A");g.fillStyle=gr;g.fillRect(0,0,W,H);
+ g.fillStyle="rgba(255,255,255,.6)";for(let k=0;k<40;k++){g.fillRect((k*97)%W,(k*53+TG.t*6)%H,2,2)}
+ g.fillStyle="#3E7B3A";g.fillRect(0,H-22,W,22);
+ const inp=$("mgType"),typed=(inp&&inp.value||"").trim().toLowerCase();
+ TG.words.forEach(o=>{if(o.hit)return;o.y+=o.v*dt;const fs=Math.max(18,Math.min(30,W/22));g.font=`900 ${fs}px ${MGFONT()}`;const tw=g.measureText(o.w).width;
+  g.fillStyle="rgba(255,140,0,.35)";g.beginPath();g.ellipse(o.x,o.y-fs*.9,fs*.35,fs*.8,0,0,7);g.fill();
+  g.fillStyle=o.col;mgRR(g,o.x-tw/2-12,o.y-fs*.75,tw+24,fs*1.5,12);g.fill();
+  const match=typed&&o.w.startsWith(typed);g.textAlign="left";g.textBaseline="middle";let x=o.x-tw/2;
+  for(let i=0;i<o.w.length;i++){const ch=o.w[i];g.fillStyle=match&&i<typed.length?"#1B5E20":"#10213A";g.fillText(ch,x,o.y);x+=g.measureText(ch).width}
+  if(o.y>H-22){o.hit=2;TG.lives--;blip("bad");$("mgLives").innerHTML=[0,1,2].map(k=>`<span class="${k<TG.lives?"":"lost"}">${HEART}</span>`).join("")}});
+ TG.words=TG.words.filter(o=>!o.hit);
+ for(let i=TG_PARTS.length-1;i>=0;i--){const p=TG_PARTS[i];p.l-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;if(p.l<=0){TG_PARTS.splice(i,1);continue}g.globalAlpha=p.l/.7;g.fillStyle=p.c;g.fillRect(p.x-3,p.y-3,6,6)}g.globalAlpha=1;
+ const left=Math.max(0,TG.dur-TG.t);$("mgProg").style.width=(TG.t/TG.dur*100)+"%";$("mgPrompt").textContent=`Sisa waktu ${Math.ceil(left)} detik · ${TG.typed} kata`;
+ if(left<=0||TG.lives<=0)return tgEnd();requestAnimationFrame(tgLoop)}
+function tgEnd(){const T=TG;TG=null;const inp=$("mgType");if(inp){inp.blur();inp.hidden=true}const wpm=Math.round(T.chars/5/(Math.min(T.t,T.dur)/60));const coins=Math.min(10,Math.floor(T.typed/2));
+ SAVE.typing=SAVE.typing||{best:0};const nb=T.score>SAVE.typing.best;if(nb)SAVE.typing.best=T.score;SAVE.coins+=coins;SAVE.xp+=Math.floor(T.typed/2);persist();updateStats();blip(T.typed>=10?"win":"good");if(T.typed>=10)confetti(30);
+ $("mgEnd").innerHTML=`<div class="mgCard"><div class="mpTitle" style="font-size:2rem">${T.lives>0?"WAKTU HABIS!":"KATA SAMPAI KE TANAH!"}</div>
+  <div class="statRow"><div class="stat"><b>${T.typed}</b><br>kata</div><div class="stat"><b>${wpm}</b><br>kata/menit</div><div class="stat"><b>${T.score}</b><br>poin${nb?" · rekor!":""}</div><div class="stat"><b>+$${coins*10}</b><br>uang</div></div>
+  <div class="foot"><button class="btn-main btn-green" id="mgAgain">MAIN LAGI</button><button class="btn-soft" id="mgBack">Kembali ke kota</button></div></div>`;$("mgEnd").hidden=false;
+ $("mgAgain").onclick=()=>{$("mgEnd").hidden=true;startTyping(T.K)};$("mgBack").onclick=()=>{MG=null;$("mg").hidden=true;setPaused(false)}}
+
 
 /* =====================================================
    GTA-STYLE OVERRIDES & SAVE MIGRATION
@@ -2375,7 +2574,7 @@ const VCFG={boat:{maxF:20,maxR:-4,acc:8,wb:3.4,rad:1.7,ride:true,label:"Speedboa
 const MA=Math.PI*19/12,MDX=Math.sin(MA),MDZ=Math.cos(MA),MU0=118,MATH_N=10;
 const BR_A=Math.PI*11/12,BR_DX=Math.sin(BR_A),BR_DZ=Math.cos(BR_A),C2D=215,R2=52,C2={x:BR_DX*C2D,z:BR_DZ*C2D};
 function axisUV(x,z){return{u:x*BR_DX+z*BR_DZ,v:x*BR_DZ-z*BR_DX}}
-function walkable(x,z,m){m=m||0;if(Math.hypot(x,z)<ISLAND_R-m)return true;if(onDock(x,z))return true;if(onIpas(x,z))return i3Walk(x,z);if(onMathBridge(x,z)||inMath(x,z))return true;const q=axisUV(x,z);
+function walkable(x,z,m){m=m||0;if(typeof player!=="undefined"&&player&&player.root&&player.root.position.y>CL.Y-8&&!W2.fly)return cloudWalk(x,z);if(inNinja(x,z))return true;if(Math.hypot(x,z)<ISLAND_R-m)return true;if(onDock(x,z))return true;if(onIpas(x,z))return i3Walk(x,z);if(onMathBridge(x,z)||inMath(x,z))return true;const q=axisUV(x,z);
  if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<2.7-m*.55)return true;return Math.hypot(x-C2.x,z-C2.z)<R2-2-m}
 function onIsland2(x,z){return Math.hypot(x-C2.x,z-C2.z)<R2+8}
 function suggestedPk(){for(let i=0;i<PK.length;i++)if(!SAVE.pk[i])return i;return -1}
@@ -2473,10 +2672,10 @@ function buildWorld(){
  billboard(Math.sin(Math.PI+Math.PI/12)*57,Math.cos(Math.PI+Math.PI/12)*57,Math.PI/12,BB_ART.key,"WELCOME TO SPEAK ISLAND","#2E86C1");
  buildPlayground();buildParkour();buildPancasila();buildMath();buildWorld2();
  // trees, grass, flowers
- [["balon",.19,"#E74C3C"],["pancing",.26,"#2E86C1"],["tikus",.33,"#8E5A2B"]].forEach(([gm,a,c])=>makeKiosk(gm,"en",Math.sin(a)*61,Math.cos(a)*61,a+Math.PI,c,"en-"+gm));
+ [["balon",.19,"#E74C3C"],["pancing",.26,"#2E86C1"],["tikus",.33,"#8E5A2B"],["ketik",.40,"#5E35B1"]].forEach(([gm,a,c])=>makeKiosk(gm,"en",Math.sin(a)*61,Math.cos(a)*61,a+Math.PI,c,"en-"+gm));
  const centers=AREAS.map((A,i)=>areaFrame(i));
  let placed=0,tries=0;
- const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=mUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=dkUV(x,z);if(q.u>40&&Math.abs(q.v)<4.5)return false}if(Math.hypot(x+11.5,z-19.5)<4||Math.hypot(x+6.5,z-4)<2.5)return false;if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
+ const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=mUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=dkUV(x,z);if(q.u>40&&Math.abs(q.v)<4.5)return false}if((x>82&&Math.abs(z)<8)||Math.hypot(x-BEAN.x,z-BEAN.z)<6||Math.hypot(x+11.5,z-19.5)<4||Math.hypot(x+6.5,z-4)<2.5)return false;if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
   if(!centers.every((F,k)=>Math.hypot(x-F.x,z-F.z)>(AREAS[k].type==="field"?19:13)))return false;
   if(!centers.every(F=>Math.abs(Math.atan2(Math.sin(a-F.a),Math.cos(a-F.a)))*r>2.4||r>F.r+2))return false;
   return obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+margin)};
@@ -2687,7 +2886,7 @@ function insidePlat(p,x,z,pad){if(p.rot){const dx=x-p.x,dz=z-p.z;return Math.abs
 function pushOutPlats(pos,y,rad){for(const p of PLATS){if(p.rot||p.top<=y+STEP||y+1.6<(p.bottom||0)||!insidePlat(p,pos.x,pos.z,rad))continue;
  if(p.cyl){const dx=pos.x-p.x,dz=pos.z-p.z,d=Math.hypot(dx,dz)||1;pos.x=p.x+dx/d*(p.r+rad);pos.z=p.z+dz/d*(p.r+rad)}
  else{const ox=p.hw+rad-Math.abs(pos.x-p.x),oz=p.hd+rad-Math.abs(pos.z-p.z);if(ox<oz)pos.x=p.x+Math.sign(pos.x-p.x||1)*(p.hw+rad);else pos.z=p.z+Math.sign(pos.z-p.z||1)*(p.hd+rad)}}}
-function floorAt(x,z,y){let f=inMath(x,z)?-50:onIpas(x,z)?i3Floor(x,z):0,pl=null;for(const p of PLATS){if(p.top<=y+STEP&&p.top>f&&insidePlat(p,x,z,0)){f=p.top;pl=p}}return{f,pl}}
+function floorAt(x,z,y){let f=inMath(x,z)?-50:onIpas(x,z)?i3Floor(x,z):0,pl=null;if(y>CL.Y-8&&cloudWalk(x,z))f=CL.Y;else if(inNinja(x,z)&&x>89.6)f=-50;for(const p of PLATS){if(p.top<=y+STEP&&p.top>f&&insidePlat(p,x,z,0)){f=p.top;pl=p}}return{f,pl}}
 function pushOutCircles(pos,rad,list){for(const o of list){const dx=pos.x-o.x,dz=pos.z-o.z,d=Math.hypot(dx,dz),m=o.r+rad;if(d<m&&d>0){pos.x=o.x+dx/d*m;pos.z=o.z+dz/d*m}}}
 
 /* ---------- main loop ---------- */
@@ -2787,7 +2986,7 @@ function movePlayer(dt){
  vy-=24*dt;pos.y+=vy*dt;fl=floorAt(pos.x,pos.z,pos.y);
  if(pos.y<=fl.f){if(fl.pl&&fl.pl.bounce&&vy<-1.5){pos.y=fl.f;vy=fl.pl.bounce;onGround=false;jumps=1;blip("jump");if(fl.pl.mesh){fl.pl.mesh.scale.y=.3;setTimeout(()=>fl.pl.mesh.scale.y=1,120)}}
   else{pos.y=fl.f;vy=0;onGround=true;jumps=0}}else if(pos.y>fl.f+.05)onGround=false;
- mathUpdate(dt,pos,pos.y-fl.f<.05?fl.pl:null);
+ mathUpdate(dt,pos,pos.y-fl.f<.05?fl.pl:null);ninjaUpdate(dt,clock.elapsedTime,pos,fl);
  player.gs.position.y=(fl.f-pos.y)/1+.02;player.gs.scale.setScalar(Math.max(.4,1-(pos.y-fl.f)*.2));
  animChar(player,dt,{speed:onGround?sp:Math.max(sp,6),air:!onGround&&vy>-30&&(pos.y-fl.f)>.35,dance:dancing>0&&len<.1&&!happyT,happy:happyT>0&&len<.1});if(happyT>0)happyT-=dt;}
  w2Summit(pos);w2Leave(pos);
@@ -2858,7 +3057,7 @@ function updateHelp(){const h=$("help");let k="",html="";
  if(ACT&&ACT.type==="fly"){k="fly";html="Terbang: Belok <kbd>A</kbd><kbd>D</kbd> · Menukik <kbd>W</kbd> · Melambat <kbd>S</kbd> · Tahan <kbd>Spasi</kbd> / <b>Kepak</b> untuk naik"}
  else if(ACT){k="act"+ACT.type+(ACT.phase||"");html=ACT.type==="climb"?"Panjat: Naik <kbd>W</kbd> · Turun <kbd>S</kbd> · Lompat turun <kbd>Spasi</kbd>":ACT.type==="swing"?"Ayunan: Dorong <kbd>W</kbd> · Rem <kbd>S</kbd> · Turun <kbd>Spasi</kbd>":ACT.type==="fish"?(ACT.phase==="bite"?"Ada yang makan umpan! Tekan <kbd>E</kbd> / <b>Tarik!</b>":"Tunggu tanda <b style='color:#E74C3C'>!</b> lalu tekan <kbd>E</kbd> · Berhenti <kbd>Spasi</kbd>"):"";if(!html)k=""}
  else if(SWIM){k="swim"+(W2.diveWant>0?1:0);html=W2.diveWant>0?"Menyelam: gerakkan <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Naik ke permukaan <kbd>Spasi</kbd> / <b>Naik</b> · Awas napas!":"Berenang: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Cepat <kbd>Shift</kbd> · Menyelam <kbd>Spasi</kbd> / <b>Selam</b>"}
- else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`}
+ else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`}
  else if(driving){k="drive"+car.type;html=`${esc(car.cfg.label)}: Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · ${car.cfg.ride?"Turun":"Keluar"} <kbd>F</kbd>`}
  else if(nearNpc>=0){k="npc"+nearNpc;html=`Tekan <kbd>E</kbd> untuk ngobrol dengan <b style="color:#F7D23E">${esc(AREAS[nearNpc].npc.name)}</b>`}
  else if(nearKiosk>=0){const K=KIOSKS[nearKiosk];k="kiosk"+nearKiosk;html=`Tekan <kbd>E</kbd> untuk main <b style="color:#FF8FD1">${esc(K.name)}</b>${K.subj==="en"?" (Bahasa Inggris)":""}`}
@@ -2895,6 +3094,8 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
   const L=mU(MATH_N)+MS.end-MU0;g.save();g.translate(MDX*MU0*s,MDZ*MU0*s);g.rotate(-MA);g.fillStyle="#3D3645";g.fillRect(-(MS.inner+2)*s,0,(MS.inner+2)*2*s,L*s);g.fillStyle="#FF6A00";g.fillRect(-MS.inner*s,0,MS.inner*2*s,L*s);
   g.fillStyle="#6A5F70";for(let i=0;i<=MATH_N;i++){const a=i?mU(i)-MS.plat:MU0,l=i===0?MS.start:i===MATH_N?MS.end:MS.plat;g.fillRect(-MS.half*s,(a-MU0)*s,MS.half*2*s,l*s)}g.restore()}
  KIOSKS.forEach(K=>{g.fillStyle="#FF8FD1";g.strokeStyle="#000";g.lineWidth=2;g.beginPath();g.moveTo(K.x*s,K.z*s-7);g.lineTo(K.x*s+7,K.z*s);g.lineTo(K.x*s,K.z*s+7);g.lineTo(K.x*s-7,K.z*s);g.closePath();g.fill();g.stroke()});
+ g.fillStyle="#455A64";g.fillRect(NJ.x0*s,-4*s,(157-NJ.x0)*s,8*s);g.fillStyle="#FDD835";g.fillRect(97*s,-1*s,60*s,2*s);
+ g.fillStyle="rgba(255,255,255,.75)";g.beginPath();g.arc(CL.c.x*s,CL.c.z*s,CL.R*s,0,7);CL.isl.forEach(I=>{g.moveTo(I.x*s+I.r*s,I.z*s);g.arc(I.x*s,I.z*s,I.r*s,0,7)});g.fill();g.fillStyle="#2E7D32";g.beginPath();g.arc(BEAN.x*s,BEAN.z*s,4,0,7);g.fill();
  g.fillStyle="#E9D49A";g.beginPath();g.arc(C3.x*s,C3.z*s,(I3.B+3)*s,0,7);g.fill();g.fillStyle="#5D8A3A";g.beginPath();g.arc(C3.x*s,C3.z*s,I3.R0*s,0,7);g.fill();g.fillStyle="#8C8070";g.beginPath();g.arc(C3.x*s,C3.z*s,I3.R1*s,0,7);g.fill();
  g.strokeStyle="#B8946A";g.lineWidth=3*s;g.beginPath();for(let th=0;th<=I3.TH;th+=.1){const a=I3.phi0+th,r=roadR(th);const X=(C3.x+Math.sin(a)*r)*s,Z=(C3.z+Math.cos(a)*r)*s;th?g.lineTo(X,Z):g.moveTo(X,Z)}g.stroke();
  W2.gates.forEach(G=>{g.fillStyle=G.open?"#5DD39E":"#F7D23E";g.beginPath();g.arc(G.x*s,G.z*s,5,0,7);g.fill()});

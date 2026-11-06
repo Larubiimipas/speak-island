@@ -33,3 +33,6 @@ Situs: https://larubiimipas.github.io/speak-island
 - **Pangkas Rambut** (gaya & warna rambut) dan **Toko Baju** (atasan/bawahan termasuk batik, seragam SD, pramuka, jersey) dibeli dengan uang di kanan atas; **Pasar Ikan** di dermaga membeli tangkapan.
 - **Peta dunia** (ketuk radar atau tekan M): bisa digeser & di-zoom, dengan nama pulau dan lokasi.
 - **Main Bersama (2 pemain)** — tombol 👥 di kanan atas. Satu pemain *Buat Ruang* (dapat kode 4 angka), temannya *Gabung* dengan kode itu. Koneksi lewat server perantara MQTT publik (HiveMQ, cadangan EMQX) sehingga tembus jaringan seluler; tanpa akun. Saling melihat karakter (baju & rambut ikut), ucapan bahasa Inggris, lambai, joget, tos, dan tombol "Ke teman".
+- **Negeri Awan (Bahasa Indonesia)** — panjat Pohon Kacang Ajaib (timur laut kota) setinggi 60 m. Di atas awan: Istana Raksasa, 4 Gerbang Kata (soal Bahasa Indonesia sesuai kelas), jembatan pelangi, Kristal Kata, papan pantun, dan Telur Emas. Turun lewat pohon kacang atau Payung Terbang.
+- **Arena Ninja** — lintasan halang rintang di atas air (pantai timur kota): batu loncat, palang berputar, pijakan bergerak, tembok lengkung, tombol FINISH; ada checkpoint, stopwatch, dan rekor waktu.
+- **Ketik Cepat** — kios mini game latihan mengetik: ketik kata yang jatuh sebelum menyentuh tanah (kata Indonesia/Inggris sesuai kelas), 60 detik, skor kata/menit.
