@@ -2202,7 +2202,7 @@ function mpJoin(code){code=(code||"").replace(/\D/g,"");if(code.length!==4){mpSt
    let tries=0;const iv=setInterval(()=>{if(MP.status!=="join"){clearInterval(iv);return}if(++tries>5){clearInterval(iv);mpStatus(`Ruang <b>${code}</b> tidak menjawab. Pastikan temanmu sudah menekan <b>Buat Ruang</b> dan kodenya sama.`);return}
     mpSend({t:"hello",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef(),kelas:SAVE.kelas,join:1})},2500)})})}
 function mpSend(o){if(MP.cli&&MP.cli.connected&&MP.code){o.id=MP.me;try{MP.cli.publish(mpTopic(MP.code),JSON.stringify(o),{qos:0})}catch(e){}}}
-function mpClose(silent){if(MP.friend||MP.status==="on")mpSend({t:"bye"});try{MP.cli&&MP.cli.end(true)}catch(e){}MP.cli=null;MP.status="off";mpDropFriend();if(!silent)renderMp()}
+function mpClose(silent){if(MP.friend||MP.status==="on")mpSend({t:"bye"});const c=MP.cli;setTimeout(()=>{try{c&&c.end(false)}catch(e){}},400);MP.cli=null;MP.status="off";mpDropFriend();if(!silent)renderMp()}
 function mpConnected(){MP.status="on";MP.lastHear=performance.now();toast("Terhubung dengan temanmu!");blip("win");renderMp()}
 function mpDropFriend(){const F=MP.friend;if(!F)return;scene.remove(F.C.root);if(F.C.acc)scene.remove(F.C.acc);if(F.tag)scene.remove(F.tag);if(F.veh)scene.remove(F.veh);if(F.bub)scene.remove(F.bub);MP.friend=null;updateMpChip()}
 function mpMakeFriend(m){mpDropFriend();const hero=m.hero==="boy"?"boy":"girl",M=HERO_MODEL[hero];const C=makeChar(M.kind,M.tint,heroHeight(hero),heroSpecFor(hero));
