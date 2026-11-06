@@ -2223,8 +2223,7 @@ function mpBubble(F,text){if(F.bub)scene.remove(F.bub);F.bub=labelSprite(text,"#
 let MY_BUB=null,MY_BUBT=0;function myBubble(text){if(MY_BUB)scene.remove(MY_BUB);MY_BUB=labelSprite(text,"#FFF8E1","#1E2A2E",420);MY_BUB.scale.multiplyScalar(1.1);scene.add(MY_BUB);MY_BUBT=4}
 function mpTick(dt){if(MY_BUB){MY_BUBT-=dt;const p=player.root.position;MY_BUB.position.set(p.x,p.y+(TARGET_H[player.kind]||1.3)*1.9,p.z);if(MY_BUBT<=0){scene.remove(MY_BUB);MY_BUB=null}}
  if(MP.status!=="on")return;if(MP.friend&&performance.now()-(MP.lastHear||0)>12000){toast(`Koneksi dengan ${MP.friend.name} terputus`,true);mpDropFriend();MP.status=MP.host?"wait":"off";renderMp();return}MP.sendT-=dt;
- if(MP.sendT<=0){MP.sendT=.18;const p=driving?{x:car.x,y:0,z:car.z}:player.root.position;
-  mpSend({t:"s",p:[+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2)],h:+(driving?car.h:player.root.rotation.y).toFixed(3),sp:+(driving?Math.abs(car.speed):(MP.lastSp||0)).toFixed(2),rx:+(player.root.rotation.x||0).toFixed(2),sw:SWIM?1:0,d:driving?car.type:null})}
+
  const F=MP.friend;if(!F)return;const k=Math.min(1,dt*6);F.x+=(F.tx-F.x)*k;F.y+=(F.ty-F.y)*k;F.z+=(F.tz-F.z)*k;F.h+=Math.atan2(Math.sin(F.th-F.h),Math.cos(F.th-F.h))*k;
  const R=F.C.root;
  if(F.drv){if(F.vehType!==F.drv){if(F.veh)scene.remove(F.veh);F.vehType=F.drv;F.veh=F.drv==="boat"?makeBoatMesh():F.drv==="motor"?makeMotorMesh("#8E44AD"):F.drv==="bike"?makeBikeMesh("#8E44AD"):makeCarMesh("#8E44AD");scene.add(F.veh)}
@@ -2258,6 +2257,10 @@ function renderMp(){const el=$("mpBox");if(!el)return;const F=MP.friend;let body
  updateMpChip()}
 function initMp(){const chip=document.createElement("button");chip.id="mpChip";chip.className="mpChip";chip.textContent="👥 Main Bersama";chip.onclick=()=>{if(!paused)openMp()};const tr=document.querySelector(".topR");(tr||document.body).appendChild(chip);
  const box=document.createElement("div");box.id="mpBox";box.className="w2ov";box.hidden=true;document.body.appendChild(box)}
+
+function mpSendState(){if(MP.status!=="on"||!player)return;const p=driving?{x:car.x,y:0,z:car.z}:player.root.position;
+ mpSend({t:"s",p:[+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2)],h:+(driving?car.h:player.root.rotation.y).toFixed(3),sp:+(driving?Math.abs(car.speed):(MP.lastSp||0)).toFixed(2),rx:+(player.root.rotation.x||0).toFixed(2),sw:SWIM?1:0,d:driving?car.type:null})}
+setInterval(mpSendState,200);
 
 
 /* =====================================================
