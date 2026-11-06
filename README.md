@@ -32,3 +32,4 @@ Situs: https://larubiimipas.github.io/speak-island
 - **Sayap terbang** di lemari PAKAIAN TERBANG (puncak Pulau IPAS): tahan KEPAK untuk naik, ikuti cincin emas ke Negeri Pancasila.
 - **Pangkas Rambut** (gaya & warna rambut) dan **Toko Baju** (atasan/bawahan termasuk batik, seragam SD, pramuka, jersey) dibeli dengan uang di kanan atas; **Pasar Ikan** di dermaga membeli tangkapan.
 - **Peta dunia** (ketuk radar atau tekan M): bisa digeser & di-zoom, dengan nama pulau dan lokasi.
+- **Main Bersama (2 pemain)** — tombol 👥 di kanan atas. Satu pemain *Buat Ruang* (dapat kode 4 angka), temannya *Gabung* dengan kode itu. Koneksi langsung antar-perangkat (WebRTC lewat PeerJS), tanpa server sendiri. Saling melihat karakter (baju & rambut ikut), ucapan bahasa Inggris, lambai, joget, tos, dan tombol "Ke teman".

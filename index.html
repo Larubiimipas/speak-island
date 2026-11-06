@@ -317,6 +317,14 @@ input{-webkit-user-select:text;user-select:text}
 .bmZoom{position:absolute;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}.bmZoom button{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.92);font-size:1.6rem;font-weight:900;color:#10313B}
 .bmHint{position:absolute;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:#fff;font-size:.8rem;background:rgba(0,0,0,.4);padding:4px 10px;border-radius:8px;white-space:nowrap}
 .mapTag{position:fixed;transform:translateX(-50%);z-index:9;pointer-events:none;font-size:.62rem;font-weight:900;color:#fff;background:rgba(0,0,0,.55);padding:1px 6px;border-radius:6px;letter-spacing:.08em}
+.mpChip{display:block;margin-top:6px;margin-left:auto;background:rgba(0,0,0,.5);color:#fff;font-weight:800;font-size:.8rem;padding:6px 10px;border-radius:10px;pointer-events:auto}
+.mpChip.on{background:#7E57C2}
+.mpCard{max-width:520px;gap:10px;text-align:left;align-items:stretch}.mpCard .shopHead{width:100%}.mpP{margin:0;font-size:.95rem;line-height:1.35}.mpP.small{font-size:.82rem;color:#40585E}
+.mpOr{text-align:center;color:#7A8A8E;font-size:.8rem;font-weight:800}.mpJoinRow{display:flex;gap:8px}.mpJoinRow input{flex:1;min-width:0;font-size:1.3rem;font-weight:900;text-align:center;letter-spacing:.3em;border:2px solid #D5E2E5;border-radius:12px;padding:8px}
+.mpJoinRow input::placeholder{letter-spacing:normal;font-size:1rem;font-weight:700}
+.mpCode{font-family:var(--gta);font-size:3.4rem;text-align:center;letter-spacing:.2em;color:#5E35B1}.mpStat{font-size:.85rem;color:#C0392B;min-height:1em;text-align:center}
+.mpLbl{font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}.mpPh{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;max-height:32vh;overflow:auto}.mpPh .opt{padding:8px;font-size:.88rem}
+.mpAct{display:flex;flex-wrap:wrap;gap:6px}.mpAct .btn-soft{flex:1;padding:8px;font-size:.88rem}.mpOut{align-self:center}
 </style>
 </head>
 <body>
@@ -1582,7 +1590,7 @@ function pbr(c,r,m,extra){return new THREE.MeshStandardMaterial(Object.assign({c
 const GEMTEX={};function gemTex(key,rep){const src=(window.REAL_TEX||{})[key];if(!src)return null;const k=key+rep;if(GEMTEX[k])return GEMTEX[k];const t=new THREE.TextureLoader().load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return GEMTEX[k]=t}
 /* ---------- bangun semuanya ---------- */
 function buildWorld2(){
- initShopUI();buildShops();realismUp();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();
+ initShopUI();initMp();buildShops();realismUp();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();
  W2.ripple=new THREE.Mesh(new THREE.RingGeometry(.45,.75,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.5,depthWrite:false}));W2.ripple.rotation.x=-Math.PI/2;W2.ripple.visible=false;scene.add(W2.ripple);W2.dyn.push(W2.ripple)}
 function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.material.uniforms){const pm=new THREE.PMREMGenerator(renderer);const s2=new THREE.Scene();const sk=sky.clone();sk.material=sky.material;s2.add(sk);
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
@@ -1778,7 +1786,7 @@ function world2Update(dt,t,pp){
   const wk=v.m.userData.wake;if(wk){wk.material.opacity=Math.min(.85,sp/14);wk.material.map.offset.y=(wk.material.map.offset.y-dt*sp*.05)%1}});
  // riak saat berenang
  if(W2.ripple){W2.ripple.visible=SWIM&&!driving;if(SWIM){W2.ripple.position.set(player.root.position.x,-.4,player.root.position.z);const s=1+((t*1.2)%1)*.8;W2.ripple.scale.setScalar(s);W2.ripple.material.opacity=.45*(1-((t*1.2)%1))}}
- seaUpdate(dt,t,pp);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
+ seaUpdate(dt,t,pp);mpTick(dt);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
  // peti puncak
  if(W2.chest){const want=W2.ipasRun.rewarded?-1.2:0;W2.chest.lid.rotation.x+=(want-W2.chest.lid.rotation.x)*Math.min(1,dt*3)}
 }
@@ -2055,11 +2063,12 @@ const MASKS={girl:{hair:(h,s,l)=>h>150&&h<205&&s>.25&&l>.2,top:(h,s,l)=>h>265&&h
 function patColor(pat,x,y){if(pat==="batik"){const u=(x%64)/64,v=(y%64)/64;const d=Math.hypot(u-.5,v-.5);const ring=Math.abs(Math.sin(d*22))>.6;const dot=Math.hypot((u*4)%1-.5,(v*4)%1-.5)<.18;
   return ring?[.48,.27,.12]:dot?[.85,.68,.35]:[.24,.12,.06]}
  if(pat==="jersey"){return (Math.floor(y/48)%2)?[.85,.12,.15]:[.97,.97,.97]}return[1,1,1]}
-function applyLook(){const C=player;if(!C||!C.gltf)return;const L=lookDef(),kind=C.kind==="boy"?"boy":"girl";let mesh0=null;C.root.traverse(o=>{if(o.isSkinnedMesh&&!mesh0&&o.material&&o.material.map)mesh0=o});if(!mesh0)return;
- const mat=mesh0.material;if(!SHOP.origTex||SHOP.origKind!==kind){SHOP.origTex=mat.map;SHOP.origKind=kind}const img=SHOP.origTex.image;if(!img||!img.width){setTimeout(applyLook,500);return}
+function applyLook(){applyLookTo(player,lookDef())}
+function applyLookTo(C,L){if(!C||!C.gltf||!L)return;const kind=C.kind==="boy"?"boy":"girl";let mesh0=null;C.root.traverse(o=>{if(o.isSkinnedMesh&&!mesh0&&o.material&&o.material.map)mesh0=o});if(!mesh0)return;
+ const mat=mesh0.material;if(!C.origTex)C.origTex=mat.map;const OT=C.origTex;const img=OT.image;if(!img||!img.width){setTimeout(()=>applyLookTo(C,L),500);return}
  const hc=HAIR_COLORS.find(x=>x.k===L.hc),tp=TOPS.find(x=>x.k===L.top),bt=BOTTOMS.find(x=>x.k===L.bot);
  if(!mesh0.userData.ownMat){mesh0.material=mat.clone();mesh0.userData.ownMat=true}
- if((!hc||!hc.c)&&(!tp||(!tp.c&&!tp.pat))&&(!bt||!bt.c)){mesh0.material.map=SHOP.origTex;mesh0.material.needsUpdate=true;buildAccessory();return}
+ if((!hc||!hc.c)&&(!tp||(!tp.c&&!tp.pat))&&(!bt||!bt.c)){mesh0.material.map=OT;mesh0.material.needsUpdate=true;buildAccessory(C,L);return}
  const W=img.width,H=img.height,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.drawImage(img,0,0);const id=g.getImageData(0,0,W,H),d=id.data;const M=MASKS[kind];
  const tgt=(c)=>{if(!c)return null;const r=parseInt(c.slice(1,3),16)/255,gg=parseInt(c.slice(3,5),16)/255,b=parseInt(c.slice(5,7),16)/255;return rgb2hsl(r,gg,b)};
  const hT=tgt(hc&&hc.c),tT=tgt(tp&&tp.c),bT=tgt(bt&&bt.c);
@@ -2068,11 +2077,11 @@ function applyLook(){const C=player;if(!C||!C.gltf)return;const L=lookDef(),kind
   else if(tp&&(tp.c||tp.pat)&&M.top(h,s,l)){if(tp.pat){const pc=patColor(tp.pat,x,y),k=.55+l*.6;out=[pc[0]*k,pc[1]*k,pc[2]*k]}else out=hsl2rgb(tT[0],tT[1],Math.min(.96,Math.max(.08,tT[2]+(l-.7)*.7)))}
   else if(bT&&M.bot(h,s,l))out=hsl2rgb(bT[0],bT[1],Math.min(.9,Math.max(.06,bT[2]+(l-.5)*.7)));
   if(out){d[i]=Math.min(255,out[0]*255);d[i+1]=Math.min(255,out[1]*255);d[i+2]=Math.min(255,out[2]*255)}}
- g.putImageData(id,0,0);const t=new THREE.CanvasTexture(cv);t.flipY=SHOP.origTex.flipY;t.encoding=SHOP.origTex.encoding;t.wrapS=SHOP.origTex.wrapS;t.wrapT=SHOP.origTex.wrapT;
- mesh0.material.map=t;mesh0.material.needsUpdate=true;buildAccessory()}
+ g.putImageData(id,0,0);const t=new THREE.CanvasTexture(cv);t.flipY=OT.flipY;t.encoding=OT.encoding;t.wrapS=OT.wrapS;t.wrapT=OT.wrapT;
+ mesh0.material.map=t;mesh0.material.needsUpdate=true;buildAccessory(C,L)}
 /* ---------- aksesori rambut (mengikuti kepala) ---------- */
-function buildAccessory(){if(SHOP.acc){scene.remove(SHOP.acc);SHOP.acc=null}const L=lookDef();if(L.hair==="asli")return;
- const hc=HAIR_COLORS.find(x=>x.k===L.hc);const hairCol=(hc&&hc.c)||(player.kind==="boy"?"#2B1D14":"#3FBFC4");const hm=pbr(hairCol,.55),g=new THREE.Group();
+function buildAccessory(C,L){if(C.acc){scene.remove(C.acc);C.acc=null}if(!L||L.hair==="asli")return;
+ const hc=HAIR_COLORS.find(x=>x.k===L.hc);const hairCol=(hc&&hc.c)||(C.kind==="boy"?"#2B1D14":"#3FBFC4");const hm=pbr(hairCol,.55),g=new THREE.Group();
  if(L.hair==="kuncir"){mesh(new THREE.TorusGeometry(.035,.012,8,16),pbr("#E91E63",.5),0,.15,-.1,g);const p=mesh(G.cap(.045,.2),hm,0,.04,-.15,g);p.rotation.x=.35}
  else if(L.hair==="cepol"){mesh(G.sph(.065,16,12),hm,0,.22,-.08,g);mesh(new THREE.TorusGeometry(.055,.01,8,20),pbr("#F06292",.5),0,.2,-.08,g).rotation.x=Math.PI/2}
  else if(L.hair==="panjang"){const sh=mesh(new THREE.SphereGeometry(.14,20,14,Math.PI*.15,Math.PI*1.7,0,Math.PI*.55),hm,0,.12,-.005,g);sh.rotation.y=Math.PI;
@@ -2083,11 +2092,12 @@ function buildAccessory(){if(SHOP.acc){scene.remove(SHOP.acc);SHOP.acc=null}cons
   [-.09,0,.09].forEach((x,k)=>{const f=mesh(G.sph(.03,10,8),pbr(["#FFEB3B","#FFFFFF","#FF80AB"][k],.6),x,.24-Math.abs(x)*.6,.03,g);f.scale.z=.5})}
  else if(L.hair==="kerudung"){const col=["#F8BBD0","#B3E5FC","#C8E6C9"][(SAVE.owned.kerColor||0)%3];const km=new THREE.MeshStandardMaterial({color:col,roughness:.9,side:THREE.DoubleSide});
   const sh=mesh(new THREE.SphereGeometry(.15,24,16,Math.PI*.22,Math.PI*1.56,0,Math.PI*.72),km,0,.1,-.01,g);sh.rotation.y=Math.PI;const dr=mesh(new THREE.ConeGeometry(.22,.22,24,1,true),km,0,-.08,-.01,g)}
- g.traverse(o=>{if(o.isMesh)o.castShadow=true});scene.add(g);SHOP.acc=g}
-function accUpdate(){if(!SHOP.acc||!player)return;const B=bonesOf(player);const head=B.Head;if(!head){SHOP.acc.visible=false;return}
- SHOP.acc.visible=player.root.visible;head.getWorldPosition(_v3);SHOP.acc.position.copy(_v3);head.getWorldQuaternion(_q4);
- if(!SHOP.headFix){/* orientasi kepala saat pose diam → koreksi agar aksesori tegak */SHOP.headFix=_q4.clone().invert().multiply(player.root.getWorldQuaternion(new THREE.Quaternion()))}
- SHOP.acc.quaternion.copy(_q4).multiply(SHOP.headFix);const s=(player.scale||1)*(player.kind==="boy"?1.02:1);SHOP.acc.scale.setScalar(s*(TARGET_H[player.kind]||1.3)/1.3)}
+ g.traverse(o=>{if(o.isMesh)o.castShadow=true});scene.add(g);C.acc=g;if(!ACC_CHARS.includes(C))ACC_CHARS.push(C)}
+const ACC_CHARS=[];
+function accUpdate(){ACC_CHARS.forEach(C=>{if(!C.acc)return;const B=bonesOf(C);const head=B.Head;if(!head){C.acc.visible=false;return}
+ C.acc.visible=C.root.visible;head.getWorldPosition(_v3);C.acc.position.copy(_v3);head.getWorldQuaternion(_q4);
+ if(!C.headFix)C.headFix=_q4.clone().invert().multiply(C.root.getWorldQuaternion(new THREE.Quaternion()));
+ C.acc.quaternion.copy(_q4).multiply(C.headFix);C.acc.scale.setScalar((C.scale||1)*(TARGET_H[C.kind]||1.3)/1.3)})}
 /* ---------- UI toko ---------- */
 function openShop(S){setPaused(true);SHOP.open=S;SHOP.cam=true;SHOP.tab=S.type==="hair"?"gaya":S.type==="clothes"?"atas":"jual";renderShop()}
 function closeShop(){SHOP.open=null;SHOP.cam=false;$("shopBox").hidden=true;setPaused(false)}
@@ -2105,7 +2115,7 @@ function renderShop(){const S=SHOP.open,el=$("shopBox"),L=lookDef();if(!S)return
  el.hidden=false;$("shopX").onclick=closeShop;el.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{SHOP.tab=b.dataset.tab;renderShop()});
  el.querySelectorAll(".shopItem").forEach(b=>b.onclick=()=>{const slot=b.dataset.slot,k=b.dataset.k,it=itemsFor(SHOP.tab).find(x=>x.k===k);const key=slot+":"+k;
   if(!(it.p===0||SAVE.owned[key])){if(SAVE.coins<it.p){$("shopNote").innerHTML=`<b style="color:#C0392B">Uangmu kurang.</b> Butuh ${money(it.p)}, kamu punya ${money(SAVE.coins)}.`;blip("bad");return}SAVE.coins-=it.p;SAVE.owned[key]=1;blip("coin");toast(`Kamu membeli ${it.n}!`)}
-  L[slot]=k;persist();updateStats();applyLook();blip("good");renderShop()})}
+  L[slot]=k;persist();updateStats();applyLook();mpSend({t:"look",look:L});blip("good");renderShop()})}
 function renderMarket(){const el=$("shopBox");SAVE.fishInv=SAVE.fishInv||{};const inv=SAVE.fishInv;const ks=Object.keys(inv).filter(k=>inv[k]>0);
  const total=ks.reduce((s,k)=>s+inv[k]*FISH_PRICE[k],0);
  el.innerHTML=`<div class="shopPanel"><div class="shopHead"><b>🐟 Pasar Ikan</b><span class="shopMoney">${money(SAVE.coins)}</span><button class="x" id="shopX" aria-label="Tutup">✕</button></div>
@@ -2147,6 +2157,7 @@ function drawBigMap(){if(!BMAP.open)return;const cv=$("bmCv"),g=cv.getContext("2
  g.textAlign="center";g.textBaseline="middle";
  if(s>2.2)AREAS.forEach((A,i)=>{const F=areaFrame(i);lbl(g,A.name,X(F.x),Y(F.z)-9,11,"#FFFFFF")});
  MAP_LABELS().forEach(([x,z,t,lv])=>{if(lv===3&&s<2.6)return;if(lv===1&&s>3.2&&x===0&&z===0)return;if(lv===2&&s<1.1)return;lbl(g,t,X(x),Y(z)+(lv===1?0:-10),lv===1?Math.min(22,10+s*3):lv===2?12:11,lv===1?"#FFF59D":"#FFFFFF")});
+ if(MP.friend){const F=MP.friend;dot(F.x,F.z,"#B388FF",7);lbl(g,"👥 "+F.name,X(F.x),Y(F.z)-14,12,"#E1D5FF")}
  const p=driving?{x:car.x,z:car.z}:player.root.position,hd=driving?car.h:player.root.rotation.y;g.save();g.translate(X(p.x),Y(p.z));g.rotate(-hd);g.fillStyle="#FF3B30";g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.moveTo(0,10);g.lineTo(7,-7);g.lineTo(0,-3);g.lineTo(-7,-7);g.closePath();g.fill();g.stroke();g.restore();
  lbl(g,"Kamu",X(p.x),Y(p.z)+18,12,"#FFFFFF");
  $("bmScale").textContent=`${Math.round(100/s)} m`;requestAnimationFrame(drawBigMap)}
@@ -2167,6 +2178,78 @@ function initShopUI(){const sb=document.createElement("div");sb.id="shopBox";sb.
  addEventListener("resize",()=>{if(BMAP.open)resizeMap()});
  const rd=$("radar");if(rd){rd.style.cursor="pointer";rd.style.pointerEvents="auto";rd.addEventListener("click",()=>{if(!paused)openMap()});const tag=document.createElement("div");tag.className="mapTag";tag.textContent="PETA · M";rd.parentNode&&rd.parentNode.appendChild(tag);const place=()=>{const r=rd.getBoundingClientRect();tag.style.left=(r.left+r.width/2)+"px";tag.style.top=(r.bottom-12)+"px"};place();addEventListener("resize",place);setInterval(place,1500)}
  addEventListener("keydown",e=>{if(e.code==="KeyM"&&!e.repeat){if(BMAP.open)closeMap();else if(!paused)openMap()}if(e.code==="Escape"){if(BMAP.open)closeMap();else if(SHOP.open)closeShop()}})}
+
+/* ================= MAIN BERSAMA (2 pemain, PeerJS / WebRTC) ================= */
+const MP={peer:null,conn:null,code:"",host:false,friend:null,sendT:0,status:"off",lib:false};
+const MP_PHRASES=["Hello! 👋","How are you?","I'm fine, thank you!","Let's play together!","Follow me!","Wait for me!","Good job! 👍","Thank you!","Where are you?","See you later!"];
+function mpLoadLib(cb){if(window.Peer)return cb();if(MP.loading){MP.loading.push(cb);return}MP.loading=[cb];const s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
+ s.onload=()=>{MP.loading.forEach(f=>f());MP.loading=null};s.onerror=()=>{MP.loading=null;mpStatus("Gagal memuat modul main bersama. Periksa internet lalu coba lagi.")};document.head.appendChild(s)}
+function mpId(code){return "speakisland-v1-"+code}
+function mpStatus(t){const el=$("mpStatus");if(el)el.innerHTML=t}
+function mpHost(){mpLoadLib(()=>{mpClose(true);const code=String(1000+Math.floor(Math.random()*9000));MP.code=code;MP.host=true;MP.status="wait";
+ const p=new Peer(mpId(code));MP.peer=p;mpStatus(`Membuat ruang...`);
+ p.on("open",()=>{renderMp()});p.on("connection",c=>{if(MP.conn&&MP.conn.open){c.on("open",()=>{c.send({t:"full"});setTimeout(()=>c.close(),300)});return}mpBind(c)});
+ p.on("error",e=>{if(e.type==="unavailable-id"){mpHost()}else mpStatus("Koneksi bermasalah: "+esc(e.type||"error")+". Coba lagi.")});renderMp()})}
+function mpJoin(code){code=(code||"").replace(/\D/g,"");if(code.length!==4){mpStatus("Masukkan 4 angka kode ruang dari temanmu.");return}
+ mpLoadLib(()=>{mpClose(true);MP.code=code;MP.host=false;MP.status="join";const p=new Peer();MP.peer=p;mpStatus("Menghubungkan ke ruang "+code+"...");
+  p.on("open",()=>{const c=p.connect(mpId(code),{reliable:true});mpBind(c);setTimeout(()=>{if(MP.status==="join"){mpStatus("Ruang "+code+" tidak menjawab. Pastikan temanmu sudah menekan <b>Buat Ruang</b>.")}},12000)});
+  p.on("error",e=>{if(e.type==="peer-unavailable")mpStatus(`Kode <b>${code}</b> tidak ditemukan. Cek lagi kodenya.`);else mpStatus("Koneksi bermasalah: "+esc(e.type||"error"))});renderMp()})}
+function mpBind(c){MP.conn=c;c.on("open",()=>{MP.status="on";mpSend({t:"hello",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef(),kelas:SAVE.kelas});toast("Terhubung! Tunggu temanmu muncul");blip("win");renderMp()});
+ c.on("data",mpRecv);c.on("close",()=>{if(MP.friend){toast(`${MP.friend.name} keluar dari permainan`,true)}mpDropFriend();MP.status=MP.host?"wait":"off";renderMp()});c.on("error",()=>{})}
+function mpSend(o){if(MP.conn&&MP.conn.open){try{MP.conn.send(o)}catch(e){}}}
+function mpClose(silent){try{MP.conn&&MP.conn.close()}catch(e){}try{MP.peer&&MP.peer.destroy()}catch(e){}MP.conn=null;MP.peer=null;MP.status="off";mpDropFriend();if(!silent)renderMp()}
+function mpDropFriend(){const F=MP.friend;if(!F)return;scene.remove(F.C.root);if(F.C.acc)scene.remove(F.C.acc);if(F.tag)scene.remove(F.tag);if(F.veh)scene.remove(F.veh);if(F.bub)scene.remove(F.bub);MP.friend=null;updateMpChip()}
+function mpMakeFriend(m){mpDropFriend();const hero=m.hero==="boy"?"boy":"girl",M=HERO_MODEL[hero];const C=makeChar(M.kind,M.tint,heroHeight(hero),heroSpecFor(hero));
+ C.root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});scene.add(C.root);const tag=labelSprite("👥 "+(m.name||"Teman"),"#7E57C2","#FFFFFF",320);scene.add(tag);
+ const F={C,name:m.name||"Teman",hero,tag,x:0,y:0,z:0,h:0,tx:0,ty:0,tz:0,th:0,sp:0,rx:0,drv:null,veh:null,vehType:"",bub:null,bubT:0,emote:"",emT:0,seen:false};MP.friend=F;
+ if(m.look)setTimeout(()=>applyLookTo(C,m.look),300);updateMpChip();toast(`${F.name} bergabung! Ketuk 👥 untuk menyapa`);say("Hello "+F.name,GR().rate,"en-US")}
+function mpRecv(m){if(!m||!m.t)return;const F=MP.friend;
+ if(m.t==="full"){mpStatus("Ruang sudah penuh (maksimal 2 orang).");return}
+ if(m.t==="hello"){mpMakeFriend(m);if(MP.host)mpSend({t:"hello2",name:SAVE.heroName||"Teman",hero:SAVE.hero,look:lookDef()});renderMp();return}
+ if(m.t==="hello2"){if(!MP.friend)mpMakeFriend(m);renderMp();return}
+ if(!F)return;
+ if(m.t==="s"){F.tx=m.p[0];F.ty=m.p[1];F.tz=m.p[2];F.th=m.h;F.sp=m.sp;F.rx=m.rx||0;F.drv=m.d||null;F.sw=m.sw;if(!F.seen){F.seen=true;F.x=F.tx;F.y=F.ty;F.z=F.tz;F.h=F.th}return}
+ if(m.t==="look"){applyLookTo(F.C,m.look);return}
+ if(m.t==="say"){mpBubble(F,m.text);say(m.text.replace(/[^\w\s',.!?]/g,""),GR().rate,"en-US");return}
+ if(m.t==="emote"){F.emote=m.k;F.emT=m.k==="dance"?4:2.2;if(m.k==="tos"){mpBubble(F,"High five! ✋");if(Math.hypot(F.x-player.root.position.x,F.z-player.root.position.z)<3.5){happyT=1.6;confetti(20);blip("win");SAVE.coins++;persist();updateStats();toast(`Tos dengan ${F.name}! +$10`)}}return}}
+function mpBubble(F,text){if(F.bub)scene.remove(F.bub);F.bub=labelSprite(text,"#FFFFFF","#1E2A2E",420);F.bub.scale.multiplyScalar(1.1);scene.add(F.bub);F.bubT=4}
+let MY_BUB=null,MY_BUBT=0;function myBubble(text){if(MY_BUB)scene.remove(MY_BUB);MY_BUB=labelSprite(text,"#FFF8E1","#1E2A2E",420);MY_BUB.scale.multiplyScalar(1.1);scene.add(MY_BUB);MY_BUBT=4}
+function mpTick(dt){if(MY_BUB){MY_BUBT-=dt;const p=player.root.position;MY_BUB.position.set(p.x,p.y+(TARGET_H[player.kind]||1.3)*1.9,p.z);if(MY_BUBT<=0){scene.remove(MY_BUB);MY_BUB=null}}
+ if(MP.status!=="on")return;MP.sendT-=dt;
+ if(MP.sendT<=0){MP.sendT=.1;const p=driving?{x:car.x,y:0,z:car.z}:player.root.position;
+  mpSend({t:"s",p:[+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2)],h:+(driving?car.h:player.root.rotation.y).toFixed(3),sp:+(driving?Math.abs(car.speed):(MP.lastSp||0)).toFixed(2),rx:+(player.root.rotation.x||0).toFixed(2),sw:SWIM?1:0,d:driving?car.type:null})}
+ const F=MP.friend;if(!F)return;const k=Math.min(1,dt*8);F.x+=(F.tx-F.x)*k;F.y+=(F.ty-F.y)*k;F.z+=(F.tz-F.z)*k;F.h+=Math.atan2(Math.sin(F.th-F.h),Math.cos(F.th-F.h))*k;
+ const R=F.C.root;
+ if(F.drv){if(F.vehType!==F.drv){if(F.veh)scene.remove(F.veh);F.vehType=F.drv;F.veh=F.drv==="boat"?makeBoatMesh():F.drv==="motor"?makeMotorMesh("#8E44AD"):F.drv==="bike"?makeBikeMesh("#8E44AD"):makeCarMesh("#8E44AD");scene.add(F.veh)}
+  F.veh.visible=true;F.veh.position.set(F.x,F.drv==="boat"?-.5:0,F.z);F.veh.rotation.y=F.h;R.visible=F.drv!=="car";R.position.set(F.x,F.drv==="boat"?.25:F.drv==="car"?0:.45,F.z);R.rotation.set(0,F.h,0);animChar(F.C,dt,{speed:0})}
+ else{if(F.veh){F.veh.visible=false}R.visible=true;R.position.set(F.x,F.y,F.z);R.rotation.order="YXZ";R.rotation.y=F.h;R.rotation.x=F.rx;
+  const emo=F.emT>0?F.emote:"";if(F.emT>0)F.emT-=dt;animChar(F.C,dt,{speed:F.sw?Math.min(F.sp,2):F.sp,wave:emo==="wave",dance:emo==="dance",happy:emo==="tos"})}
+ const hh=(TARGET_H[F.hero]||1.3);F.tag.position.set(F.x,F.y+hh*1.55,F.z);if(F.bub){F.bubT-=dt;F.bub.position.set(F.x,F.y+hh*1.95,F.z);if(F.bubT<=0){scene.remove(F.bub);F.bub=null}}
+ if(FRAME%15===0)updateMpChip()}
+function updateMpChip(){const el=$("mpChip");if(!el)return;const F=MP.friend;if(MP.status==="off"){el.textContent="👥 Main Bersama";el.classList.remove("on");return}
+ if(!F){el.textContent=MP.host?`👥 Ruang ${MP.code} · menunggu`:"👥 Menghubungkan…";el.classList.add("on");return}
+ const d=Math.round(Math.hypot(F.x-player.root.position.x,F.z-player.root.position.z));el.textContent=`👥 ${F.name} · ${d} m`;el.classList.add("on")}
+function openMp(){setPaused(true);renderMp();$("mpBox").hidden=false}
+function closeMp(){$("mpBox").hidden=true;setPaused(false)}
+function renderMp(){const el=$("mpBox");if(!el)return;const F=MP.friend;let body="";
+ if(MP.status==="off")body=`<p class="mpP">Main berdua dengan teman di perangkat lain. Satu orang membuat ruang, temannya bergabung dengan kode 4 angka.</p>
+  <button class="btn-main btn-green" id="mpHostB">BUAT RUANG</button><div class="mpOr">atau</div>
+  <div class="mpJoinRow"><input id="mpCode" inputmode="numeric" maxlength="4" placeholder="Kode 4 angka" aria-label="Kode ruang"><button class="btn-main" id="mpJoinB">GABUNG</button></div>`;
+ else if(!F)body=MP.host?`<p class="mpP">Bagikan kode ini ke temanmu:</p><div class="mpCode">${MP.code||"…"}</div><p class="mpP small">Temanmu buka Speak Island, tekan <b>👥 Main Bersama</b> → masukkan kode → <b>Gabung</b>.</p><button class="btn-soft" id="mpOffB">Batal</button>`
+  :`<p class="mpP">Menghubungkan ke ruang <b>${esc(MP.code)}</b>…</p><button class="btn-soft" id="mpOffB">Batal</button>`;
+ else body=`<p class="mpP">Kamu bermain bersama <b>${esc(F.name)}</b> (ruang ${esc(MP.code)}).</p>
+  <div class="mpLbl">Ucapkan dalam bahasa Inggris:</div><div class="mpPh">${MP_PHRASES.map((t,i)=>`<button class="opt" data-ph="${i}">${esc(t)}</button>`).join("")}</div>
+  <div class="mpLbl">Aksi bersama:</div><div class="mpAct"><button class="btn-soft" data-em="wave">👋 Lambai</button><button class="btn-soft" data-em="dance">💃 Joget</button><button class="btn-soft" data-em="tos">✋ Tos</button><button class="btn-soft" id="mpGo">📍 Ke teman</button></div>
+  <button class="btn-soft mpOut" id="mpOffB">Putuskan</button>`;
+ el.innerHTML=`<div class="mgCard mpCard"><div class="shopHead"><b>👥 Main Bersama</b><button class="x" id="mpX" aria-label="Tutup">✕</button></div>${body}<div class="mpStat" id="mpStatus"></div></div>`;
+ const q=id=>document.getElementById(id);q("mpX").onclick=closeMp;if(q("mpHostB"))q("mpHostB").onclick=mpHost;if(q("mpJoinB"))q("mpJoinB").onclick=()=>mpJoin(q("mpCode").value);if(q("mpOffB"))q("mpOffB").onclick=()=>{mpClose();renderMp()};
+ el.querySelectorAll("[data-ph]").forEach(b=>b.onclick=()=>{const t=MP_PHRASES[+b.dataset.ph];mpSend({t:"say",text:t});myBubble(t);say(t.replace(/[^\w\s',.!?]/g,""),GR().rate,"en-US");closeMp()});
+ el.querySelectorAll("[data-em]").forEach(b=>b.onclick=()=>{const k=b.dataset.em;mpSend({t:"emote",k});if(k==="dance")dancing=4;else happyT=1.6;if(k==="tos"){myBubble("High five! ✋");const F=MP.friend;if(F&&Math.hypot(F.x-player.root.position.x,F.z-player.root.position.z)>3.5)toast("Dekati temanmu dulu supaya bisa tos!",true)}closeMp()});
+ if(q("mpGo"))q("mpGo").onclick=()=>{const F=MP.friend;if(!F)return;if(driving)toggleCar();if(ACT&&ACT.type!=="fly")endAct();const a=Math.random()*6.28;let x=F.x+Math.sin(a)*1.6,z=F.z+Math.cos(a)*1.6;
+  if(!walkable(x,z)){x=F.x;z=F.z}SWIM=!walkable(x,z)&&waterAt(x,z);player.root.position.set(x,SWIM?-.9:Math.max(0,F.y),z);vy=0;blip("jump");closeMp()};
+ updateMpChip()}
+function initMp(){const chip=document.createElement("button");chip.id="mpChip";chip.className="mpChip";chip.textContent="👥 Main Bersama";chip.onclick=()=>{if(!paused)openMp()};const tr=document.querySelector(".topR");(tr||document.body).appendChild(chip);
+ const box=document.createElement("div");box.id="mpBox";box.className="w2ov";box.hidden=true;document.body.appendChild(box)}
 
 
 /* =====================================================
@@ -2679,7 +2762,7 @@ function movePlayer(dt){
  const {ix,iz,len}=inputVec();
  const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
  const run=running||keys.ShiftLeft||keys.ShiftRight||Math.hypot(joyVec.x,joyVec.y)>.92;
- const sp=(SWIM?(run?3.6:1.9):(run?7.6:2.3))*len;const mx=fx*iz+rx*ix,mz=fz*iz+rz*ix;
+ const sp=(SWIM?(run?3.6:1.9):(run?7.6:2.3))*len;MP.lastSp=sp;const mx=fx*iz+rx*ix,mz=fz*iz+rz*ix;
  const g=player.root,pos=g.position;const ox=pos.x,oz=pos.z;
  pos.x+=mx*sp*dt;pos.z+=mz*sp*dt;
  if(len>.1){dancing=0;const want=Math.atan2(mx,mz);g.rotation.y+=Math.atan2(Math.sin(want-g.rotation.y),Math.cos(want-g.rotation.y))*Math.min(1,dt*12)}
@@ -2806,6 +2889,7 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
  W2.gates.forEach(G=>{g.fillStyle=G.open?"#5DD39E":"#F7D23E";g.beginPath();g.arc(G.x*s,G.z*s,5,0,7);g.fill()});
  g.strokeStyle="#9C7B55";g.lineWidth=3.2*s;g.beginPath();g.moveTo(DK_DX*53.7*s,DK_DZ*53.7*s);g.lineTo(DK_DX*DK_U1*s,DK_DZ*DK_U1*s);g.stroke();
  W2.animals.forEach(a=>{g.fillStyle="#FFB6C1";g.beginPath();g.arc(a.x*s,a.z*s,3,0,7);g.fill()});
+ if(MP.friend){const F=MP.friend;g.fillStyle="#B388FF";g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.arc(F.x*s,F.z*s,9,0,7);g.fill();g.stroke()}
  VEH.forEach(v=>{g.fillStyle=v.type==="boat"?"#00E5FF":v.type==="car"?"#E74C3C":v.type==="motor"?"#2E86C1":"#27AE60";g.fillRect(v.x*s-5,v.z*s-5,10,10)});
  g.restore();
  // waypoint edge arrow for suggested mission
