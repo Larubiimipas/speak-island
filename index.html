@@ -280,11 +280,15 @@ input{-webkit-user-select:text;user-select:text}
 .mgCard{background:#fff;color:var(--ink);border-radius:20px;padding:14px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:440px;width:100%;text-align:center}
 .mgCard .stat{color:var(--ink)}
 .act.talk.play{background:#FF8FD1;color:#2b0b1f}
+#lavaFx{position:fixed;inset:0;pointer-events:none;z-index:6;background:radial-gradient(circle,rgba(255,90,0,.25),rgba(200,30,0,.75));opacity:0}
+#lavaFx.on{animation:lavaFx .9s ease-out}@keyframes lavaFx{0%{opacity:1}100%{opacity:0}}
+#world.shake{animation:wshake .35s}@keyframes wshake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
 </style>
 </head>
 <body>
 
 
+<div id="lavaFx"></div>
 <canvas id="world" tabindex="0" aria-label="Dunia 3D Speak Island"></canvas>
 
 <div class="hud" id="hud" hidden>
@@ -1362,6 +1366,132 @@ function makeKiosk(game,subj,x,z,rot,color,id){const G=MG_GAMES[game];const g=ne
 function G_BOX(w,h,d){return new THREE.BoxGeometry(w,h,d)}
 function THREE_CYL(a,b,h,s){return new THREE.CylinderGeometry(a,b,h,s)}
 
+/* ================= PULAU MATEMATIKA (obby lava) ================= */
+const MATH={stages:[],cps:[],cp:0,kelas:0,dyn:[],group:null,plus:[],run:0,portal:null,lavaTex:null,best:0,lastPl:null};
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+const NEG=n=>n<0?`(−${-n})`:String(n);
+function mathQ(k,s){const hard=s>=5;let t,ans,near=[];const pick=a=>a[rnd(0,a.length-1)];
+ const r=Math.random();
+ if(k<=1){if(r<.55){const a=rnd(1,hard?12:9),b=rnd(1,hard?8:9);ans=a+b;t=`${a} + ${b}`}else{const a=rnd(hard?10:4,hard?20:10),b=rnd(1,a-1);ans=a-b;t=`${a} − ${b}`}}
+ else if(k===2){if(r<.35){const a=rnd(11,hard?59:35),b=rnd(5,hard?39:20);ans=a+b;t=`${a} + ${b}`}else if(r<.65){const a=rnd(25,hard?99:60),b=rnd(5,a-6);ans=a-b;t=`${a} − ${b}`}
+  else{const a=pick([2,5,10]),b=rnd(1,10);ans=a*b;t=`${b} × ${a}`;near=[ans+a,ans-a]}}
+ else if(k===3){if(r<.45){const a=rnd(2,hard?10:6),b=rnd(2,10);ans=a*b;t=`${a} × ${b}`;near=[ans+a,ans-a,ans+b]}
+  else if(r<.7){const b=rnd(2,hard?10:5),c=rnd(2,10);ans=c;t=`${b*c} ÷ ${b}`;near=[c+1,c-1,c+2]}
+  else{const a=rnd(100,hard?650:400),b=rnd(20,hard?340:199);if(Math.random()<.5){ans=a+b;t=`${a} + ${b}`;near=[ans+10,ans-10,ans+100]}else{ans=a-b;t=`${a} − ${b}`;near=[ans+10,ans-10]}}}
+ else if(k===4){if(r<.35){const a=rnd(12,hard?49:29),b=rnd(2,hard?9:6);ans=a*b;t=`${a} × ${b}`;near=[ans+b,ans-b,ans+10]}
+  else if(r<.6){const b=rnd(2,9),c=rnd(11,hard?40:20);ans=c;t=`${b*c} ÷ ${b}`;near=[c+1,c-1,c+10]}
+  else{const a=rnd(2,20),b=rnd(2,9),c=rnd(2,9);ans=a+b*c;t=`${a} + ${b} × ${c}`;near=[(a+b)*c,ans+b,ans-c]}}
+ else if(k===5){if(r<.3){const a=rnd(2,15),b=rnd(2,12),c=rnd(2,9);ans=(a+b)*c;t=`(${a} + ${b}) × ${c}`;near=[a+b*c,ans+c,ans-c]}
+  else if(r<.55){const a=rnd(3,12),b=rnd(3,12),c=rnd(2,9),d=rnd(2,a*b/c|0||2);ans=a*b-c*d;if(ans<0)return mathQ(k,s);t=`${a} × ${b} − ${c} × ${d}`;near=[ans+c,ans-d,ans+10]}
+  else if(r<.8){const n=rnd(hard?8:2,hard?15:10);ans=n*n;t=`${n}²`;near=[n*2,ans+n,ans-n]}
+  else{const b=rnd(3,9),c=rnd(21,hard?120:60);ans=c;t=`${b*c} ÷ ${b}`;near=[c+1,c-1,c+10]}}
+ else{if(r<.3){const a=rnd(2,15)*(Math.random()<.5?-1:1),b=rnd(2,15)*-1;ans=a+b;t=`${NEG(a)} + ${NEG(b)}`;near=[a-b,-ans,ans+1]}
+  else if(r<.55){const a=rnd(2,12)*(Math.random()<.6?-1:1),b=rnd(2,9)*(Math.random()<.6?-1:1);ans=a*b;t=`${NEG(a)} × ${NEG(b)}`;near=[-ans,ans+a,ans-b]}
+  else if(r<.75){const a=rnd(-20,20),b=rnd(2,20);ans=a-(-b);t=`${NEG(a)} − ${NEG(-b)}`;near=[a-b,-ans,ans+1]}
+  else if(r<.88){const n=rnd(2,hard?6:4);ans=n*n*n;t=`${n}³`;near=[n*3,n*n,ans+n]}
+  else{const a=rnd(-12,-3),b=rnd(-9,-2),c=rnd(5,30);ans=a*b-c;t=`${NEG(a)} × ${NEG(b)} − ${c}`;near=[a*b+c,-ans,ans+10]}}
+ return{t:t+" = ?",ans}}
+function mathOpts(q,n,k){const set=new Set([q.ans]);const cand=shuffle([...(q.near||[]),q.ans+1,q.ans-1,q.ans+2,q.ans-2,q.ans+10,q.ans-10,q.ans+5]);
+ for(const c of cand){if(set.size>=n)break;if(c===q.ans||(k<6&&c<0)||!Number.isFinite(c))continue;set.add(c)}
+ let g=3;while(set.size<n){set.add(q.ans+g);g++}return shuffle([...set])}
+function mathGen(k,s){const q=mathQ(k,s);q.near=q.near||[];return q}
+/* geometri: sumbu u menjauh dari pulau, v ke samping */
+const MS={plat:6,gap:8,start:10,end:14,half:7,inner:8.6};
+function mU(i){/* awal platform tahap i (0 = start) */return MU0+MS.start+i*(MS.gap+MS.plat)}
+function mW(u,v){return{x:MDX*u+MDZ*v,z:MDZ*u-MDX*v}}
+function mPlat(u,v,hu,hv,extra){const w=mW(u,v);return plat(Object.assign({x:w.x,z:w.z,hw:hv,hd:hu,top:0,rot:1},extra||{}))}
+function lavaTexture(){const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d");const gr=g.createLinearGradient(0,0,256,256);gr.addColorStop(0,"#FF6A00");gr.addColorStop(1,"#FF3D00");g.fillStyle=gr;g.fillRect(0,0,256,256);
+ for(let k=0;k<70;k++){const x=Math.random()*256,y=Math.random()*256,r=8+Math.random()*30;const rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,k%3?"rgba(255,214,64,.95)":"rgba(255,245,170,.9)");rg.addColorStop(1,"rgba(255,140,0,0)");g.fillStyle=rg;
+  for(const dx of[-256,0,256])for(const dy of[-256,0,256]){g.beginPath();g.arc(x+dx,y+dy,r,0,7);g.fill()}}
+ g.strokeStyle="rgba(120,20,0,.55)";g.lineWidth=3;for(let k=0;k<14;k++){g.beginPath();let x=Math.random()*256,y=Math.random()*256;g.moveTo(x,y);for(let j=0;j<5;j++){x+=(Math.random()-.5)*60;y+=(Math.random()-.5)*60;g.lineTo(x,y)}g.stroke()}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.encoding=THREE.sRGBEncoding;return t}
+function numTex(txt,bg,fg,w,h,size){const c=document.createElement("canvas");c.width=w;c.height=h;const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;t.userData={c,bg,fg,size};drawNumTex(t,txt);return t}
+function drawNumTex(t,txt,bg){const {c,fg,size}=t.userData;const g=c.getContext("2d");g.fillStyle=bg||t.userData.bg;g.fillRect(0,0,c.width,c.height);
+ g.fillStyle="rgba(0,0,0,.18)";for(let k=0;k<c.width;k+=c.width/6)g.fillRect(k,0,2,c.height);
+ let s=size;g.font=`900 ${s}px ${MGFONT()}`;while(g.measureText(txt).width>c.width*.9&&s>14){s-=4;g.font=`900 ${s}px ${MGFONT()}`}
+ g.textAlign="center";g.textBaseline="middle";g.lineWidth=s*.12;g.strokeStyle="rgba(0,0,0,.55)";g.strokeText(txt,c.width/2,c.height/2);g.fillStyle=fg;g.fillText(txt,c.width/2,c.height/2);t.needsUpdate=true}
+function buildMath(){const G0=new THREE.Group();G0.rotation.y=MA;scene.add(G0);MATH.group=G0;
+ const rockM=texStd("rock","#3D3645",4,4,1),rock2=texStd("rock2","#4B4252",3,3,1);
+ // jalan setapak di pulau utama + jembatan
+ const u0=53.7,u1=93;const pth=mesh(G.box(5,.06,u1-u0),texStd("paving","#CFC7B5",1,(u1-u0)/3,.95),0,.05,(u0+u1)/2,G0,true);pth.receiveShadow=true;
+ const b0=86,b1=MU0+1,L=b1-b0,mid=(b0+b1)/2;
+ mesh(G.box(6,.4,L),texStd("wood","#9A7A55",2,L/2,.8),0,-.15,mid,G0,true).receiveShadow=true;
+ [-3,3].forEach(v=>{box(.16,.12,L,"#F5F5F5",v,1,mid,G0);box(.1,.08,L,"#2E86C1",v,.6,mid,G0);for(let k=0;k<=L;k+=4)cyl(.07,.07,1,"#F5F5F5",v,.5,b0+k,G0,6);for(let k=6;k<L;k+=14)cyl(.35,.4,4,"#8C8577",v*.93,-2.3,b0+k,G0,10)});
+ const gate=(u,txt,col)=>{[-3.4,3.4].forEach(v=>{box(.8,5,.8,"#FFFFFF",v,2.5,u,G0);box(.86,1.2,.86,col,v,4.4,u,G0);const w=mW(u,v);obstacles.push({x:w.x,z:w.z,r:.55})});
+  box(7.8,.9,.9,col,0,5.4,u,G0);const lb=labelSprite(txt,col,"#FFFFFF",448);lb.position.set(0,6.6,u);lb.scale.multiplyScalar(1.6);G0.add(lb)};
+ gate(58,"JALAN KE PULAU MATEMATIKA","#2E86C1");
+ // cekungan lava
+ const UE=mU(MATH_N)+MS.end,LEN=UE-MU0+2,MID=(MU0+UE)/2;
+ MATH.lavaTex=lavaTexture();MATH.lavaTex.repeat.set(3,LEN/8);
+ const lava=mesh(new THREE.PlaneGeometry(MS.inner*2+1,LEN),new THREE.MeshBasicMaterial({map:MATH.lavaTex,color:"#FFFFFF"}),0,-.3,MID,G0,true);lava.rotation.x=-Math.PI/2;MATH.lava=lava;MATH.dyn.push(lava);
+ mesh(G.box(MS.inner*2+6,1.2,LEN+4),rockM,0,-2,MID,G0,true);
+ [-1,1].forEach(sd=>{const wl=mesh(G.box(2.4,3.2,LEN+4),rock2,sd*(MS.inner+1.2),-.4,MID,G0);wl.receiveShadow=true;
+  for(let k=0;k<LEN;k+=9){const sp=mesh(new THREE.ConeGeometry(1.2+Math.random()*.8,2.5+Math.random()*3,6),rockM,sd*(MS.inner+1.6+Math.random()),1+Math.random(),MU0+k+Math.random()*4,G0);sp.rotation.y=Math.random()*3}});
+ mesh(G.box(MS.inner*2+5,3.2,2.4),rock2,0,-.4,UE+1.2,G0);
+ const lavaLight=new THREE.PointLight("#FF7A1A",1.2,60,1.6);lavaLight.position.set(0,4,MID);G0.add(lavaLight);
+ // platform: start, tahap 1..N (checkpoint), finish
+ const platAt=(uA,len,cp)=>{const m=mesh(G.box(MS.half*2,3,len),rockM,0,-1.5,uA+len/2,G0);m.receiveShadow=true;
+  mesh(G.box(MS.half*2-.3,.06,len-.3),texStd("rockTop","#6A5F70",4,4,1),0,.03,uA+len/2,G0,true).receiveShadow=true;
+  mPlat(uA+len/2,0,len/2,MS.half,{cp});MATH.cps[cp]=uA+len/2};
+ platAt(MU0,MS.start,0);
+ for(let i=1;i<=MATH_N;i++)platAt(mU(i)-MS.plat,i===MATH_N?MS.end:MS.plat,i);
+ // checkpoint plus hijau
+ for(let i=1;i<=MATH_N;i++){const g=new THREE.Group();const mat=new THREE.MeshBasicMaterial({color:i===MATH_N?"#FFD23F":"#39FF6A"});
+  g.add(new THREE.Mesh(G.box(1.5,.45,.45),mat));g.add(new THREE.Mesh(G.box(.45,1.5,.45),mat));g.position.set(-(MS.half-1.4),2.2,MATH.cps[i]);G0.add(g);MATH.plus[i]=g;MATH.dyn.push(g);
+  const pad=mesh(new THREE.RingGeometry(.6,1.1,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.7}),-(MS.half-1.4),.08,MATH.cps[i],G0,true);pad.rotation.x=-Math.PI/2}
+ // finish: piala + portal kembali
+ const fu=MATH.cps[MATH_N];cyl(.8,1,1.2,"#D4AC0D",3,.6,fu+3,G0,16);const cup=mesh(G.sph(.7,16,12),std("#F7D23E",.3),3,1.9,fu+3,G0);cup.scale.y=1.2;
+ {const w=mW(fu+3,3);obstacles.push({x:w.x,z:w.z,r:1})}
+ const lb=labelSprite("SELESAI! Injak portal untuk main lagi","#27AE60","#FFFFFF",512);lb.position.set(0,4.2,fu+4.5);lb.scale.multiplyScalar(1.6);G0.add(lb);
+ const por=mesh(new THREE.TorusGeometry(1.2,.16,10,32),new THREE.MeshBasicMaterial({color:"#7DF9FF"}),-2.5,1.4,fu+4,G0,true);MATH.portal={u:fu+4,v:-2.5,m:por};MATH.dyn.push(por);
+ const pdisc=mesh(new THREE.CircleGeometry(1.1,32),new THREE.MeshBasicMaterial({color:"#7DF9FF",transparent:true,opacity:.35,side:THREE.DoubleSide}),-2.5,1.4,fu+4,G0,true);MATH.dyn.push(pdisc);
+ const sl=labelSprite("PULAU MATEMATIKA","#2E86C1","#FFFFFF",448);sl.position.set(0,5.4,MU0+2);sl.scale.multiplyScalar(1.8);G0.add(sl);
+ // tahap: papan soal + jembatan papan
+ for(let i=0;i<MATH_N;i++){const ug=mU(i),st={i,ug,planks:[],solved:false};
+  const sg=new THREE.Group();sg.position.set(0,0,ug-.6);G0.add(sg);
+  [-1,1].forEach(sd=>{box(.3,4.4,.3,"#5B3A1A",sd*(MS.half-.5),2.2,0,sg);const w=mW(ug-.6,sd*(MS.half-.5));obstacles.push({x:w.x,z:w.z,r:.3})});
+  box(MS.half*2-.6,.35,.35,"#5B3A1A",0,4.35,0,sg);
+  st.tex=numTex("",'#1E2A2E',"#FFFFFF",1024,256,140);const board=new THREE.Mesh(new THREE.PlaneGeometry(9,2.25),new THREE.MeshBasicMaterial({map:st.tex}));board.position.set(0,3.05,-.02);board.rotation.y=Math.PI;sg.add(board);
+  const back=box(9.2,2.45,.12,"#5B3A1A",0,3.05,.06,sg);
+  const lbl=labelSprite(`Tahap ${i+1}`,"#2E86C1","#FFFFFF",256);lbl.position.set(0,4.9,0);sg.add(lbl);
+  MATH.dyn.push(board);MATH.stages.push(st)}
+}
+function mathLayout(st,n){/* posisi v papan */const sp=n===4?3.6:4.4;return [...Array(n)].map((_,k)=>(k-(n-1)/2)*sp)}
+function mathSetStage(st){const k=SAVE.kelas||3,n=k>=5?4:3,q=mathGen(k,st.i),opts=mathOpts(q,n,k);st.q=q;st.solved=false;
+ drawNumTex(st.tex,q.t);
+ st.planks.forEach(p=>{MATH.group.remove(p.m);p.m.geometry.dispose();p.tex.dispose();if(p.spr){MATH.group.remove(p.spr)}const ix=PLATS.indexOf(p.p);if(ix>=0)PLATS.splice(ix,1)});st.planks=[];
+ const vs=mathLayout(st,n),uc=st.ug+MS.gap/2;
+ opts.forEach((val,k)=>{const v=vs[k];const tex=numTex(String(val),"#6B4423","#FFFFFF",256,512,150);tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(1,2);tex.center.set(.5,.5);tex.rotation=Math.PI;
+  const mats=[std("#5A381C",.9),std("#5A381C",.9),new THREE.MeshStandardMaterial({map:tex,roughness:.85}),std("#5A381C",.9),std("#5A381C",.9),std("#5A381C",.9)];
+  const m=new THREE.Mesh(G.box(1.9,.3,MS.gap+.2),mats);m.position.set(v,-.15,uc);m.castShadow=m.receiveShadow=true;MATH.group.add(m);
+  const spr=labelSprite(String(val),"#1E2A2E","#FFFFFF",256);spr.position.set(v,1.5,st.ug+.4);spr.scale.multiplyScalar(.9);MATH.group.add(spr);
+  const pk={val,ok:val===q.ans,state:0,t:0,m,tex,spr,v,mats,vy:0};pk.p=mPlat(uc,v,MS.gap/2,.95,{plank:pk,st});st.planks.push(pk)})}
+function mathEnsure(){const k=SAVE.kelas||3;if(MATH.kelas===k)return;MATH.kelas=k;MATH.stages.forEach(mathSetStage);MATH.cp=0;MATH.run=0;
+ MATH.plus.forEach((g,i)=>g&&g.children.forEach(c=>c.material.color.set(i===MATH_N?"#FFD23F":"#39FF6A")))}
+function inMath(x,z){const q=mUV(x,z);return q.u>MU0-1&&q.u<mU(MATH_N)+MS.end+.5&&Math.abs(q.v)<MS.inner+.6}
+function onMathBridge(x,z){const q=mUV(x,z);return q.u>80&&q.u<=MU0+1&&Math.abs(q.v)<2.7}
+function mUV(x,z){return{u:x*MDX+z*MDZ,v:x*MDZ-z*MDX}}
+function mathRespawn(msg){const u=MATH.cps[MATH.cp];const w=mW(u,0);const pos=player.root.position;pos.set(w.x,.2,w.z);vy=0;player.root.rotation.y=MA;yaw=MA+Math.PI;
+ if(msg)toast(msg,true)}
+function mathUpdate(dt,pos,pl){MATH.lavaTex&&(MATH.lavaTex.offset.y+=dt*.04,MATH.lavaTex.offset.x=Math.sin(clock.elapsedTime*.2)*.05);
+ MATH.plus.forEach(g=>{if(g)g.rotation.y+=dt*1.8});if(MATH.portal)MATH.portal.m.rotation.z+=dt;
+ MATH.stages.forEach(st=>st.planks.forEach(p=>{if(p.state===1){p.t-=dt;p.m.position.x=p.v+Math.sin(p.t*70)*.06;if(p.t<=0){p.state=2;const ix=PLATS.indexOf(p.p);if(ix>=0)PLATS.splice(ix,1)}}
+  else if(p.state===2&&p.m.visible){p.vy-=18*dt;p.m.position.y+=p.vy*dt;p.m.rotation.x+=dt*.8;if(p.m.position.y<-6){p.m.visible=false;if(p.spr)p.spr.visible=false}}}));
+ const inside=inMath(pos.x,pos.z);if(!inside&&!onMathBridge(pos.x,pos.z))return;
+ mathEnsure();
+ if(pl&&pl.plank&&onGround){const p=pl.plank,st=pl.st;
+  if(!p.ok&&p.state===0){p.state=1;p.t=.5;const rd=std("#C0392B",.9);p.m.material=p.mats.map((x,k)=>k===2?x:rd);drawNumTex(p.tex,String(p.val),"#A93226");blip("bad");MG_SHAKE()}
+  else if(p.ok&&!st.solved){st.solved=true;drawNumTex(p.tex,String(p.val),"#1E8449");drawNumTex(st.tex,st.q.t.replace("?",String(p.val))+" ✓","#1E5631");blip("good");SAVE.coins++;persist();updateStats();
+   toast(`Benar! ${st.q.t.replace("= ?","= "+p.val)}`)}}
+ if(pl&&pl.cp!==undefined&&pl.cp>MATH.cp){MATH.cp=pl.cp;const g=MATH.plus[pl.cp];if(g)g.children.forEach(c=>c.material.color.set("#FFFFFF"));
+  SAVE.math=SAVE.math||{best:0,done:0};if(pl.cp>SAVE.math.best)SAVE.math.best=pl.cp;
+  if(pl.cp===MATH_N){SAVE.math.done++;SAVE.xp+=50;SAVE.coins+=5;blip("win");confetti(60);toast("Pulau Matematika selesai! +50 XP · +$50")}else{blip("coin");toast(`Checkpoint ${pl.cp}/${MATH_N}`)}persist();updateStats()}
+ if(MATH.portal&&MATH.cp===MATH_N){const q=mUV(pos.x,pos.z);if(Math.hypot(q.u-MATH.portal.u,q.v-MATH.portal.v)<1.3){MATH.kelas=0;mathEnsure();MATH.cp=0;mathRespawn("Soal baru! Ayo coba lagi.");blip("jump")}}
+ if(inside&&pos.y<-.9){const st=MATH.stages[MATH.cp];const ans=st&&st.q?st.q.ans:"";const qt=st&&st.q?st.q.t.replace("= ?","= "+ans):"";
+  blip("bad");$("lavaFx").classList.remove("on");void $("lavaFx").offsetWidth;$("lavaFx").classList.add("on");
+  if(st)mathSetStage(st);mathRespawn(`Aduh, jatuh ke lava! ${qt?"Jawaban benar: "+qt:""}`)}}
+function MG_SHAKE(){const c=$("world");if(!c)return;c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}
+
 
 /* =====================================================
    GTA-STYLE OVERRIDES & SAVE MIGRATION
@@ -1471,9 +1601,10 @@ SAVE.pk=SAVE.pk||{};
 const VCFG={car:{maxF:19,maxR:-6,acc:9,wb:2.6,rad:1.5,ride:false,label:"Mobil",seat:0},
  motor:{maxF:22,maxR:-3,acc:14,wb:1.5,rad:.8,ride:true,label:"Motor",seat:.18},
  bike:{maxF:9,maxR:-2,acc:6,wb:1.15,rad:.7,ride:true,label:"Sepeda",seat:.12}};
+const MA=Math.PI*19/12,MDX=Math.sin(MA),MDZ=Math.cos(MA),MU0=118,MATH_N=10;
 const BR_A=Math.PI*11/12,BR_DX=Math.sin(BR_A),BR_DZ=Math.cos(BR_A),C2D=215,R2=52,C2={x:BR_DX*C2D,z:BR_DZ*C2D};
 function axisUV(x,z){return{u:x*BR_DX+z*BR_DZ,v:x*BR_DZ-z*BR_DX}}
-function walkable(x,z,m){m=m||0;if(Math.hypot(x,z)<ISLAND_R-m)return true;const q=axisUV(x,z);
+function walkable(x,z,m){m=m||0;if(Math.hypot(x,z)<ISLAND_R-m)return true;if(onMathBridge(x,z)||inMath(x,z))return true;const q=axisUV(x,z);
  if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<2.7-m*.55)return true;return Math.hypot(x-C2.x,z-C2.z)<R2-2-m}
 function onIsland2(x,z){return Math.hypot(x-C2.x,z-C2.z)<R2+8}
 function suggestedPk(){for(let i=0;i<PK.length;i++)if(!SAVE.pk[i])return i;return -1}
@@ -1569,12 +1700,12 @@ function buildWorld(){
  billboard(Math.sin(-Math.PI/2)*13.5,Math.cos(-Math.PI/2)*13.5,-Math.PI/2,BB_ART.ball,"PLAY. TALK. HAVE FUN!","#2FA66A");
  billboard(Math.sin(Math.PI/12)*57,Math.cos(Math.PI/12)*57,Math.PI/12+Math.PI,BB_ART.play,"JUMP AT THE PLAYGROUND!","#F39C12");
  billboard(Math.sin(Math.PI+Math.PI/12)*57,Math.cos(Math.PI+Math.PI/12)*57,Math.PI/12,BB_ART.key,"WELCOME TO SPEAK ISLAND","#2E86C1");
- buildPlayground();buildParkour();buildPancasila();
+ buildPlayground();buildParkour();buildPancasila();buildMath();
  // trees, grass, flowers
  [["balon",.19,"#E74C3C"],["pancing",.26,"#2E86C1"],["tikus",.33,"#8E5A2B"]].forEach(([gm,a,c])=>makeKiosk(gm,"en",Math.sin(a)*61,Math.cos(a)*61,a+Math.PI,c,"en-"+gm));
  const centers=AREAS.map((A,i)=>areaFrame(i));
  let placed=0,tries=0;
- const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
+ const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=mUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
   if(!centers.every((F,k)=>Math.hypot(x-F.x,z-F.z)>(AREAS[k].type==="field"?19:13)))return false;
   if(!centers.every(F=>Math.abs(Math.atan2(Math.sin(a-F.a),Math.cos(a-F.a)))*r>2.4||r>F.r+2))return false;
   return obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+margin)};
@@ -1762,7 +1893,7 @@ function pkPortrait(i){const k="pk"+i;if(PORTRAIT[k])return PORTRAIT[k];const P=
 function mergeStatic(){
  if(!THREE.BufferGeometryUtils||!THREE.BufferGeometryUtils.mergeBufferGeometries)return;
  const skip=new Set([water,sky,FLAG,...balloons,...coins,...stars.map(x=>x.m),...PLATS.filter(p=>p.mesh).map(p=>p.mesh),...VEH.map(v=>v.m),...traffic.map(T=>T.m),
-  ...npcs.flatMap(n=>[n.C.root,n.mk,n.ringM]),...pkn.flatMap(n=>[n.C.root,n.mk,n.ringM]),...KIOSKS.flatMap(K=>[K.mk,K.ringM]),...peds.map(P=>P.C.root),...clouds,...birds.map(b=>b.g)].filter(Boolean));
+  ...npcs.flatMap(n=>[n.C.root,n.mk,n.ringM]),...pkn.flatMap(n=>[n.C.root,n.mk,n.ringM]),...KIOSKS.flatMap(K=>[K.mk,K.ringM]),...MATH.dyn,...peds.map(P=>P.C.root),...clouds,...birds.map(b=>b.g)].filter(Boolean));
  const isSkipped=o=>{for(let q=o;q;q=q.parent){if(skip.has(q))return true}return false};
  scene.updateMatrixWorld(true);
  const groups=new Map(),victims=[];const CH=48;const v=new THREE.Vector3();
@@ -1781,11 +1912,11 @@ function mergeStatic(){
 }
 
 /* ---------- platform physics ---------- */
-function insidePlat(p,x,z,pad){return p.cyl?Math.hypot(x-p.x,z-p.z)<p.r+pad:Math.abs(x-p.x)<p.hw+pad&&Math.abs(z-p.z)<p.hd+pad}
-function pushOutPlats(pos,y,rad){for(const p of PLATS){if(p.top<=y+STEP||y+1.6<(p.bottom||0)||!insidePlat(p,pos.x,pos.z,rad))continue;
+function insidePlat(p,x,z,pad){if(p.rot){const dx=x-p.x,dz=z-p.z;return Math.abs(dx*MDZ-dz*MDX)<p.hw+pad&&Math.abs(dx*MDX+dz*MDZ)<p.hd+pad}return p.cyl?Math.hypot(x-p.x,z-p.z)<p.r+pad:Math.abs(x-p.x)<p.hw+pad&&Math.abs(z-p.z)<p.hd+pad}
+function pushOutPlats(pos,y,rad){for(const p of PLATS){if(p.rot||p.top<=y+STEP||y+1.6<(p.bottom||0)||!insidePlat(p,pos.x,pos.z,rad))continue;
  if(p.cyl){const dx=pos.x-p.x,dz=pos.z-p.z,d=Math.hypot(dx,dz)||1;pos.x=p.x+dx/d*(p.r+rad);pos.z=p.z+dz/d*(p.r+rad)}
  else{const ox=p.hw+rad-Math.abs(pos.x-p.x),oz=p.hd+rad-Math.abs(pos.z-p.z);if(ox<oz)pos.x=p.x+Math.sign(pos.x-p.x||1)*(p.hw+rad);else pos.z=p.z+Math.sign(pos.z-p.z||1)*(p.hd+rad)}}}
-function floorAt(x,z,y){let f=0,pl=null;for(const p of PLATS){if(p.top<=y+STEP&&p.top>f&&insidePlat(p,x,z,0)){f=p.top;pl=p}}return{f,pl}}
+function floorAt(x,z,y){let f=inMath(x,z)?-50:0,pl=null;for(const p of PLATS){if(p.top<=y+STEP&&p.top>f&&insidePlat(p,x,z,0)){f=p.top;pl=p}}return{f,pl}}
 function pushOutCircles(pos,rad,list){for(const o of list){const dx=pos.x-o.x,dz=pos.z-o.z,d=Math.hypot(dx,dz),m=o.r+rad;if(d<m&&d>0){pos.x=o.x+dx/d*m;pos.z=o.z+dz/d*m}}}
 
 /* ---------- main loop ---------- */
@@ -1850,10 +1981,11 @@ function tick(){
   let pkb=-1,pbd=12;pkn.forEach(n=>{const d=Math.hypot(n.x-target.x,n.z-target.z);if(d<pbd){pbd=d;pkb=n.i}});
   const q=axisUV(target.x,target.z);const onBr=q.u>88&&q.u<C2D-R2+2&&Math.abs(q.v)<6,onIs=onIsland2(target.x,target.z);
   const pg=Math.hypot(target.x,target.z-19)<8?"pg":Math.hypot(target.x,target.z+19)<7?"pk":null;
-  const key=best>=0?best:pkb>=0?"p"+pkb:onBr?"br":onIs?"is":pg;
+  const mi=inMath(target.x,target.z),mb=!mi&&onMathBridge(target.x,target.z)&&mUV(target.x,target.z).u>88;const key=mi?"mi":mb?"mb":best>=0?best:pkb>=0?"p"+pkb:onBr?"br":onIs?"is":pg;
   if(key!==lastArea){lastArea=key;const el=$("loc");
    if(best>=0){el.innerHTML=`<b>${esc(AREAS[best].name)}</b><span>${esc(AREAS[best].topic)}</span>`}
    else if(pkb>=0){el.innerHTML=`<b>${esc(PK[pkb].place)}</b><span>PPKn · ${esc(PK[pkb].topic)}</span>`}
+   else if(key==="mb"){el.innerHTML="<b>Jembatan Angka</b><span>Jalan ke Pulau Matematika</span>"}else if(key==="mi"){el.innerHTML="<b>Pulau Matematika</b><span>Pilih jembatan dengan jawaban benar!</span>"}
    else if(onBr){el.innerHTML="<b>Jembatan Garuda</b><span>Jalan ke Negeri Pancasila</span>"}
    else if(onIs){el.innerHTML="<b>Negeri Pancasila</b><span>Belajar PPKn bersama 7 guru</span>"}
    else if(pg==="pg"){el.innerHTML="<b>Taman Lompat</b><span>Trampolin & tangga balok</span>"}else if(pg==="pk"){el.innerHTML="<b>Menara Parkour</b><span>Naik sampai puncak!</span>"}
@@ -1878,6 +2010,7 @@ function movePlayer(dt){
  vy-=24*dt;pos.y+=vy*dt;const fl=floorAt(pos.x,pos.z,pos.y);
  if(pos.y<=fl.f){if(fl.pl&&fl.pl.bounce&&vy<-1.5){pos.y=fl.f;vy=fl.pl.bounce;onGround=false;jumps=1;blip("jump");if(fl.pl.mesh){fl.pl.mesh.scale.y=.3;setTimeout(()=>fl.pl.mesh.scale.y=1,120)}}
   else{pos.y=fl.f;vy=0;onGround=true;jumps=0}}else if(pos.y>fl.f+.05)onGround=false;
+ mathUpdate(dt,pos,pos.y-fl.f<.05?fl.pl:null);
  player.gs.position.y=(fl.f-pos.y)/1+.02;player.gs.scale.setScalar(Math.max(.4,1-(pos.y-fl.f)*.2));
  animChar(player,dt,{speed:onGround?sp:Math.max(sp,6),air:!onGround&&vy>-30&&(pos.y-fl.f)>.35,dance:dancing>0&&len<.1&&!happyT,happy:happyT>0&&len<.1});if(happyT>0)happyT-=dt;
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.hypot(c.position.x-pos.x,c.position.z-pos.z)<1.05&&Math.abs(c.position.y-(pos.y+.9))<1.2){scene.remove(c);coins.splice(i,1);SAVE.coins++;persist();updateStats();blip("coin");if(c.userData.y<1.5)setTimeout(spawnCoin,20000)}}
@@ -1946,7 +2079,9 @@ function updateHelp(){const h=$("help");let k="",html="";
  if(k!==helpKey){helpKey=k;h.hidden=!k;h.innerHTML=html}}
 let objKey="";
 function updateObjective(tg){const el=$("objective");let html;const q=axisUV(tg.x,tg.z);
- if(onIsland2(tg.x,tg.z)||(q.u>86&&Math.abs(q.v)<7)){const pi=suggestedPk();
+ if(inMath(tg.x,tg.z)||onMathBridge(tg.x,tg.z)){const c=MATH.cp;
+  html=c>=MATH_N?`Pulau Matematika selesai! <span class="small">Injak portal biru untuk main lagi dengan soal baru.</span>`:`<span class="y">Tahap ${c+1}/${MATH_N}</span> · Baca soal di papan, lalu lewati jembatan dengan jawaban yang benar.<span class="small">Salah pilih? Jembatan runtuh ke lava!</span>`}
+ else if(onIsland2(tg.x,tg.z)||(q.u>86&&Math.abs(q.v)<7)){const pi=suggestedPk();
   if(pi<0)html=`Semua pelajaran PPKn selesai! <span class="small">Kembali lewat Jembatan Garuda atau ulangi pelajaran favoritmu.</span>`;
   else{const n=pkn[pi];const d=Math.round(Math.hypot(n.x-tg.x,n.z-tg.z));html=`Belajar PPKn dengan <span class="y">${esc(PK[pi].name)}</span> di <span class="y">${esc(PK[pi].place)}</span>.<span class="small">${esc(PK[pi].topic)} · ${d} m</span>`}}
  else{const si=suggested();
@@ -1968,6 +2103,9 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
  g.fillStyle="#E67E22";g.beginPath();g.arc(0,19*s,7.6*s,0,7);g.fill();g.fillStyle="#7F8C8D";g.beginPath();g.arc(0,-19*s,6.5*s,0,7);g.fill();
  const si=suggested();
  npcs.forEach(n=>{const done=!!SAVE.stars[n.i];g.fillStyle=done?"#5DD39E":"#F7D23E";g.strokeStyle="#000";g.lineWidth=3;g.beginPath();g.arc(n.x*s,n.z*s,n.i===si?11:7,0,7);g.fill();g.stroke()});
+ {g.strokeStyle="#B9A57C";g.lineWidth=5*s;g.beginPath();g.moveTo(MDX*53.7*s,MDZ*53.7*s);g.lineTo(MDX*MU0*s,MDZ*MU0*s);g.stroke();
+  const L=mU(MATH_N)+MS.end-MU0;g.save();g.translate(MDX*MU0*s,MDZ*MU0*s);g.rotate(-MA);g.fillStyle="#3D3645";g.fillRect(-(MS.inner+2)*s,0,(MS.inner+2)*2*s,L*s);g.fillStyle="#FF6A00";g.fillRect(-MS.inner*s,0,MS.inner*2*s,L*s);
+  g.fillStyle="#6A5F70";for(let i=0;i<=MATH_N;i++){const a=i?mU(i)-MS.plat:MU0,l=i===0?MS.start:i===MATH_N?MS.end:MS.plat;g.fillRect(-MS.half*s,(a-MU0)*s,MS.half*2*s,l*s)}g.restore()}
  KIOSKS.forEach(K=>{g.fillStyle="#FF8FD1";g.strokeStyle="#000";g.lineWidth=2;g.beginPath();g.moveTo(K.x*s,K.z*s-7);g.lineTo(K.x*s+7,K.z*s);g.lineTo(K.x*s,K.z*s+7);g.lineTo(K.x*s-7,K.z*s);g.closePath();g.fill();g.stroke()});
  VEH.forEach(v=>{g.fillStyle=v.type==="car"?"#E74C3C":v.type==="motor"?"#2E86C1":"#27AE60";g.fillRect(v.x*s-5,v.z*s-5,10,10)});
  g.restore();
