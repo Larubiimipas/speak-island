@@ -229,6 +229,13 @@ input{-webkit-user-select:text;user-select:text}
 .kelas button small{display:block;font-family:var(--body);font-size:.62rem;font-weight:900;color:var(--muted);letter-spacing:.06em}
 .kelas button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1C4}
 .kelas.need{animation:shake .35s;outline:3px solid var(--coral);outline-offset:4px;border-radius:12px}
+.cineRow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cineRow button{padding:8px 6px 7px;border-radius:12px;background:#E7F3F4;color:var(--ink);border:3px solid transparent;line-height:1.1;text-align:center}
+.cineRow button b{display:block;font-family:var(--display);font-size:1.05rem}
+.cineRow button small{display:block;font-family:var(--body);font-size:.66rem;font-weight:800;color:var(--muted)}
+.cineRow button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1C4}
+.cineRow button[data-c="1"][aria-pressed="true"]{background:linear-gradient(135deg,#3B2236,#B4542E 60%,#F2A35A);color:#FFF4E2}
+.cineRow button[data-c="1"][aria-pressed="true"] small{color:#FFDDB8}
 .kelasInfo{margin:0;font-size:.82rem;color:var(--muted);font-weight:800}
 .xp.small2{font-size:1rem}
 @media (max-height:540px) and (orientation:landscape){.xp.small2{font-size:.8rem}.kelas button{font-size:1.05rem;padding:6px 0 4px}}
@@ -375,6 +382,10 @@ input{-webkit-user-select:text;user-select:text}
         <button class="hero" data-h="boy" aria-pressed="false"><img id="pk_boy" alt="Hisyam" width="192" height="192"><span>Hisyam</span><small>Petualang putra</small></button>
       </div>
       <label class="nameRow" for="heroName">3. Nama pemain<input id="heroName" maxlength="14" placeholder="Tulis namamu" autocomplete="off"></label>
+      <div class="lbl2">4. Tampilan</div>
+      <div class="cineRow" id="cineRow" role="group" aria-label="Pilih tampilan">
+        <button data-c="0" aria-pressed="true"><b>Biasa</b><small>Cerah, ringan</small></button><button data-c="1" aria-pressed="false"><b>Sinematik ✦</b><small>Senja dramatis, kamera atas</small></button>
+      </div>
     </div>
     <button class="btn-main" id="startBtn" disabled>MEMUAT KARAKTER...</button>
     <p class="status" id="loadStatus">Menyiapkan model 3D...</p>
@@ -1594,7 +1605,7 @@ function pbr(c,r,m,extra){return new THREE.MeshStandardMaterial(Object.assign({c
 const GEMTEX={};function gemTex(key,rep){const src=(window.REAL_TEX||{})[key];if(!src)return null;const k=key+rep;if(GEMTEX[k])return GEMTEX[k];const t=new THREE.TextureLoader().load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return GEMTEX[k]=t}
 /* ---------- bangun semuanya ---------- */
 function buildWorld2(){
- initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();
+ initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();cineInit();
  W2.ripple=new THREE.Mesh(new THREE.RingGeometry(.45,.75,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.5,depthWrite:false}));W2.ripple.rotation.x=-Math.PI/2;W2.ripple.visible=false;scene.add(W2.ripple);W2.dyn.push(W2.ripple)}
 function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.material.uniforms){const pm=new THREE.PMREMGenerator(renderer);const s2=new THREE.Scene();const sk=sky.clone();sk.material=sky.material;s2.add(sk);
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
@@ -2680,6 +2691,214 @@ function odLyricUpdate(){if(!ODM.on||!actx)return;const L=ODM.song.len,e=((actx.
  const key=li+"";if(el.dataset.k!==key){el.dataset.k=key;el.querySelector(".t").textContent=li<0?"♪ tin tin! ♪":OD_LYR[li];el.querySelector(".n").textContent=OD_LYR[(li+1)%8]}
  el.querySelector(".bar i").style.width=(pr*100).toFixed(1)+"%"}
 
+/* ===== MODE SINEMATIK: kamera atas serong, senja dramatis, patung raksasa, bloom & partikel ===== */
+const CINE={on:false,built:false,grp:null,post:null,base:null,fx:null,lastXP:-1,wasG:true,minVy:0,shake:0,envC:null,
+ // sudut (derajat, x=sin, z=cos) patung raksasa; diatur supaya tidak menabrak pulau lain
+ POS:{torch:{a:-128,r:470},book:{a:118,r:480},gate:{a:-28,r:500}}};
+try{CINE.on=localStorage.getItem("siCine")==="1"}catch(e){}
+const CINE_MOBILE=matchMedia("(pointer:coarse)").matches;
+
+/* ---------- material batu pahat ---------- */
+function cineStone(c,rep){const m=texStd("rock",c||"#A7A097",rep||3,rep||3,.96);m.flatShading=true;return m}
+function cineLathe(pts,seg){return new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),seg||14)}
+function cineM(geo,mat,x,y,z,p){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);p.add(m);return m}
+function cineRocks(g,r,n,mat){for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.random()*.4,rr=r*(.55+Math.random()*.5),s=r*(.25+Math.random()*.3);
+ const k=cineM(new THREE.DodecahedronGeometry(s,0),mat,Math.sin(a)*rr,s*.15,Math.cos(a)*rr,g);k.scale.y=.55+Math.random()*.5;k.rotation.set(Math.random(),Math.random()*6,Math.random())}}
+function cineFlameMat(){return new THREE.MeshBasicMaterial({color:new THREE.Color(5.5,2.2,.5),transparent:true,opacity:.92,depthWrite:false,fog:false})}
+
+/* Patung 1: Penjaga Obor — sosok berjubah tinggi mengangkat obor menyala, memegang perisai */
+function cineTorchStatue(){const g=new THREE.Group(),S=cineStone("#A9A398",3),D=cineStone("#8F8574",2),M=new THREE.MeshStandardMaterial({color:"#A0B0A0",roughness:.6,metalness:.55,flatShading:true});
+ cineRocks(g,34,14,D);
+ cineM(G.box(46,8,46),D,0,4,0,g);cineM(G.box(36,10,36),S,0,13,0,g);cineM(G.box(30,3,30),D,0,19.5,0,g);
+ // jubah & badan
+ cineM(cineLathe([[0,0],[13,0],[12.5,4],[10.5,20],[8.6,34],[7.4,40],[0,40]],16),S,0,21,0,g);
+ cineM(cineLathe([[0,0],[7.6,0],[8.8,6],[10.2,14],[9.4,18],[5,21],[0,21]],14),S,0,60,0,g);
+ cineM(G.box(3.2,30,1.4),D,0,38,7.6,g).rotation.x=-.08; // lipatan jubah
+ [-1,1].forEach(s=>{const f=cineM(G.box(1.2,34,1),D,s*5.4,37,7.2,g);f.rotation.z=s*.06;f.rotation.x=-.1});
+ // kepala berhelm
+ cineM(G.cyl(2.6,3.2,4,10),S,0,82.5,0,g);
+ const h=cineM(G.sph(4.6,12,9),S,0,88,0,g);h.scale.set(1,1.15,1.05);
+ cineM(G.box(.8,7,10),D,0,93,-.6,g);cineM(G.box(7.6,1.2,1.2),D,0,88.6,4.2,g);
+ // lengan kanan terangkat
+ const sh=new THREE.Group();sh.position.set(-9.5,77,0);g.add(sh);sh.rotation.z=-.35;sh.rotation.x=-.12;
+ cineM(G.sph(4,10,8),S,0,0,0,sh);cineM(G.cyl(2.8,3.4,14,10),S,0,7,0,sh);
+ const el=new THREE.Group();el.position.set(0,14,0);el.rotation.z=.32;sh.add(el);cineM(G.cyl(2.4,2.8,12,10),S,0,6,0,el);
+ cineM(G.sph(3,10,8),S,0,13,0,el);
+ const tor=new THREE.Group();tor.position.set(0,13,0);el.add(tor);cineM(G.cyl(1.4,1.7,16,8),M,0,4,0,tor);
+ cineM(cineLathe([[0,0],[1.8,0],[4.6,4],[5.2,5],[0,5]],12),M,0,12,0,tor);
+ const fl=new THREE.Group();fl.position.set(0,17,0);tor.add(fl);const fm=cineFlameMat();
+ const f1=cineM(new THREE.ConeGeometry(4,11,10),fm,0,5,0,fl),f2=cineM(new THREE.ConeGeometry(2.6,8,8),fm,1.2,4,1,fl),f3=cineM(new THREE.ConeGeometry(2.4,7,8),fm,-1.4,3.6,-.6,fl);
+ g.userData.flames=[f1,f2,f3];g.userData.flame=fl;
+ // lengan kiri memegang perisai
+ const sl=new THREE.Group();sl.position.set(9.5,77,0);sl.rotation.z=.18;g.add(sl);cineM(G.sph(4,10,8),S,0,0,0,sl);
+ cineM(G.cyl(2.8,3.2,15,10),S,0,-7.5,0,sl);cineM(G.cyl(2.4,2.6,12,10),S,1,-19,2,sl).rotation.x=-.6;
+ const shd=cineM(G.cyl(10,10,1.8,20),M,4.5,-22,7,sl);shd.rotation.x=Math.PI/2;shd.rotation.z=.15;
+ cineM(G.cyl(3,3,2.2,5),new THREE.MeshStandardMaterial({color:"#D9B45A",roughness:.35,metalness:.85,flatShading:true}),4.5,-22,8.2,sl).rotation.x=Math.PI/2;
+ return g}
+
+/* Patung 2: Sang Bijak — duduk bersila membaca buku terbuka yang bercahaya */
+function cineBookStatue(){const g=new THREE.Group(),S=cineStone("#A6A094",3),D=cineStone("#857B6B",2);
+ cineRocks(g,32,12,D);cineM(G.cyl(30,34,10,10),D,0,5,0,g);cineM(G.cyl(26,28,6,10),S,0,13,0,g);
+ // kaki bersila
+ const lg=cineM(G.cap(7,26),S,0,22,6,g);lg.rotation.z=Math.PI/2;lg.scale.set(1,1,.9);
+ cineM(cineLathe([[0,0],[16,0],[15,3],[12,8],[0,8]],14),S,0,16,2,g);
+ // badan & jubah
+ cineM(cineLathe([[0,0],[13,0],[12,8],[10,22],[11.5,30],[6,34],[0,34]],14),S,0,20,-2,g);
+ cineM(G.cyl(3.2,3.8,4,10),S,0,55,-2,g);
+ const hd=cineM(G.sph(6,12,9),S,0,62,-1,g);hd.scale.set(1,1.1,1.05);
+ const bd=cineM(new THREE.ConeGeometry(4.4,13,9),D,0,52.5,3.4,g);bd.rotation.x=Math.PI+.2; // janggut
+ cineM(G.cyl(6.6,6.2,2,12),D,0,67.6,-1,g);cineM(G.cyl(3.6,6,4,12),D,0,70,-1,g); // tudung
+ // lengan menopang buku
+ [-1,1].forEach(s=>{const a=cineM(G.cap(3,16),S,s*10.5,42,4,g);a.rotation.z=s*.5;a.rotation.x=-.9;
+  const f=cineM(G.cap(2.6,13),S,s*7,33,13,g);f.rotation.z=s*-1.15;f.rotation.x=.1});
+ // buku terbuka
+ const bk=new THREE.Group();bk.position.set(0,35,16);bk.rotation.x=-.65;g.add(bk);const cv=new THREE.MeshStandardMaterial({color:"#6B3A2A",roughness:.8,flatShading:true});
+ [-1,1].forEach(s=>{const p=new THREE.Group();p.rotation.z=s*-.22;bk.add(p);cineM(G.box(12,1,15),cv,s*6,0,0,p);
+  cineM(G.box(11,1.4,14),new THREE.MeshBasicMaterial({color:new THREE.Color(2.6,2.2,1.2),fog:false}),s*5.8,.9,0,p)});
+ g.userData.book=bk;return g}
+
+/* Patung 3: Gerbang Raksasa runtuh — dua pilar dan balok atas yang patah */
+function cineGate(){const g=new THREE.Group(),S=cineStone("#A8A296",4),D=cineStone("#8A806F",2);
+ cineRocks(g,40,14,D);
+ [-1,1].forEach(s=>{cineM(G.box(18,8,18),D,s*24,4,0,g);cineM(G.cyl(6.5,7.5,s<0?78:58,12),S,s*24,8+(s<0?39:29),0,g);
+  for(let k=0;k<5;k++)cineM(G.cyl(7.8,7.8,1.6,12),D,s*24,14+k*(s<0?14:10),0,g);cineM(G.box(17,5,17),S,s*24,8+(s<0?78:58)+2.5,0,g)});
+ const lt=cineM(G.box(40,9,15),S,-14,98,0,g);lt.rotation.z=-.07; // balok patah menjorok
+ const br=cineM(G.box(20,9,15),D,22,12,9,g);br.rotation.set(.3,.5,1.15); // potongan jatuh
+ cineM(G.box(9,9,9),D,8,4.5,16,g).rotation.y=.7;return g}
+
+/* Pegunungan berbatu bergerigi di cakrawala */
+function cineMountains(g){const M=new THREE.MeshStandardMaterial({color:"#6F6873",roughness:1,flatShading:true});
+ for(let i=0;i<22;i++){let geo=new THREE.IcosahedronGeometry(1,2);geo.deleteAttribute("normal");geo.deleteAttribute("uv");geo=THREE.BufferGeometryUtils.mergeVertices(geo);
+  const P=geo.attributes.position;for(let k=0;k<P.count;k++){const x=P.getX(k),y=P.getY(k),z=P.getZ(k);const n=1+.28*Math.sin(x*7.1+i)*Math.cos(z*6.3-i)+.18*Math.sin(y*9.7+i*2.1);
+   const yy=y>0?Math.pow(y,1.6+(i%3)*.3):y;P.setXYZ(k,x*n,yy*n,z*n)}geo.computeVertexNormals();
+  const a=i/22*Math.PI*2+Math.sin(i*3.7)*.09,r=730+Math.sin(i*5.3)*30,h=70+((i*37)%7)*16,w=80+((i*53)%5)*22;
+  const m=cineM(geo,M,Math.sin(a)*r,-h*.12,Math.cos(a)*r,g);m.scale.set(w,h,w*.8);m.rotation.y=a+i}}
+
+function cineBuild(){if(CINE.built)return;CINE.built=true;const g=new THREE.Group();g.name="cineWorld";
+ const place=(o,p,s)=>{const a=p.a*Math.PI/180;o.position.set(Math.sin(a)*p.r,-1,Math.cos(a)*p.r);o.rotation.y=a+Math.PI;if(s)o.scale.setScalar(s);g.add(o);return o};
+ CINE.torch=place(cineTorchStatue(),CINE.POS.torch,2.2);CINE.book=place(cineBookStatue(),CINE.POS.book,2.3);place(cineGate(),CINE.POS.gate,2.1);
+ cineMountains(g);
+ g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.matrixAutoUpdate=true}});
+ // cahaya obor
+ const L=new THREE.PointLight("#FF9A40",3,500,1.6);L.position.set(0,0,0);CINE.torchL=L;g.add(L);
+ scene.add(g);CINE.grp=g;cineFxInit()}
+
+/* ---------- partikel ---------- */
+function cineDot(){const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),gr=x.createRadialGradient(32,32,0,32,32,32);
+ gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.35,"rgba(255,255,255,.6)");gr.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gr;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)}
+function cinePool(n,additive,size){const geo=new THREE.BufferGeometry(),pos=new Float32Array(n*3),col=new Float32Array(n*4);
+ geo.setAttribute("position",new THREE.BufferAttribute(pos,3));geo.setAttribute("color",new THREE.BufferAttribute(col,4));
+ const m=new THREE.PointsMaterial({size,sizeAttenuation:true,map:CINE.dot,vertexColors:true,transparent:true,depthWrite:false,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending,fog:!additive});
+ const pts=new THREE.Points(geo,m);pts.frustumCulled=false;scene.add(pts);
+ return{pts,pos,col,n,vel:new Float32Array(n*3),life:new Float32Array(n),max:new Float32Array(n),rgb:new Float32Array(n*3),grav:new Float32Array(n),drag:new Float32Array(n),i:0,add:additive}}
+function cineFxInit(){CINE.dot=cineDot();CINE.fx={glow:cinePool(700,true,.42),dust:cinePool(260,false,.9),ember:cinePool(90,true,.3)};
+ const E=CINE.fx.ember;for(let i=0;i<E.n;i++)E.life[i]=-1}
+function cineEmit(P,x,y,z,vx,vy,vz,life,r,gg,b,grav,drag){const i=P.i;P.i=(P.i+1)%P.n;
+ P.pos[i*3]=x;P.pos[i*3+1]=y;P.pos[i*3+2]=z;P.vel[i*3]=vx;P.vel[i*3+1]=vy;P.vel[i*3+2]=vz;P.life[i]=life;P.max[i]=life;
+ P.rgb[i*3]=r;P.rgb[i*3+1]=gg;P.rgb[i*3+2]=b;P.grav[i]=grav||0;P.drag[i]=drag||0}
+function cineStepPool(P,dt){let alive=false;for(let i=0;i<P.n;i++){if(P.life[i]<=0){P.col[i*4+3]=0;continue}alive=true;P.life[i]-=dt;
+ const k=Math.max(0,P.life[i]/P.max[i]),d=Math.max(0,1-P.drag[i]*dt);P.vel[i*3]*=d;P.vel[i*3+2]*=d;P.vel[i*3+1]=P.vel[i*3+1]*d-P.grav[i]*dt;
+ P.pos[i*3]+=P.vel[i*3]*dt;P.pos[i*3+1]+=P.vel[i*3+1]*dt;P.pos[i*3+2]+=P.vel[i*3+2]*dt;
+ const f=P.add?k:Math.min(1,k*1.6)*.55;P.col[i*4]=P.rgb[i*3]*(P.add?f:1);P.col[i*4+1]=P.rgb[i*3+1]*(P.add?f:1);P.col[i*4+2]=P.rgb[i*3+2]*(P.add?f:1);P.col[i*4+3]=P.add?1:f}
+ P.pts.geometry.attributes.position.needsUpdate=true;P.pts.geometry.attributes.color.needsUpdate=true;return alive}
+function cineDust(x,y,z,n,sp){const P=CINE.fx.dust;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=sp*(.6+Math.random()*.6);
+ cineEmit(P,x+Math.sin(a)*.3,y+.08,z+Math.cos(a)*.3,Math.sin(a)*s,.6+Math.random()*1.2,Math.cos(a)*s,.7+Math.random()*.5,.78,.68,.55,1.2,3.2)}}
+function cineSparks(x,y,z,n){const P=CINE.fx.glow;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=1.5+Math.random()*4,u=4+Math.random()*7,gold=Math.random()<.7;
+ cineEmit(P,x,y+.8,z,Math.sin(a)*s,u,Math.cos(a)*s,1+Math.random()*1.1,gold?2.4:.9,gold?1.2:1.6,gold?.15:2.6,7,1.2)}
+ for(let i=0;i<40;i++){const a=i/40*Math.PI*6;cineEmit(P,x+Math.sin(a)*1.1,y+.1+i*.05,z+Math.cos(a)*1.1,Math.cos(a)*.5,2.6,-Math.sin(a)*.5,1.6,2.2,1.3,.3,0,.2)}}
+window.cineBurst=function(){if(CINE.on&&CINE.fx&&player)cineSparks(player.root.position.x,player.root.position.y,player.root.position.z,90)};
+
+/* ---------- post-processing: bloom + grading + vignette ---------- */
+const CINE_VS="varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}";
+function cinePostInit(){if(CINE.post!==null)return CINE.post;try{
+ const gl2=renderer.capabilities.isWebGL2,ex=renderer.extensions;const hf=gl2?(ex.has("EXT_color_buffer_float")||ex.has("EXT_color_buffer_half_float")):ex.has("OES_texture_half_float")&&ex.has("EXT_color_buffer_half_float");
+ const type=hf?THREE.HalfFloatType:THREE.UnsignedByteType;const mk=(s)=>new THREE.WebGLRenderTarget(4,4,Object.assign({type,depthBuffer:false,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter},s||{}));
+ const P={type,rtS:mk({depthBuffer:true,samples:(gl2&&!CINE_MOBILE)?4:0}),q1:mk(),q2:mk(),e1:mk(),e2:mk(),w:0,h:0};
+ P.cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);P.scene=new THREE.Scene();P.quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));P.quad.frustumCulled=false;P.scene.add(P.quad);
+ P.bright=new THREE.ShaderMaterial({uniforms:{t:{value:null},px:{value:new THREE.Vector2()},th:{value:hf?1.0:.82}},vertexShader:CINE_VS,depthTest:false,depthWrite:false,
+  fragmentShader:"uniform sampler2D t;uniform vec2 px;uniform float th;varying vec2 vUv;void main(){vec3 c=(texture2D(t,vUv+px*vec2(-1.,-1.)).rgb+texture2D(t,vUv+px*vec2(1.,-1.)).rgb+texture2D(t,vUv+px*vec2(-1.,1.)).rgb+texture2D(t,vUv+px).rgb)*.25;float l=max(max(c.r,c.g),c.b);c*=smoothstep(th,th*1.6+.3,l);gl_FragColor=vec4(min(c,vec3(12.)),1.);}"});
+ P.blur=new THREE.ShaderMaterial({uniforms:{t:{value:null},dir:{value:new THREE.Vector2()}},vertexShader:CINE_VS,depthTest:false,depthWrite:false,
+  fragmentShader:"uniform sampler2D t;uniform vec2 dir;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227027;c+=(texture2D(t,vUv+dir*1.3846).rgb+texture2D(t,vUv-dir*1.3846).rgb)*.3162162;c+=(texture2D(t,vUv+dir*3.2308).rgb+texture2D(t,vUv-dir*3.2308).rgb)*.0702703;gl_FragColor=vec4(c,1.);}"});
+ P.fin=new THREE.ShaderMaterial({uniforms:{tS:{value:null},tB1:{value:null},tB2:{value:null},exposure:{value:.8},bs:{value:.9},vig:{value:1.5},time:{value:0},hdr:{value:hf?1:0}},vertexShader:CINE_VS,depthTest:false,depthWrite:false,
+  fragmentShader:`uniform sampler2D tS,tB1,tB2;uniform float exposure,bs,vig,time,hdr;varying vec2 vUv;
+vec3 aces(vec3 color){const mat3 I=mat3(vec3(.59719,.07600,.02840),vec3(.35458,.90834,.13383),vec3(.04823,.01566,.83777));const mat3 O=mat3(vec3(1.60475,-.10208,-.00327),vec3(-.53108,1.10813,-.07276),vec3(-.07367,-.00605,1.07602));
+ color*=exposure/.6;color=I*color;vec3 a=color*(color+.0245786)-.000090537;vec3 b=color*(.983729*color+.4329510)+.238081;return clamp(O*(a/b),0.,1.);}
+vec3 srgb(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(.0031308),c));}
+float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+void main(){vec3 c=texture2D(tS,vUv).rgb+bs*(texture2D(tB1,vUv).rgb*.55+texture2D(tB2,vUv).rgb*.75);
+ c=hdr>.5?aces(c):clamp(c,0.,1.);float l=dot(c,vec3(.2126,.7152,.0722));
+ c=mix(c,c*vec3(1.1,.98,.84),smoothstep(.2,.85,l));c=mix(c,c*vec3(.86,.94,1.1),1.-smoothstep(.0,.3,l));c=mix(vec3(l),c,1.05);
+ c=srgb(clamp(c,0.,1.));c=mix(c,c*c*(3.-2.*c),.6);vec2 d=vUv-.5;d.x*=1.25;c*=1.-dot(d,d)*vig;
+ c+=(hash(vUv*913.7+time)-.5)*.018;gl_FragColor=vec4(c,1.);}`});
+ CINE.post=P;return P}catch(e){console.warn("cine post",e);CINE.post=false;return false}}
+const _cv2=new THREE.Vector2();
+function cinePass(mat,target){CINE.post.quad.material=mat;renderer.setRenderTarget(target);renderer.render(CINE.post.scene,CINE.post.cam)}
+function cineRender(){if(!CINE.on)return false;
+ // guncangan kamera kecil saat mendarat keras
+ let sx=0,sy=0,sz=0;if(CINE.shake>0){const a=CINE.shake*.12;sx=(Math.random()-.5)*a;sy=(Math.random()-.5)*a;sz=(Math.random()-.5)*a;camera.position.x+=sx;camera.position.y+=sy;camera.position.z+=sz}
+ const P=QUAL.level>=2?false:cinePostInit();let ok=false;
+ if(P){try{renderer.getDrawingBufferSize(_cv2);const w=_cv2.x|0,h=_cv2.y|0;
+  if(w!==P.w||h!==P.h){P.w=w;P.h=h;P.rtS.setSize(w,h);const qw=Math.max(1,w>>2),qh=Math.max(1,h>>2),ew=Math.max(1,w>>3),eh=Math.max(1,h>>3);P.q1.setSize(qw,qh);P.q2.setSize(qw,qh);P.e1.setSize(ew,eh);P.e2.setSize(ew,eh)}
+  renderer.setRenderTarget(P.rtS);renderer.render(scene,camera);
+  P.bright.uniforms.t.value=P.rtS.texture;P.bright.uniforms.px.value.set(1/w,1/h);cinePass(P.bright,P.q1);
+  const B=P.blur.uniforms;B.t.value=P.q1.texture;B.dir.value.set(1/P.q1.width,0);cinePass(P.blur,P.q2);B.t.value=P.q2.texture;B.dir.value.set(0,1/P.q1.height);cinePass(P.blur,P.q1);
+  B.t.value=P.q1.texture;B.dir.value.set(1/P.e1.width,0);cinePass(P.blur,P.e2);B.t.value=P.e2.texture;B.dir.value.set(0,1/P.e1.height);cinePass(P.blur,P.e1);
+  B.t.value=P.e1.texture;B.dir.value.set(2/P.e1.width,0);cinePass(P.blur,P.e2);B.t.value=P.e2.texture;B.dir.value.set(0,2/P.e1.height);cinePass(P.blur,P.e1);
+  const F=P.fin.uniforms;F.tS.value=P.rtS.texture;F.tB1.value=P.q1.texture;F.tB2.value=P.e1.texture;F.exposure.value=renderer.toneMappingExposure;F.time.value=(clock.elapsedTime%10);
+  F.vig.value=_uw?2:1.5;cinePass(P.fin,null);ok=true}catch(e){console.warn("cine render",e);CINE.post=false;renderer.setRenderTarget(null)}}
+ if(!ok)renderer.render(scene,camera);
+ if(CINE.shake>0){camera.position.x-=sx;camera.position.y-=sy;camera.position.z-=sz}
+ return true}
+
+/* ---------- pencahayaan senja & kamera ---------- */
+function cineHemi(){let h=null;scene.traverse(o=>{if(!h&&o.isHemisphereLight)h=o});return h}
+function cineEnv(){try{if(!(sky&&sky.material&&sky.material.uniforms))return null;const pm=new THREE.PMREMGenerator(renderer),s2=new THREE.Scene(),sk=sky.clone();sk.material=sky.material;s2.add(sk);
+ const rt=pm.fromScene(s2,0,.1,1000);pm.dispose();return rt.texture}catch(e){return null}}
+function cineApply(on){CINE.on=on;try{localStorage.setItem("siCine",on?"1":"0")}catch(e){}
+ if(!scene||!sun||!CINE.ready){cineUI();return}const hemi=cineHemi(),U=sky&&sky.material&&sky.material.uniforms&&sky.material.uniforms.turbidity?sky.material.uniforms:null;
+ if(!CINE.base){CINE.base={fc:scene.fog.color.clone(),fn:scene.fog.near,ff:scene.fog.far,exp:renderer.toneMappingExposure,sc:sun.color.clone(),si:sun.intensity,sd:SUNDIR.clone(),
+  hc:hemi&&hemi.color.clone(),hg:hemi&&hemi.groundColor.clone(),hi:hemi&&hemi.intensity,env:scene.environment,far:camera.far,
+  sky:U&&{t:U.turbidity.value,r:U.rayleigh.value,m:U.mieCoefficient.value,g:U.mieDirectionalG.value}}}
+ const B=CINE.base;if(!_uw)_fogBase=null;
+ if(on){cineBuild();CINE.grp.visible=true;Object.values(CINE.fx).forEach(P=>P.pts.visible=true);
+  SUNDIR.setFromSphericalCoords(1,THREE.MathUtils.degToRad(79),THREE.MathUtils.degToRad(150));
+  if(U){U.turbidity.value=7;U.rayleigh.value=3.2;U.mieCoefficient.value=.007;U.mieDirectionalG.value=.93;U.sunPosition.value.copy(SUNDIR)}
+  sun.color.set("#FF9E58");sun.intensity=4.2;if(hemi){hemi.color.set("#F6B48C");hemi.groundColor.set("#2E2238");hemi.intensity=B.hi*.55}
+  if(!_uw){scene.fog.color.set("#D99E78");scene.fog.near=45;scene.fog.far=830}renderer.toneMappingExposure=.68;camera.far=1400;
+  if(!CINE.envC)CINE.envC=cineEnv();if(CINE.envC)scene.environment=CINE.envC}
+ else{if(CINE.grp){CINE.grp.visible=false;Object.values(CINE.fx).forEach(P=>P.pts.visible=false)}
+  SUNDIR.copy(B.sd);if(U&&B.sky){U.turbidity.value=B.sky.t;U.rayleigh.value=B.sky.r;U.mieCoefficient.value=B.sky.m;U.mieDirectionalG.value=B.sky.g;U.sunPosition.value.copy(SUNDIR)}
+  sun.color.copy(B.sc);sun.intensity=B.si;if(hemi){hemi.color.copy(B.hc);hemi.groundColor.copy(B.hg);hemi.intensity=B.hi}
+  if(!_uw){scene.fog.color.copy(B.fc);scene.fog.near=B.fn;scene.fog.far=B.ff}renderer.toneMappingExposure=B.exp;scene.environment=B.env;camera.far=B.far}
+ camera.updateProjectionMatrix();if(typeof resize==="function")resize();cineUI()}
+function cineUI(){document.querySelectorAll("#cineRow button").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.c==="1")===CINE.on)))}
+// dipanggil dari blok kamera: mengubah jarak & sudut agar melihat dari atas serong
+function cineCam(cd,pitch){if(!CINE.on||driving||(W2&&W2.fly)||SWIM||ACT)return null;
+ const portrait=innerWidth<innerHeight;return{cd:Math.max(camDist,6.5)*(portrait?2.0:1.75),pitch:Math.min(.95,Math.max(.24,pitch+.12)),lift:portrait?1.2:2.2}}
+function cineFov(){return CINE.on?(innerWidth<innerHeight?62:48):null}
+
+function cineUpdate(dt,t){if(!CINE.on||!CINE.fx)return;const pp=player.root.position;
+ // obor & buku berdenyut
+ if(CINE.torch){const u=CINE.torch.userData;u.flames.forEach((f,i)=>{const s=1+Math.sin(t*9+i*2)*.12+Math.sin(t*23+i)*.06;f.scale.set(s,1+Math.sin(t*7+i*1.7)*.18,s)});
+  u.flame.getWorldPosition(CINE.torchL.position);CINE.torchL.intensity=2.6+Math.sin(t*11)*.5;
+  if(Math.random()<dt*14){const p=CINE.torchL.position;cineEmit(CINE.fx.glow,p.x+(Math.random()-.5)*4,p.y+6,p.z+(Math.random()-.5)*4,(Math.random()-.5)*3,8+Math.random()*8,(Math.random()-.5)*3,2.5,9,3.5,.8,-1,.3)}}
+ // bara api melayang di sekitar pemain
+ const E=CINE.fx.ember;for(let i=0;i<E.n;i++){if(E.life[i]<=0&&Math.random()<dt*.9){const a=Math.random()*Math.PI*2,r=3+Math.random()*16;
+  E.i=i;cineEmit(E,pp.x+Math.sin(a)*r,pp.y+Math.random()*2,pp.z+Math.cos(a)*r,(Math.random()-.5)*.6,.5+Math.random()*.8,(Math.random()-.5)*.6,4+Math.random()*4,2.4,1.1,.35,-.05,0)}}
+ for(let i=0;i<E.n;i++)if(E.life[i]>0){E.vel[i*3]+=Math.sin(t*1.3+i)*dt*.4;E.vel[i*3+2]+=Math.cos(t*1.1+i*.7)*dt*.4}
+ // lompat & mendarat
+ if(!driving&&!ACT&&!SWIM){if(CINE.wasG&&!onGround&&vy>5)cineDust(pp.x,pp.y,pp.z,12,2.2);
+  if(!onGround)CINE.minVy=Math.min(CINE.minVy,vy);
+  if(!CINE.wasG&&onGround){if(CINE.minVy<-9){cineDust(pp.x,pp.y,pp.z,30,4.5);CINE.shake=Math.min(1,(-CINE.minVy-9)/8+.35)}else if(CINE.minVy<-5)cineDust(pp.x,pp.y,pp.z,10,2.4);CINE.minVy=0}
+  CINE.wasG=onGround}
+ if(CINE.shake>0)CINE.shake=Math.max(0,CINE.shake-dt*3);
+ // XP bertambah → semburan bunga api emas
+ if(CINE.lastXP<0)CINE.lastXP=SAVE.xp;if(SAVE.xp>CINE.lastXP){cineBurst()}CINE.lastXP=SAVE.xp;
+ cineStepPool(CINE.fx.glow,dt);cineStepPool(CINE.fx.dust,dt);cineStepPool(CINE.fx.ember,dt)}
+
+function cineInit(){CINE.ready=true;cineApply(CINE.on)}
+(function(){const row=document.getElementById("cineRow");if(row)row.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{cineApply(b.dataset.c==="1");if(typeof blip==="function")try{blip()}catch(e){}}));cineUI()})();
+
 
 /* =====================================================
    GTA-STYLE OVERRIDES & SAVE MIGRATION
@@ -2976,7 +3195,7 @@ function spawnCoinAt(x,y,z){const c=mesh(G.cyl(.32,.32,.08,20),new THREE.MeshSta
  const h=new THREE.Group();h.add(c);h.position.set(x,y,z);h.userData.y=y;scene.add(h);coins.push(h)}
 function spawnCoin(){let x,z,ok=false,t=0;while(!ok&&t<60){t++;const r=10+Math.random()*74,a=Math.random()*Math.PI*2;x=Math.sin(a)*r;z=Math.cos(a)*r;ok=obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+1.2)&&PLATS.every(p=>!insidePlat(p,x,z,.8))}spawnCoinAt(x,.95,z)}
 function refreshMarkers(){const paint=(n,d,base)=>{const c=d?"#5DD39E":base;n.mk.material.color.set(c);n.ringM.material.color.set(c);n.chev.material.color.set(c);n.mk.material.opacity=d?.18:.38};npcs.forEach(n=>paint(n,!!SAVE.stars[n.i],"#F7D23E"));pkn.forEach(n=>paint(n,!!SAVE.pk[n.i],"#6FB7FF"))}
-function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?72:58;camera.updateProjectionMatrix()}
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=(typeof cineFov==='function'&&cineFov())||(w<h?72:58);camera.updateProjectionMatrix()}
 function suggested(){for(let i=0;i<AREAS.length;i++)if(!SAVE.stars[i])return i;return -1}
 
 /* ---------- motor & sepeda ---------- */
@@ -3152,20 +3371,21 @@ function tick(){
  VEH.forEach(v=>{v.m.position.set(v.x,0,v.z);v.m.rotation.y=v.h;
   if(v.cfg.ride){const lean=(driving&&v===car)?-v.steer*Math.min(1,Math.abs(v.speed)/8)*.55:0;v.m.rotation.z=lerp(v.m.rotation.z,lean,.12)}
   if(v.m.userData.wheels&&v.speed)v.m.userData.wheels.forEach(w=>w.rotation.x+=v.speed*dt/.33)});
- world2Update(dt,t,pp);
+ world2Update(dt,t,pp);cineUpdate(dt,t);
  // camera
  const target=driving?{x:car.x,y:0,z:car.z}:player.root.position;
  if(driving&&!dragging){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
  else if(W2.fly&&!dragging){const want=W2.fly.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.2)}
- const cd=driving?Math.max(camDist,8.5):W2.fly?Math.max(camDist,9):camDist,ch=driving?1.6:1.25*(player.scale||1);
- const tx=target.x+Math.sin(yaw)*cd*Math.cos(pitch),tz=target.z+Math.cos(yaw)*cd*Math.cos(pitch),ty=target.y+ch+cd*Math.sin(pitch);
+ const cd0=driving?Math.max(camDist,8.5):W2.fly?Math.max(camDist,9):camDist,ch=driving?1.6:1.25*(player.scale||1);
+ const cq=cineCam(cd0,pitch),cd=cq?cq.cd:cd0,pt=cq?cq.pitch:pitch,lk=cq?cq.lift:0;
+ const tx=target.x+Math.sin(yaw)*cd*Math.cos(pt),tz=target.z+Math.cos(yaw)*cd*Math.cos(pt),ty=target.y+ch+cd*Math.sin(pt);
  let fx=tx,fy=ty,fz=tz;{const ox=target.x,oy=target.y+ch,oz=target.z;let safe=1;for(let k=1;k<=12;k++){const f=k/12,x=ox+(tx-ox)*f,y=oy+(ty-oy)*f,z=oz+(tz-oz)*f;
   let hit=false;if(onIpas(x,z)){const q=i3pol(x,z);if(y<i3T(q.r,q.a)+.5)hit=true}for(const p of PLATS){if(hit)break;if(y<p.top+.25&&y>(p.bottom||0)-.2&&insidePlat(p,x,z,.25)){hit=true;break}}
   if(!hit&&y<6)for(const o of obstacles){if(o.r>1&&Math.hypot(x-o.x,z-o.z)<o.r){hit=true;break}}
   if(hit){safe=Math.max(.15,(k-1)/12);break}}
   if(safe<1){fx=ox+(tx-ox)*safe;fy=oy+(ty-oy)*safe;fz=oz+(tz-oz)*safe}}
  if(SWIM&&W2.dive>.6){fy=Math.min(fy,-.8)}
- if(!shopCamera(dt)){camera.position.lerp(tmpV.set(fx,fy,fz),Math.min(1,dt*(fx!==tx?20:9)));camera.lookAt(target.x,target.y+ch,target.z);}
+ if(!shopCamera(dt)){camera.position.lerp(tmpV.set(fx,fy,fz),Math.min(1,dt*(fx!==tx?20:9)));camera.lookAt(target.x,target.y+ch+lk,target.z);}
  sky.position.copy(camera.position);
  sun.position.set(target.x+SUNDIR.x*70,target.y+SUNDIR.y*70,target.z+SUNDIR.z*70);sun.target.position.set(target.x,0,target.z);
  // location name
@@ -3184,7 +3404,7 @@ function tick(){
    if(key!==null&&key!==undefined){el.style.opacity=1;locT=2.6}}}
  if(locT>0){locT-=dt;if(locT<=0)$("loc").style.opacity=0}
  updateHelp();updateObjective(target);if(FRAME%2===0)drawRadar(target);adaptQuality(dt);
- renderer.render(scene,camera);
+ if(!cineRender())renderer.render(scene,camera);
 }
 function inputVec(){let ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joyVec.x;let iz=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+joyVec.y;const len=Math.hypot(ix,iz);if(len>1){ix/=len;iz/=len}return{ix,iz,len:Math.min(1,len)}}
 function movePlayer(dt){
