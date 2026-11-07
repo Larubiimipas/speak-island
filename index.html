@@ -236,6 +236,17 @@ input{-webkit-user-select:text;user-select:text}
 .cineRow button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1C4}
 .cineRow button[data-c="1"][aria-pressed="true"]{background:linear-gradient(135deg,#3B2236,#B4542E 60%,#F2A35A);color:#FFF4E2}
 .cineRow button[data-c="1"][aria-pressed="true"] small{color:#FFDDB8}
+.bagBtn{margin-top:4px}
+.bagPanel{background:#FBF6EC;color:var(--ink);border-radius:18px;width:min(520px,92vw);max-height:calc(100svh - 24px);display:flex;flex-direction:column;gap:10px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);border:3px solid #8A5A2B}
+.bagGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;overflow:auto;min-height:0;padding:8px;background:#7A4E25;border-radius:12px;box-shadow:inset 0 3px 8px rgba(0,0,0,.35)}
+.bagSlot{position:relative;aspect-ratio:1;border-radius:10px;background:#F3E6CC;border:3px solid #C49A63;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:2px;color:var(--ink)}
+.bagSlot.empty{background:rgba(243,230,204,.25);border-style:dashed;border-color:rgba(243,230,204,.4)}
+.bagSlot img{width:70%;height:58%;object-fit:contain}.bagSlot i{font-style:normal;font-size:1.8rem}
+.bagSlot b{position:absolute;top:2px;right:5px;font-size:.8rem;color:#5A3510}.bagSlot span{font-size:.62rem;font-weight:800;line-height:1.05;text-align:center}
+.bagSlot.sel{border-color:var(--coral);background:#FFF1C4;box-shadow:0 0 0 2px #fff}.bagSlot.on::after{content:"✋";position:absolute;top:1px;left:4px;font-size:.85rem}
+.bagInfo{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border-radius:12px;padding:8px 10px}.bagInfo span{color:var(--muted);font-weight:700}.bagInfo small{display:block;color:#40585E;font-weight:700;font-size:.78rem}
+.bagInfo .btn-main{padding:10px 14px;font-size:.95rem;white-space:nowrap}
+.act.hold{background:#F2C230;color:#3B2A05}
 .kelasInfo{margin:0;font-size:.82rem;color:var(--muted);font-weight:800}
 .xp.small2{font-size:1rem}
 @media (max-height:540px) and (orientation:landscape){.xp.small2{font-size:.8rem}.kelas button{font-size:1.05rem;padding:6px 0 4px}}
@@ -351,6 +362,7 @@ input{-webkit-user-select:text;user-select:text}
     <div class="xp"><b>★</b> <span id="xpN">0</span> XP · Inggris <span id="doneN">0</span>/20</div>
     <div class="xp small2">Kelas <span id="kelasN">-</span> · PPKn <span id="pkN">0</span>/7</div>
     <button class="menuBtn" id="menuBtn">Menu</button>
+    <button class="menuBtn bagBtn" id="bagBtn" aria-label="Buka tas">🎒 Tas</button>
   </div>
   <div class="loc" id="loc" style="opacity:0"></div>
   <div class="joy" id="joy" aria-hidden="true"><i id="knob"></i></div>
@@ -358,6 +370,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="act dance" id="danceBtn" aria-label="Joget">Joget</button>
     <button class="act run" id="runBtn" aria-pressed="false" aria-label="Lari">Lari</button>
     <button class="act car" id="carBtn" hidden aria-label="Mobil">Mobil</button>
+    <button class="act hold" id="holdBtn" hidden aria-label="Simpan ke tas">Simpan</button>
     <button class="act" id="jumpBtn" aria-label="Lompat">Lompat</button>
     <button class="act talk" id="talkBtn" disabled aria-label="Bicara">Bicara</button>
   </div>
@@ -1605,7 +1618,7 @@ function pbr(c,r,m,extra){return new THREE.MeshStandardMaterial(Object.assign({c
 const GEMTEX={};function gemTex(key,rep){const src=(window.REAL_TEX||{})[key];if(!src)return null;const k=key+rep;if(GEMTEX[k])return GEMTEX[k];const t=new THREE.TextureLoader().load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return GEMTEX[k]=t}
 /* ---------- bangun semuanya ---------- */
 function buildWorld2(){
- initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();cineInit();
+ initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();cineInit();initBag();
  W2.ripple=new THREE.Mesh(new THREE.RingGeometry(.45,.75,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.5,depthWrite:false}));W2.ripple.rotation.x=-Math.PI/2;W2.ripple.visible=false;scene.add(W2.ripple);W2.dyn.push(W2.ripple)}
 function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.material.uniforms){const pm=new THREE.PMREMGenerator(renderer);const s2=new THREE.Scene();const sk=sky.clone();sk.material=sky.material;s2.add(sk);
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
@@ -1939,7 +1952,7 @@ function reelLoop(now){if(!REEL)return;const R=REEL,dt=Math.min(.05,(now-R.last)
 function reelWin(){const f=REEL.f;REEL=null;const w=(f.w[0]+Math.random()*(f.w[1]-f.w[0])).toFixed(1);SAVE.fish=SAVE.fish||{};SAVE.fish[f.k]=(SAVE.fish[f.k]||0)+1;SAVE.fishInv=SAVE.fishInv||{};SAVE.fishInv[f.k]=(SAVE.fishInv[f.k]||0)+1;if(!f.trash){SAVE.coins+=3}else{SAVE.xp+=5}persist();updateStats();blip("win");
  const img=(window.FISH_IMG||{})[f.k];const total=Object.keys(SAVE.fish).length;
  $("reel").innerHTML=`<div class="reelCard"><div class="mpTitle" style="font-size:1.8rem">${f.trash?"EH, SAMPAH!":"DAPAT!"}</div>${img?`<img class="fishImg" src="${img}" alt="${esc(f.id)}">`:`<div class="fishEmoji">${f.trash?"👢":"🐟"}</div>`}
-  <div class="fishName">${esc(f.id)} <span>· ${esc(f.en)}</span></div><div class="fishW">${f.trash?"":w+" kg · "}${esc(f.fact)}</div><div class="fishW">Koleksi: ${total}/${FISHES.length} jenis · ${f.trash?"Buang di Pasar Ikan (+XP)":"Jual di Pasar Ikan: "+money(FISH_PRICE[f.k])}</div>
+  <div class="fishName">${esc(f.id)} <span>· ${esc(f.en)}</span></div><div class="fishW">${f.trash?"":w+" kg · "}${esc(f.fact)}</div><div class="fishW">Koleksi: ${total}/${FISHES.length} jenis · Masuk ke 🎒 Tas · ${f.trash?"Buang di Pasar Ikan (+XP)":"Jual di Pasar Ikan: "+money(FISH_PRICE[f.k])}</div>
   <div class="foot"><button class="btn-main btn-green" id="reelAgain">MANCING LAGI</button><button class="btn-soft" id="reelDone">Selesai</button></div></div>`;
  say(f.en,GR().rate,"en-US");$("reelAgain").onclick=()=>{reelClose();if(ACT){ACT.phase="cast";ACT.t=.6;W2.bobber.visible=false}};$("reelDone").onclick=()=>{fishStop()}}
 function reelLose(){REEL=null;blip("bad");$("reel").innerHTML=`<div class="reelCard"><div class="mpTitle fail" style="font-size:1.8rem">LEPAS!</div><div class="fishW">Ikannya berhasil kabur. Coba lagi ya!</div>
@@ -2293,7 +2306,7 @@ function mpTick(dt){if(MY_BUB){MY_BUBT-=dt;const p=player.root.position;MY_BUB.p
 
  const F=MP.friend;if(!F)return;const k=Math.min(1,dt*6);F.x+=(F.tx-F.x)*k;F.y+=(F.ty-F.y)*k;F.z+=(F.tz-F.z)*k;F.h+=Math.atan2(Math.sin(F.th-F.h),Math.cos(F.th-F.h))*k;
  const R=F.C.root;
- if(F.drv){if(F.vehType!==F.drv){if(F.veh)scene.remove(F.veh);F.vehType=F.drv;F.veh=F.drv==="boat"?makeBoatMesh():F.drv==="motor"?makeMotorMesh("#8E44AD"):F.drv==="bike"?makeBikeMesh("#8E44AD"):makeCarMesh("#8E44AD");scene.add(F.veh)}
+ if(F.drv){if(F.vehType!==F.drv){if(F.veh)scene.remove(F.veh);F.vehType=F.drv;F.veh=F.drv==="boat"?makeBoatMesh():F.drv==="motor"?makeMotorMesh("#8E44AD"):F.drv==="bike"?makeBikeMesh("#8E44AD"):makeSportCarMesh("#8E44AD");scene.add(F.veh)}
   F.veh.visible=true;F.veh.position.set(F.x,F.drv==="boat"?-.5:0,F.z);F.veh.rotation.y=F.h;R.visible=F.drv!=="car";R.position.set(F.x,F.drv==="boat"?.25:F.drv==="car"?0:.45,F.z);R.rotation.set(0,F.h,0);animChar(F.C,dt,{speed:0})}
  else{if(F.veh){F.veh.visible=false}R.visible=true;R.position.set(F.x,F.y,F.z);R.rotation.order="YXZ";R.rotation.y=F.h;R.rotation.x=F.rx;
   const emo=F.emT>0?F.emote:"";if(F.emT>0)F.emT-=dt;animChar(F.C,dt,{speed:F.sw?Math.min(F.sp,2):F.sp,wave:emo==="wave",dance:emo==="dance",happy:emo==="tos"})}
@@ -2899,6 +2912,248 @@ function cineUpdate(dt,t){if(!CINE.on||!CINE.fx)return;const pp=player.root.posi
 function cineInit(){CINE.ready=true;cineApply(CINE.on)}
 (function(){const row=document.getElementById("cineRow");if(row)row.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{cineApply(b.dataset.c==="1");if(typeof blip==="function")try{blip()}catch(e){}}));cineUI()})();
 
+/* ===== TAS INVENTORI + IKAN 3D YANG BISA DIANGKAT DUA TANGAN ===== */
+const HOLD={k:null,m:null,t:0};
+const FISH3D={};
+
+/* ---------- model 3D hasil tangkapan (prosedural, warna per-verteks) ---------- */
+const _fc=new THREE.Color(),_fc2=new THREE.Color();
+function finMat(c,op){return new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.05,side:THREE.DoubleSide,transparent:op<1,opacity:op||1})}
+function fishShape(pts){const s=new THREE.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]);return new THREE.ShapeGeometry(s)}
+// badan ikan: lathe sepanjang sumbu X (kepala di +X), warna dari fungsi (t=0 ekor..1 kepala, up=-1 perut..1 punggung, side)
+function fishBody(L,R,thick,colFn,prof){const pts=[],N=26;
+ prof=prof||(t=>(.13+.87*Math.sin(Math.PI*Math.pow(t,.72)))*(t>.9?Math.pow((1-t)/.1,.45):1));
+ for(let i=0;i<=N;i++){const t=i/N;pts.push(new THREE.Vector2(Math.max(.002,R*prof(t)),(t-.5)*L))}
+ const g=new THREE.LatheGeometry(pts,20);g.rotateZ(-Math.PI/2);g.scale(1,1,thick);
+ const P=g.attributes.position,C=new Float32Array(P.count*3);
+ for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i);const t=x/L+.5,rr=Math.max(1e-4,Math.hypot(y,z/thick));colFn(t,y/rr,z/(thick*rr),x,y,z,_fc);C[i*3]=_fc.r;C[i*3+1]=_fc.g;C[i*3+2]=_fc.b}
+ g.setAttribute("color",new THREE.BufferAttribute(C,3));g.computeVertexNormals();
+ return new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.32,metalness:.18}))}
+function fishEyes(g,x,y,z,r){[-1,1].forEach(s=>{const e=new THREE.Mesh(G.sph(r,10,8),std("#F4F1E8",.2));e.position.set(x,y,z*s);g.add(e);
+ const p=new THREE.Mesh(G.sph(r*.62,10,8),std("#0B0B0B",.1));p.position.set(x+r*.2,y,z*s+s*r*.5);g.add(p)})}
+function grad(back,belly){const a=new THREE.Color(back),b=new THREE.Color(belly);return(t,up,side,x,y,z,o)=>{o.copy(b).lerp(a,THREE.MathUtils.smoothstep(up,-.35,.6))}}
+function makeFishLike(o){const g=new THREE.Group(),L=o.L,R=o.R;
+ const body=fishBody(L,R,o.thick,o.col,o.prof);g.add(body);
+ const fm=finMat(o.fin,o.finOp||.92);
+ // ekor
+ const tl=o.tail||"fork",tx=-L/2+.01,th=R*(o.tailH||1.25),tw=L*(o.tailW||.22);
+ const tp=tl==="round"?[[0,0],[-tw*.6,th*.75],[-tw,th*.55],[-tw*1.08,0],[-tw,-th*.55],[-tw*.6,-th*.75]]:tl==="sickle"?[[0,0],[-tw*.5,th*.35],[-tw*1.1,th*1.15],[-tw*.55,0],[-tw*1.1,-th*1.15],[-tw*.5,-th*.35]]:[[0,0],[-tw*.55,th*.45],[-tw*1.05,th],[-tw*.6,0],[-tw*1.05,-th],[-tw*.55,-th*.45]];
+ const tail=new THREE.Mesh(fishShape(tp),fm);tail.position.x=tx+L*.04;g.add(tail);
+ // sirip punggung, dubur, dada
+ const dh=R*(o.dorsalH||.75);const d=new THREE.Mesh(fishShape(o.dorsal||[[L*.22,0],[L*.12,dh],[-L*.02,dh*.85],[-L*.2,dh*.3],[-L*.24,0]]),fm);d.position.y=R*.86;g.add(d);
+ const a=new THREE.Mesh(fishShape([[L*.02,0],[-L*.06,-R*.5],[-L*.2,-R*.35],[-L*.22,0]]),fm);a.position.y=-R*.8;g.add(a);
+ [-1,1].forEach(s=>{const p=new THREE.Mesh(fishShape([[0,0],[-L*.13,R*.28],[-L*.16,-R*.05]]),fm);p.position.set(L*.18,-R*.2,s*R*o.thick*.95);p.rotation.y=s*.5;g.add(p)});
+ fishEyes(g,L*.36,R*.22,R*o.thick*.62,R*.15);
+ if(o.extra)o.extra(g,L,R,fm);return g}
+function makeCrab(){const g=new THREE.Group(),sh=new THREE.MeshStandardMaterial({color:"#C2410C",roughness:.38,metalness:.1}),lg=new THREE.MeshStandardMaterial({color:"#E0601E",roughness:.45});
+ const b=new THREE.Mesh(G.sph(.17,18,12),sh);b.scale.set(1.25,.42,.9);g.add(b);
+ for(let i=0;i<4;i++)[-1,1].forEach(s=>{const z=s*(.1+.0),x=-.1+i*.055;const u=new THREE.Mesh(G.cyl(.016,.014,.18,6),lg);u.position.set(x,0,s*.2);u.rotation.x=s*1.15;u.rotation.z=(i-1.5)*.25;g.add(u);
+  const l=new THREE.Mesh(G.cyl(.013,.006,.17,6),lg);l.position.set(x+(i-1.5)*.03,-.08,s*.3);l.rotation.x=-s*.35;g.add(l)});
+ [-1,1].forEach(s=>{const arm=new THREE.Mesh(G.cyl(.022,.022,.16,6),sh);arm.position.set(.2,.0,s*.12);arm.rotation.z=-1.1;arm.rotation.x=s*.4;g.add(arm);
+  const c=new THREE.Mesh(G.sph(.06,10,8),sh);c.scale.set(1.5,.75,.85);c.position.set(.29,.03,s*.17);g.add(c);
+  const f=new THREE.Mesh(new THREE.ConeGeometry(.022,.09,6),sh);f.rotation.z=-1.6;f.position.set(.37,.06,s*.15);g.add(f)});
+ [-1,1].forEach(s=>{const st=new THREE.Mesh(G.cyl(.008,.008,.06,5),sh);st.position.set(.17,.07,s*.04);g.add(st);const e=new THREE.Mesh(G.sph(.016,8,6),std("#111",.1));e.position.set(.17,.1,s*.04);g.add(e)});
+ return g}
+function makeSquid(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:"#E9D8E6",roughness:.3,metalness:.05,transparent:true,opacity:.95}),dots=new THREE.MeshStandardMaterial({color:"#A0405F",roughness:.4});
+ const mant=new THREE.Mesh(cineLatheSafe([[0,0],[.06,.02],[.075,.12],[.07,.25],[.035,.36],[0,.38]],16),m);mant.rotation.z=Math.PI/2;mant.position.x=-.38;g.add(mant);
+ // sirip
+ [-1,1].forEach(s=>{const f=new THREE.Mesh(fishShape([[0,0],[-.1,.09],[-.13,0]]),m);f.position.set(-.3,0,0);f.rotation.x=s*Math.PI/2;g.add(f)});
+ for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,r=.04+Math.random()*.03,x=-.32+Math.random()*.3;const d=new THREE.Mesh(G.sph(.008,6,4),dots);d.position.set(x,Math.sin(a)*r,Math.cos(a)*r);g.add(d)}
+ const head=new THREE.Mesh(G.sph(.055,12,10),m);head.scale.set(1.2,1,1);head.position.x=.03;g.add(head);fishEyes(g,.05,.02,.045,.018);
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2,len=i<2?.32:.2;const t=new THREE.Mesh(G.cyl(.012,.004,len,5),m);t.rotation.z=-Math.PI/2+Math.sin(a)*.25;t.rotation.y=Math.cos(a)*.25;
+  t.position.set(.08+len/2,Math.sin(a)*.03,Math.cos(a)*.03);g.add(t)}
+ return g}
+function cineLatheSafe(p,s){return new THREE.LatheGeometry(p.map(q=>new THREE.Vector2(q[0],q[1])),s||14)}
+function makeRay(){const g=new THREE.Group();const s=new THREE.Shape();s.moveTo(.36,0);s.quadraticCurveTo(.12,.42,-.08,.46);s.quadraticCurveTo(-.2,.2,-.3,0);s.quadraticCurveTo(-.2,-.2,-.08,-.46);s.quadraticCurveTo(.12,-.42,.36,0);
+ const geo=new THREE.ExtrudeGeometry(s,{depth:.02,bevelEnabled:true,bevelThickness:.035,bevelSize:.03,bevelSegments:3,curveSegments:10});geo.rotateX(-Math.PI/2);
+ const P=geo.attributes.position,C=new Float32Array(P.count*3),top=new THREE.Color("#6B5A44"),bot=new THREE.Color("#EEE6DA"),sp=new THREE.Color("#3F3427");
+ for(let i=0;i<P.count;i++){const y=P.getY(i),x=P.getX(i),z=P.getZ(i);const c=y<0.005?bot:(Math.sin(x*40)*Math.sin(z*38)>.82?sp:top);C[i*3]=c.r;C[i*3+1]=c.g;C[i*3+2]=c.b}
+ geo.setAttribute("color",new THREE.BufferAttribute(C,3));geo.computeVertexNormals();
+ const b=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,metalness:.08}));b.position.y=-.01;g.add(b);
+ const tail=new THREE.Mesh(G.cyl(.012,.003,.55,6),std("#5A4A38",.5));tail.rotation.z=Math.PI/2;tail.position.set(-.55,.02,0);g.add(tail);
+ [-1,1].forEach(s=>{const e=new THREE.Mesh(G.sph(.02,8,6),std("#1A1A1A",.2));e.position.set(.17,.05,s*.06);g.add(e)});return g}
+function makeStar(){const s=new THREE.Shape();for(let i=0;i<10;i++){const a=i/10*Math.PI*2,r=i%2?.07:.2;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?s.lineTo(x,y):s.moveTo(x,y)}s.closePath();
+ const geo=new THREE.ExtrudeGeometry(s,{depth:.02,bevelEnabled:true,bevelThickness:.03,bevelSize:.025,bevelSegments:3});geo.rotateX(-Math.PI/2);
+ const g=new THREE.Group();g.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:"#F07A2A",roughness:.7})));
+ const dm=std("#FFD7A6",.6);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;for(let k=1;k<4;k++){const d=new THREE.Mesh(G.sph(.012,6,4),dm);d.position.set(Math.cos(a)*k*.045,.055,-Math.sin(a)*k*.045);g.add(d)}}return g}
+function makeBoot(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:"#4A3A2A",roughness:.85}),dk=std("#2A2018",.9),alg=std("#3E7A3A",.8);
+ const leg=new THREE.Mesh(RB(.13,.3,.16,.04),m);leg.position.set(-.06,.12,0);g.add(leg);const ft=new THREE.Mesh(RB(.3,.11,.15,.05),m);ft.position.set(.03,-.03,0);g.add(ft);
+ const sole=new THREE.Mesh(RB(.32,.035,.16,.015),dk);sole.position.set(.03,-.09,0);g.add(sole);
+ for(let i=0;i<4;i++){const a=new THREE.Mesh(G.cyl(.006,.003,.12+i*.03,4),alg);a.position.set(-.08+i*.04,.3,.05-i*.02);a.rotation.z=.4-i*.2;g.add(a)}
+ g.rotation.z=.15;return g}
+const FISH_MAKERS={
+ kakap:()=>makeFishLike({L:.62,R:.15,thick:.42,fin:"#D8343A",col:(t,up,side,x,y,z,o)=>{o.set("#F7B9A6").lerp(_fc2.set("#B71C2B"),THREE.MathUtils.smoothstep(up,-.5,.55));if(Math.abs(side)>.5&&up>.1&&Math.sin(t*60)>.85)o.multiplyScalar(.85)}}),
+ kerapu:()=>makeFishLike({L:.72,R:.2,thick:.55,fin:"#6E5236",tail:"round",dorsalH:.6,col:(t,up,side,x,y,z,o)=>{o.set("#D8C4A2").lerp(_fc2.set("#7A5A3A"),THREE.MathUtils.smoothstep(up,-.6,.3));const n=Math.sin(x*48+Math.sin(y*30)*2)*Math.sin(y*52+z*30);if(n>.55)o.multiplyScalar(.55)}}),
+ badut:()=>makeFishLike({L:.34,R:.1,thick:.5,fin:"#F06418",tail:"round",tailH:1,dorsalH:.9,col:(t,up,side,x,y,z,o)=>{const band=[.2,.52,.8].some(c=>Math.abs(t-c)<.045+(c===.52?.02:0)),edge=[.2,.52,.8].some(c=>{const d=Math.abs(t-c);return d>=.045+(c===.52?.02:0)&&d<.06+(c===.52?.02:0)});
+  o.set(band?"#FFFFFF":edge?"#111111":"#F26B1D")}}),
+ bandeng:()=>makeFishLike({L:.6,R:.105,thick:.5,fin:"#9FB2BD",tailW:.26,tailH:1.6,dorsalH:.7,col:grad("#55707F","#EEF3F6")}),
+ tuna:()=>makeFishLike({L:1.15,R:.21,thick:.72,fin:"#1F2E52",tail:"sickle",tailW:.18,tailH:1.6,dorsalH:.9,dorsal:[[.1,0],[.02,.17],[-.08,.14],[-.16,0]],
+  col:(t,up,side,x,y,z,o)=>{o.set("#E3E8EE").lerp(_fc2.set("#16264A"),THREE.MathUtils.smoothstep(up,-.15,.45));if(up>-.2&&up<.05&&Math.abs(side)>.6)o.lerp(_fc2.set("#C9A23A"),.35)},
+  extra:(g,L,R)=>{const y=std("#E9C032",.4);for(let i=0;i<6;i++)[1,-1].forEach(s=>{const f=new THREE.Mesh(new THREE.ConeGeometry(.012,.04,4),y);f.position.set(-L*.2-i*.045,s*R*(.55-i*.07),0);f.rotation.z=s>0?0:Math.PI;g.add(f)})}}),
+ kepiting:makeCrab,cumi:makeSquid,pari:makeRay,bintang:makeStar,sepatu:makeBoot};
+function fishModel(k){if(!FISH3D[k]){const mk=FISH_MAKERS[k]||FISH_MAKERS.kakap;const g=mk();g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false}});FISH3D[k]=g}return FISH3D[k].clone()}
+// ukuran tampilan saat dipegang (panjang terbesar, meter)
+const FISH_SPAN={kakap:.62,kerapu:.72,badut:.34,bandeng:.6,tuna:1.15,kepiting:.6,cumi:.75,pari:1.0,bintang:.42,sepatu:.36};
+
+/* ---------- memegang ---------- */
+function holdBones(C){if(!C.hb){C.hb={};C.obj&&C.obj.traverse(o=>{if(o.isBone){const m=o.name.match(/(LeftHand|RightHand|LeftArm|RightArm|LeftForeArm|RightForeArm|Spine)$/);if(m&&!C.hb[m[1]])C.hb[m[1]]=o}})}return C.hb}
+function holdTake(k){if(!(SAVE.fishInv&&SAVE.fishInv[k]>0))return;holdStore(true);if(driving||ACT||SWIM){toast("Turun dulu dari kendaraan atau selesaikan aktivitas, lalu keluarkan dari tas.");return}
+ const m=fishModel(k);HOLD.k=k;HOLD.m=m;HOLD.t=0;player.root.add(m);const f=FISHES.find(x=>x.k===k);
+ $("holdBtn").hidden=false;toast(`Kamu mengangkat ${f?f.id:"tangkapan"}!`);blip("good");if(typeof cineBurst==="function"&&!f.trash)cineBurst()}
+function holdStore(silent){if(!HOLD.m)return;HOLD.m.parent&&HOLD.m.parent.remove(HOLD.m);HOLD.m=null;const k=HOLD.k;HOLD.k=null;$("holdBtn").hidden=true;if(!silent){toast("Disimpan ke tas.");blip()}return k}
+const _hv1=new THREE.Vector3(),_hv2=new THREE.Vector3();
+function holdPose(C){const B=holdBones(C);if(!B.LeftArm)return;C.root.updateMatrixWorld(true);
+ setAxis(1,0,0);rotBone(B.Spine,-.06);rotBone(B.LeftArm,-1.0);rotBone(B.RightArm,-1.0);
+ rotWorldY(B.LeftArm,-.45);rotWorldY(B.RightArm,.45);
+ setAxis(1,0,0);rotBone(B.LeftForeArm,-.55);rotBone(B.RightForeArm,-.55);
+ rotWorldY(B.LeftForeArm,-.55);rotWorldY(B.RightForeArm,.55)}
+function holdUpdate(dt){if(!HOLD.m)return;if(driving||ACT||SWIM||!player){holdStore(true);return}
+ if(!(SAVE.fishInv&&SAVE.fishInv[HOLD.k]>0)){holdStore(true);return}
+ HOLD.t+=dt;const m=HOLD.m,sc=player.scale||1;
+ if(player.gltf){holdPose(player);const B=holdBones(player);player.root.updateMatrixWorld(true);
+  if(B.LeftHand&&B.RightHand){B.LeftHand.getWorldPosition(_hv1);B.RightHand.getWorldPosition(_hv2);_hv1.add(_hv2).multiplyScalar(.5);player.root.worldToLocal(_hv1);
+   const yo={tuna:-.16,kerapu:-.06,pari:-.04}[HOLD.k]||0;m.position.set(0,_hv1.y+(.05+yo)*sc,Math.max(.18,_hv1.z)+.03+(HOLD.k==='tuna'?.08:0))}}
+ else m.position.set(0,1.25*.55*sc,.32*sc);
+ // ikan melintang di depan dada, kepala ke kanan pemain; ikan bergerak-gerak sedikit
+ const flat=HOLD.k==="pari"||HOLD.k==="bintang"||HOLD.k==="kepiting";
+ m.rotation.set(flat?-.35:0,HOLD.k==="sepatu"?Math.PI/2:Math.PI,flat?0:Math.sin(HOLD.t*7)*.06+(HOLD.k==="cumi"?.1:0));
+ m.scale.setScalar(sc);
+ if(!flat&&HOLD.k!=="sepatu"&&HOLD.k!=="cumi"){const tail=m.children[1];if(tail)tail.rotation.y=Math.sin(HOLD.t*9)*.35}}
+
+/* ---------- panel tas ---------- */
+function bagOpen(){if(!$("bagBox"))return;setPaused(true);bagRender()}
+function bagClose(){$("bagBox").hidden=true;setPaused(false)}
+function bagRender(){const el=$("bagBox"),inv=SAVE.fishInv=SAVE.fishInv||{};const ks=FISHES.map(f=>f.k).filter(k=>inv[k]>0);const n=ks.reduce((s,k)=>s+inv[k],0);const SLOTS=Math.max(12,Math.ceil(ks.length/4)*4);
+ let cells="";for(let i=0;i<SLOTS;i++){const k=ks[i];if(!k){cells+=`<div class="bagSlot empty" aria-hidden="true"></div>`;continue}
+  const f=FISHES.find(x=>x.k===k),img=(window.FISH_IMG||{})[k],on=HOLD.k===k;
+  cells+=`<button class="bagSlot${on?" on":""}" data-k="${k}" aria-pressed="${on}">${img?`<img src="${img}" alt="">`:`<i>${f.trash?"👢":"🐟"}</i>`}<b>×${inv[k]}</b><span>${esc(f.id)}</span></button>`}
+ const sel=SAVE.bagSel&&inv[SAVE.bagSel]>0?SAVE.bagSel:ks[0];const sf=sel&&FISHES.find(x=>x.k===sel);
+ el.innerHTML=`<div class="bagPanel"><div class="shopHead"><b>🎒 Tas</b><span class="shopMoney">${n} barang</span><button class="x" id="bagX" aria-label="Tutup tas">✕</button></div>
+  <div class="bagGrid">${cells}</div>
+  ${sf?`<div class="bagInfo"><div><b>${esc(sf.id)}</b> <span>· ${esc(sf.en)}</span><small>${sf.trash?"Sampah: buang di Pasar Ikan untuk XP.":"Harga di Pasar Ikan: "+money(FISH_PRICE[sel])+"/ekor"}</small></div>
+   ${HOLD.k===sel?`<button class="btn-soft" id="bagStore">Simpan lagi</button>`:`<button class="btn-main btn-green" id="bagHold">KELUARKAN & ANGKAT</button>`}</div>`
+   :`<div class="shopNote">Tas masih kosong. Pancing ikan di ujung dermaga, hasil tangkapannya masuk ke sini.</div>`}</div>`;
+ el.hidden=false;$("bagX").onclick=bagClose;
+ el.querySelectorAll(".bagSlot[data-k]").forEach(b=>b.onclick=()=>{SAVE.bagSel=b.dataset.k;blip();bagRender()});
+ const h=$("bagHold");if(h)h.onclick=()=>{bagClose();holdTake(sel)};const s=$("bagStore");if(s)s.onclick=()=>{holdStore();bagRender()};
+ el.querySelectorAll(".bagSlot").forEach(b=>b.classList.toggle("sel",b.dataset.k===sel))}
+function initBag(){const bb=document.createElement("div");bb.id="bagBox";bb.className="w2ov";bb.hidden=true;document.body.appendChild(bb);
+ bb.addEventListener("click",e=>{if(e.target===bb)bagClose()});
+ const b=$("bagBtn");if(b)b.onclick=()=>{if(!paused)bagOpen()};const hb=$("holdBtn");if(hb)hb.onclick=()=>holdStore();
+ addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;if(e.code==="KeyI"&&!e.repeat){if(!$("bagBox").hidden)bagClose();else if(!paused)bagOpen()}
+  if(e.code==="Escape"&&!$("bagBox").hidden)bagClose()})}
+
+/* ===== KENDARAAN: mobil sport, motor cross, sepeda mini BMX ===== */
+function vShape(pts){const s=new THREE.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++){const p=pts[i];if(p.length===4)s.quadraticCurveTo(p[0],p[1],p[2],p[3]);else s.lineTo(p[0],p[1])}return s}
+// profil samping (u=depan/belakang, v=tinggi) → diekstrusi selebar w, dipusatkan
+function vExtrude(pts,w,bev,holes){const s=vShape(pts);(holes||[]).forEach(h=>s.holes.push(h));
+ const g=new THREE.ExtrudeGeometry(s,{depth:w-2*bev,bevelEnabled:bev>0,bevelThickness:bev,bevelSize:bev,bevelSegments:3,curveSegments:14});
+ g.translate(0,0,-(w-2*bev)/2);g.rotateY(-Math.PI/2);return g}
+
+function sportWheel(paint){const w=new THREE.Group(),tire=std("#141414",.85),rim=new THREE.MeshStandardMaterial({color:"#2B2E33",roughness:.25,metalness:.9});
+ const t=new THREE.Mesh(G.cyl(.36,.36,.3,28),tire);t.rotation.z=Math.PI/2;w.add(t);
+ const r=new THREE.Mesh(G.cyl(.27,.27,.31,24),rim);r.rotation.z=Math.PI/2;w.add(r);
+ const spm=new THREE.MeshStandardMaterial({color:"#C9CDD2",roughness:.2,metalness:.95});for(let i=0;i<5;i++){const s=new THREE.Mesh(G.box(.33,.05,.26),spm);s.rotation.x=i/5*Math.PI;w.add(s)}
+ const hub=new THREE.Mesh(G.cyl(.06,.06,.33,12),std("#D0D3D8",.2));hub.rotation.z=Math.PI/2;w.add(hub);return w}
+function makeSportCarMesh(color){const g=new THREE.Group();
+ const paint=new THREE.MeshPhysicalMaterial?new THREE.MeshPhysicalMaterial({color,roughness:.22,metalness:.55,clearcoat:1,clearcoatRoughness:.08}):new THREE.MeshStandardMaterial({color,roughness:.22,metalness:.55});
+ const black=std("#111214",.5),glass=new THREE.MeshStandardMaterial({color:"#0E1620",roughness:.05,metalness:.9});
+ // badan rendah berbentuk baji
+ const body=vExtrude([[2.25,.34],[2.32,.5],[2.2,.62],[1.2,.8,.5,.9],[-.4,.93],[-1.6,.96],[-2.18,.98],[-2.26,.86],[-2.24,.44],[-2.05,.3],[-1.78,.3],[-1.78,.36],[-.92,.36],[-.92,.3],[.92,.3],[.92,.36],[1.78,.36],[1.78,.3],[2.1,.3]],1.96,.07);
+ const bm=new THREE.Mesh(body,paint);g.add(bm);
+ // kabin kaca
+ const cab=vExtrude([[.62,.9],[.12,1.2,-.35,1.24],[-.95,1.22],[-1.7,.98],[-1.2,.94]],1.5,.06);g.add(new THREE.Mesh(cab,glass));
+ const roof=new THREE.Mesh(vExtrude([[.0,1.21],[-.35,1.255],[-.92,1.24],[-1.0,1.21]],1.2,.03),paint);g.add(roof);
+ // lampu depan tipis & lampu belakang memanjang
+ [-1,1].forEach(s=>{const h=new THREE.Mesh(G.box(.5,.07,.12),new THREE.MeshBasicMaterial({color:new THREE.Color(2.2,2.2,2)}));h.position.set(s*.62,.62,2.2);h.rotation.y=-s*.18;h.rotation.x=.35;g.add(h)});
+ const tl=new THREE.Mesh(G.box(1.7,.06,.05),new THREE.MeshBasicMaterial({color:new THREE.Color(2.4,.15,.12)}));tl.position.set(0,.84,-2.27);g.add(tl);
+ // gril & intake depan, diffuser belakang, intake samping
+ const gr=new THREE.Mesh(G.box(1.2,.14,.08),black);gr.position.set(0,.42,2.3);g.add(gr);
+ [-1,1].forEach(s=>{const it=new THREE.Mesh(G.box(.36,.16,.06),black);it.position.set(s*.66,.42,2.27);g.add(it);
+  const si=new THREE.Mesh(G.box(.05,.2,.6),black);si.position.set(s*.99,.6,-.75);g.add(si);
+  const m=new THREE.Mesh(G.box(.14,.08,.16),paint);m.position.set(s*1.02,.96,.55);g.add(m)}); // spion
+ const df=new THREE.Mesh(G.box(1.6,.12,.25),black);df.position.set(0,.35,-2.17);g.add(df);
+ [-.3,.3].forEach(x=>{const e=new THREE.Mesh(G.cyl(.055,.055,.12,12),std("#B8BCC2",.2));e.rotation.x=Math.PI/2;e.position.set(x,.38,-2.27);g.add(e)});
+ // sayap belakang
+ [-.62,.62].forEach(x=>{const p=new THREE.Mesh(G.box(.05,.22,.08),black);p.position.set(x,1.07,-2.02);g.add(p)});
+ const wing=new THREE.Mesh(RB(1.85,.05,.32,.02),black);wing.position.set(0,1.19,-2.05);wing.rotation.x=-.12;g.add(wing);
+ // garis balap
+ [-.16,.16].forEach(x=>{const st=new THREE.Mesh(G.box(.12,.012,1.4),std("#F4F4F2",.3));st.position.set(x,.905,1.45);st.rotation.x=.17;g.add(st)});
+ // roda + kaliper rem merah
+ const wheels=[];[[-.92,1.35],[.92,1.35],[-.92,-1.35],[.92,-1.35]].forEach(([x,z])=>{const w=sportWheel();w.position.set(x,.36,z);g.add(w);wheels.push(w);
+  const c=new THREE.Mesh(G.box(.06,.14,.2),std("#D3202A",.4));c.position.set(x-Math.sign(x)*.1,.46,z+.08);g.add(c)});
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+ const sh=new THREE.Mesh(new THREE.PlaneGeometry(2.3,4.8),new THREE.MeshBasicMaterial({color:"#000",transparent:true,opacity:.28,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;g.add(sh);
+ g.userData.wheels=wheels;return g}
+
+/* ukuran disesuaikan dengan karakter anak (tinggi ±1,25 m) */
+const VSC={motor:.64,bike:.8};
+function vScaleWrap(g,k){const o=new THREE.Group();g.scale.setScalar(k);o.add(g);o.userData.wheels=g.userData.wheels;return o}
+/* ---------- motor cross ---------- */
+function knobTire(r,t,n){const g=new THREE.Group(),m=std("#161616",.95);const tor=new THREE.Mesh(new THREE.TorusGeometry(r,t,10,26),m);tor.rotation.y=Math.PI/2;g.add(tor);
+ const kg=G.box(t*1.7,.04,.05);for(let i=0;i<n;i++){const a=i/n*Math.PI*2;const k=new THREE.Mesh(kg,m);k.position.set(0,Math.sin(a)*(r+t*.8),Math.cos(a)*(r+t*.8));k.rotation.x=-a;g.add(k)}
+ const rim=new THREE.Mesh(new THREE.TorusGeometry(r-t*.7,.018,6,26),std("#C8CCD0",.25));rim.rotation.y=Math.PI/2;g.add(rim);
+ for(let i=0;i<12;i++){const s=new THREE.Mesh(G.cyl(.004,.004,(r-t*.7)*2,4),std("#B8BCC0",.3));s.rotation.x=i/12*Math.PI;g.add(s)}
+ const hub=new THREE.Mesh(G.cyl(.05,.05,.14,10),std("#8A8E93",.3));hub.rotation.z=Math.PI/2;g.add(hub);return g}
+function plateTex(num,bg,fg){const c=document.createElement("canvas");c.width=128;c.height=128;const x=c.getContext("2d");x.fillStyle=bg;x.fillRect(0,0,128,128);x.fillStyle=fg;x.font="900 78px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(num,64,70);
+ const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+function makeMotorMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.35,metalness:.15}),white=std("#F2F2F0",.4),dark=std("#1A1A1A",.7),alu=new THREE.MeshStandardMaterial({color:"#B9BEC4",roughness:.3,metalness:.8}),gold=new THREE.MeshStandardMaterial({color:"#D9A53A",roughness:.3,metalness:.8});
+ const wheels=[];const fw=knobTire(.33,.07,26);fw.position.set(0,.4,.72);g.add(fw);wheels.push(fw);const rw=knobTire(.31,.08,26);rw.position.set(0,.39,-.66);g.add(rw);wheels.push(rw);
+ // garpu depan panjang
+ [-1,1].forEach(s=>{const f=new THREE.Mesh(G.cyl(.032,.028,.9,8),gold);f.position.set(s*.09,.82,.62);f.rotation.x=-.42;g.add(f)});
+ const tc=new THREE.Mesh(G.box(.26,.06,.12),alu);tc.position.set(0,1.18,.46);g.add(tc);
+ // spakbor depan tinggi & plat nomor
+ const ff=new THREE.Mesh(vExtrude([[.95,.82],[.75,.86,.55,.83],[.5,.8],[.62,.79,.9,.78]],.17,.015),white);g.add(ff);
+ const pl=new THREE.Mesh(new THREE.PlaneGeometry(.26,.24),new THREE.MeshStandardMaterial({map:plateTex("21","#F2F2F0","#111"),roughness:.5}));pl.position.set(0,1.02,.58);pl.rotation.x=-.42;g.add(pl);
+ const lp=new THREE.Mesh(G.box(.27,.25,.02),paint);lp.position.set(0,1.02,.565);lp.rotation.x=-.42;g.add(lp);
+ // setang lebar
+ const bar=new THREE.Mesh(G.cyl(.016,.016,.74,8),alu);bar.rotation.z=Math.PI/2;bar.position.set(0,1.27,.42);g.add(bar);
+ [-1,1].forEach(s=>{const gp=new THREE.Mesh(G.cyl(.024,.024,.12,8),dark);gp.rotation.z=Math.PI/2;gp.position.set(s*.33,1.27,.42);g.add(gp)});
+ // rangka, tangki, panel samping, jok panjang, spakbor belakang naik
+ const fr=new THREE.Mesh(G.cyl(.03,.03,.75,8),alu);fr.position.set(0,.78,.2);fr.rotation.x=.9;g.add(fr);
+ const tank=new THREE.Mesh(vExtrude([[.42,1.02],[.25,1.13,0,1.08],[-.12,1.0],[-.12,.86],[.3,.86]],.34,.05),paint);g.add(tank);
+ [-1,1].forEach(s=>{const sp=new THREE.Mesh(vExtrude([[.38,1.0],[.4,.82],[.18,.74],[.05,.86]],.04,.01),white);sp.position.x=s*.19;g.add(sp);
+  const pn=new THREE.Mesh(vExtrude([[-.1,.98],[-.62,1.0],[-.55,.78],[-.15,.74]],.04,.01),paint);pn.position.x=s*.16;g.add(pn);
+  const num=new THREE.Mesh(new THREE.PlaneGeometry(.18,.15),new THREE.MeshStandardMaterial({map:plateTex("21","#F2F2F0","#111"),roughness:.5}));num.position.set(s*.185,.88,-.36);num.rotation.y=s*Math.PI/2;g.add(num)});
+ const seat=new THREE.Mesh(vExtrude([[.12,1.03],[-.05,1.1],[-.75,1.06],[-.78,1.0],[-.05,.98]],.26,.04),dark);g.add(seat);
+ const rf=new THREE.Mesh(vExtrude([[-.7,1.0],[-1.05,1.12],[-1.1,1.08],[-.75,.94]],.2,.015),white);g.add(rf);
+ // mesin, swingarm, shock, knalpot
+ const eng=new THREE.Mesh(RB(.24,.3,.36,.05),std("#4A4E54",.5));eng.position.set(0,.6,.08);g.add(eng);
+ const cyl=new THREE.Mesh(RB(.2,.2,.18,.04),alu);cyl.position.set(0,.8,.18);cyl.rotation.x=-.3;g.add(cyl);
+ [-1,1].forEach(s=>{const a=new THREE.Mesh(G.box(.035,.06,.66),alu);a.position.set(s*.1,.47,-.33);a.rotation.x=-.12;g.add(a)});
+ const sk=new THREE.Mesh(G.cyl(.035,.035,.42,8),std("#C0392B",.4));sk.position.set(0,.72,-.22);sk.rotation.x=.45;g.add(sk);
+ const sprg=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,5,12),std("#E8C33A",.4));sprg.rotation.x=Math.PI/2+.45;sprg.position.set(0,.74,-.21);g.add(sprg);
+ const p1=new THREE.Mesh(G.cyl(.035,.035,.45,8),alu);p1.position.set(.13,.62,.24);p1.rotation.x=.9;g.add(p1);
+ const muf=new THREE.Mesh(G.cyl(.06,.05,.5,12),alu);muf.position.set(.16,.92,-.62);muf.rotation.x=Math.PI/2-.35;g.add(muf);
+ const hl=new THREE.Mesh(G.box(.12,.06,.03),new THREE.MeshBasicMaterial({color:new THREE.Color(2,2,1.8)}));hl.position.set(0,.96,.6);hl.rotation.x=-.42;g.add(hl);
+ g.traverse(o=>{if(o.isMesh)o.castShadow=true});g.add(shadowPlane(.9,2.1));g.userData.wheels=wheels;return vScaleWrap(g,VSC.motor)}
+
+/* ---------- sepeda mini BMX ---------- */
+function makeBikeMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.28,metalness:.55}),dark=std("#151515",.8),chrome=new THREE.MeshStandardMaterial({color:"#D0D4D8",roughness:.2,metalness:.9}),acc=std("#F2C230",.4);
+ const wheels=[];[-.44,.44].forEach(z=>{const w=new THREE.Group();w.position.set(0,.29,z);g.add(w);
+  const t=new THREE.Mesh(new THREE.TorusGeometry(.245,.045,10,24),dark);t.rotation.y=Math.PI/2;w.add(t);
+  const r=new THREE.Mesh(new THREE.TorusGeometry(.2,.016,6,24),acc);r.rotation.y=Math.PI/2;w.add(r);
+  for(let k=0;k<5;k++){const sp=new THREE.Mesh(G.box(.03,.4,.035),acc);sp.rotation.x=k/5*Math.PI;w.add(sp)} // velg racing 5 palang
+  const hub=new THREE.Mesh(G.cyl(.04,.04,.12,10),chrome);hub.rotation.z=Math.PI/2;w.add(hub);
+  [-1,1].forEach(s=>{const peg=new THREE.Mesh(G.cyl(.022,.022,.1,8),chrome);peg.rotation.z=Math.PI/2;peg.position.x=s*.1;w.add(peg)});wheels.push(w)});
+ const tube=(y1,z1,y2,z2,r,m)=>{const len=Math.hypot(y2-y1,z2-z1);const t=new THREE.Mesh(G.cyl(r||.028,r||.028,len,8),m||paint);t.position.set(0,(y1+y2)/2,(z1+z2)/2);t.rotation.x=Math.atan2(z2-z1,y2-y1);g.add(t);return t};
+ // rangka tebal
+ tube(.62,.3,.66,-.12,.032);tube(.66,-.12,.36,-.02,.032);tube(.36,-.02,.62,.3,.034);tube(.36,-.02,.29,-.44,.022);tube(.66,-.12,.29,-.44,.02);
+ tube(.62,.3,.78,.34,.036);// head tube
+ [-1,1].forEach(s=>{const f=tube(.29,.44,.72,.34,.018,chrome);f.position.x=s*.06});
+ // setang tinggi dengan palang
+ tube(.78,.34,.92,.3,.018,chrome);const hb=new THREE.Mesh(G.cyl(.016,.016,.58,8),chrome);hb.rotation.z=Math.PI/2;hb.position.set(0,1.0,.28);g.add(hb);
+ const cb=new THREE.Mesh(G.cyl(.012,.012,.3,6),chrome);cb.rotation.z=Math.PI/2;cb.position.set(0,.93,.3);g.add(cb);
+ [-1,1].forEach(s=>{const u=new THREE.Mesh(G.cyl(.016,.016,.16,6),chrome);u.position.set(s*.2,.93,.29);u.rotation.z=s*.35;g.add(u);
+  const gp=new THREE.Mesh(G.cyl(.026,.026,.11,8),std("#1F1F1F",.9));gp.rotation.z=Math.PI/2;gp.position.set(s*.27,1.0,.28);g.add(gp)});
+ const pad=new THREE.Mesh(RB(.2,.05,.06,.02),std("#E23B3B",.6));pad.position.set(0,.93,.3);g.add(pad);
+ // jok rendah, crank, pedal, rantai
+ tube(.66,-.12,.74,-.16,.016,chrome);const seat=new THREE.Mesh(RB(.13,.05,.26,.025),dark);seat.position.set(0,.76,-.18);g.add(seat);
+ const cr=new THREE.Mesh(G.cyl(.08,.08,.02,16),chrome);cr.rotation.z=Math.PI/2;cr.position.set(.05,.36,-.02);g.add(cr);
+ [-1,1].forEach(s=>{const arm=new THREE.Mesh(G.box(.02,.17,.03),chrome);arm.position.set(s*.08,.36-s*.07,-.02);g.add(arm);const pd=new THREE.Mesh(G.box(.1,.025,.07),dark);pd.position.set(s*.12,.36-s*.15,-.02);g.add(pd)});
+ const ch=new THREE.Mesh(G.box(.012,.012,.43),dark);ch.position.set(.05,.33,-.23);ch.rotation.x=.08;g.add(ch);
+ g.traverse(o=>{if(o.isMesh)o.castShadow=true});g.add(shadowPlane(.6,1.4));g.userData.wheels=wheels;return vScaleWrap(g,VSC.bike)}
+
 
 /* =====================================================
    GTA-STYLE OVERRIDES & SAVE MIGRATION
@@ -3008,8 +3263,8 @@ let yaw=0,pitch=.3,camDist=6.5,vy=0,onGround=true,jumps=0,paused=true,nearNpc=-1
 let car=null,driving=false,happyT=0,FRAME=0,pkn=[],VEH=[],nearPk=-1;
 SAVE.pk=SAVE.pk||{};
 const VCFG={boat:{maxF:20,maxR:-4,acc:8,wb:3.4,rad:1.7,ride:true,label:"Speedboat",seat:0,boat:true},car:{maxF:19,maxR:-6,acc:9,wb:2.6,rad:1.5,ride:false,label:"Mobil",seat:0},
- motor:{maxF:22,maxR:-3,acc:14,wb:1.5,rad:.8,ride:true,label:"Motor",seat:.18},
- bike:{maxF:9,maxR:-2,acc:6,wb:1.15,rad:.7,ride:true,label:"Sepeda",seat:.12}};
+ motor:{maxF:22,maxR:-3,acc:14,wb:1.1,rad:.6,ride:true,label:"Motor",seat:.12},
+ bike:{maxF:9,maxR:-2,acc:6,wb:.95,rad:.55,ride:true,label:"Sepeda",seat:.1}};
 const MA=Math.PI*19/12,MDX=Math.sin(MA),MDZ=Math.cos(MA),MU0=118,MATH_N=10;
 const BR_A=Math.PI*11/12,BR_DX=Math.sin(BR_A),BR_DZ=Math.cos(BR_A),C2D=215,R2=52,C2={x:BR_DX*C2D,z:BR_DZ*C2D};
 function axisUV(x,z){return{u:x*BR_DX+z*BR_DZ,v:x*BR_DZ-z*BR_DX}}
@@ -3144,7 +3399,7 @@ function buildWorld(){
   const C=makeChar(kind,tint,female?1.66:1.78,{skin:"#C68A5E",hair:"#222222",style:female?"long":"short",shirt:tint,pants:"#34495E",shoes:"#222222"});
   const R=k<4?45.15:52.85;scene.add(C.root);peds.push({C,R,th:Math.random()*Math.PI*2,dir:k%3?1:-1,v:1.3+Math.random()*.4,pause:0})}
  // player car
- car=addVehicle("car",makeCarMesh("#C0392B"),-7,13,Math.PI/2);
+ car=addVehicle("car",makeSportCarMesh("#D3141E"),-7,13,Math.PI/2);
  addVehicle("motor",makeMotorMesh("#1F6FD1"),7.5,12.5,-Math.PI/2);addVehicle("bike",makeBikeMesh("#27AE60"),9.6,15,-Math.PI/2);
  {const a=axisUV(0,0);const w1=toWorldXY(BR_DX*62,BR_DZ*62,BR_A,4.6,0),w2=toWorldXY(BR_DX*64,BR_DZ*64,BR_A,-4.6,0);
   addVehicle("bike",makeBikeMesh("#E67E22"),w1.x,w1.z,BR_A);addVehicle("motor",makeMotorMesh("#C0392B"),w2.x,w2.z,BR_A)}
@@ -3202,20 +3457,6 @@ function suggested(){for(let i=0;i<AREAS.length;i++)if(!SAVE.stars[i])return i;r
 /* ---------- motor & sepeda ---------- */
 function shadowPlane(w,d){const sh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({color:"#000",transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.03;return sh}
 function wheelGeo(r,t){const g=new THREE.TorusGeometry(r,t,8,22);g.rotateY(Math.PI/2);return g}
-function makeMotorMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.3,metalness:.4});const dark=std("#1A1A1A",.7),chrome=std("#BDC3C7",.25);
- const wheels=[];[-.62,.62].forEach(z=>{const w=mesh(wheelGeo(.3,.09),dark,0,.36,z,g);const hub=mesh(G.cyl(.12,.12,.12,10),chrome,0,0,0,w);hub.rotation.z=Math.PI/2;wheels.push(w)});
- mesh(RB(.34,.34,1.0,.12),paint,0,.66,0,g);mesh(RB(.38,.26,.5,.12),paint,0,.88,.22,g);mesh(RB(.32,.1,.62,.05),dark,0,.86,-.25,g);
- const fork=mesh(G.cyl(.035,.035,.75,6),chrome,0,.7,.56,g);fork.rotation.x=-.35;
- const bar=mesh(G.cyl(.03,.03,.72,6),dark,0,1.05,.46,g);bar.rotation.z=Math.PI/2;
- mesh(G.sph(.09,10,8),new THREE.MeshBasicMaterial({color:"#FFF8DC"}),0,.9,.68,g,true);mesh(G.box(.1,.08,.04),new THREE.MeshBasicMaterial({color:"#E74C3C"}),0,.8,-.62,g,true);
- const ex=mesh(G.cyl(.05,.06,.6,8),chrome,.2,.45,-.25,g);ex.rotation.x=Math.PI/2;
- g.add(shadowPlane(.9,1.9));g.userData.wheels=wheels;return g}
-function makeBikeMesh(color){const g=new THREE.Group();const paint=new THREE.MeshStandardMaterial({color,roughness:.35,metalness:.3});const dark=std("#1A1A1A",.7);
- const wheels=[];[-.55,.55].forEach(z=>{const w=mesh(wheelGeo(.33,.03),dark,0,.36,z,g);for(let k=0;k<3;k++){const sp=mesh(G.box(.012,.62,.012),std("#BDC3C7",.3),0,0,0,w);sp.rotation.x=k*Math.PI/3}wheels.push(w)});
- const tube=(y1,z1,y2,z2,r)=>{const len=Math.hypot(y2-y1,z2-z1);const m=mesh(G.cyl(r||.025,r||.025,len,6),paint,0,(y1+y2)/2,(z1+z2)/2,g);m.rotation.x=Math.atan2(z2-z1,y2-y1);return m};
- tube(.36,-.55,.78,-.15);tube(.36,-.55,.4,-.05);tube(.4,-.05,.8,-.16);tube(.4,-.05,.82,.38);tube(.8,-.15,.84,.38);tube(.36,.55,.98,.4);
- mesh(RB(.16,.06,.26,.03),dark,0,.86,-.18,g);const bar=mesh(G.cyl(.022,.022,.55,6),dark,0,1,.4,g);bar.rotation.z=Math.PI/2;
- g.add(shadowPlane(.6,1.6));g.userData.wheels=wheels;return g}
 function addVehicle(type,m,x,z,h){scene.add(m);const v={type,cfg:VCFG[type],m,x,z,h,speed:0,steer:0};VEH.push(v);return v}
 
 /* ---------- Negeri Pancasila (pulau PPKn) ---------- */
@@ -3367,7 +3608,7 @@ function tick(){
   traffic.forEach(U=>{if(U!==T&&U.lane===T.lane){const d=Math.atan2(Math.sin(U.th-T.th),Math.cos(U.th-T.th))*T.dir;if(d>0&&d*T.lane<9)block=true}});
   T.cur=lerp(T.cur||T.v,block?0:T.v,Math.min(1,dt*(block?4:1)));T.th+=T.dir*T.cur*dt/T.lane;
   T.m.position.set(Math.sin(T.th)*T.lane,0,Math.cos(T.th)*T.lane);T.m.rotation.y=Math.atan2(fx,fz)});
- if(!paused){if(driving)driveCar(dt);else if(ACT)actUpdate(dt);else movePlayer(dt)}else if(!driving&&!ACT)animChar(player,dt,{speed:0});
+ if(!paused){if(driving)driveCar(dt);else if(ACT)actUpdate(dt);else movePlayer(dt)}else if(!driving&&!ACT)animChar(player,dt,{speed:0});holdUpdate(dt);
  if(dancing>0){dancing-=dt}
  VEH.forEach(v=>{v.m.position.set(v.x,0,v.z);v.m.rotation.y=v.h;
   if(v.cfg.ride){const lean=(driving&&v===car)?-v.steer*Math.min(1,Math.abs(v.speed)/8)*.55:0;v.m.rotation.z=lerp(v.m.rotation.z,lean,.12)}
@@ -3456,7 +3697,7 @@ function driveCar(dt){
  if(C.boat?!boatOK(pos.x,pos.z,C.rad):!walkable(pos.x,pos.z,C.rad*.7)){pos.x=car.x;pos.z=car.z}
  if(Math.hypot(pos.x-before.x,pos.z-before.z)>.01){car.speed*=-.25;if(Math.abs(car.speed)>2)blip("bad")}
  car.x=pos.x;car.z=pos.z;
- if(C.ride){player.root.rotation.y=car.h;const sz=car.type==="bike"?-.2:car.type==="boat"?-.65:-.28;player.root.position.set(car.x+Math.sin(car.h)*sz,C.seat,car.z+Math.cos(car.h)*sz);
+ if(C.ride){player.root.rotation.y=car.h;const sz=car.type==="bike"?-.17*VSC.bike:car.type==="boat"?-.65:-.3*VSC.motor;player.root.position.set(car.x+Math.sin(car.h)*sz,C.seat,car.z+Math.cos(car.h)*sz);
   if(player.gltf){animChar(player,dt,{speed:0});ridePose(player,car,dt)}else animChar(player,dt,{speed:car.type==="bike"?Math.min(4,Math.abs(car.speed)*.45):0})}
  else player.root.position.set(car.x,0,car.z);
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.hypot(c.position.x-car.x,c.position.z-car.z)<1.4&&c.userData.y<1.5){scene.remove(c);coins.splice(i,1);SAVE.coins++;persist();updateStats();blip("coin");setTimeout(spawnCoin,20000)}}
@@ -3473,7 +3714,7 @@ function ridePose(C,v,dt){
  rotBone(B.LeftUpLeg,-(bike?1.15:1.45)+pl);rotBone(B.RightUpLeg,-(bike?1.15:1.45)+pr);
  rotBone(B.LeftLeg,(bike?1.25:1.35)-pl*1.4);rotBone(B.RightLeg,(bike?1.25:1.35)-pr*1.4);
  rotBone(B.LeftArm,-1.05);rotBone(B.RightArm,-1.05);rotBone(B.LeftForeArm,-.35);rotBone(B.RightForeArm,-.35);
- if(C.gs)C.gs.visible=false;if(B.Hips){B.Hips.getWorldPosition(_rv);const seatTop=v.type==="boat"?v.m.position.y+.98:bike?.9:.93;C.root.position.y+=seatTop+.04-_rv.y}
+ if(C.gs)C.gs.visible=false;if(B.Hips){B.Hips.getWorldPosition(_rv);const seatTop=v.type==="boat"?v.m.position.y+.98:bike?.8*VSC.bike:v.type==="motor"?1.08*VSC.motor:.93;C.root.position.y+=seatTop+.04-_rv.y}
 }
 function toggleCar(){
  if(paused)return;
