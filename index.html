@@ -1559,7 +1559,7 @@ function mathOpts(q,n,k){const set=new Set([q.ans]);const cand=shuffle([...(q.ne
  let g=3;while(set.size<n){set.add(q.ans+g);g++}return shuffle([...set])}
 function mathGen(k,s){const q=mathQ(k,s);q.near=q.near||[];return q}
 /* geometri: sumbu u menjauh dari pulau, v ke samping */
-const MS={plat:6,gap:8,start:10,end:14,half:7,inner:8.6};
+const MS={plat:6,gap:13,start:10,end:14,half:7,inner:8.6};
 function mU(i){/* awal platform tahap i (0 = start) */return MU0+MS.start+i*(MS.gap+MS.plat)}
 function mW(u,v){return{x:MDX*u+MDZ*v,z:MDZ*u-MDX*v}}
 function mPlat(u,v,hu,hv,extra){const w=mW(u,v);return plat(Object.assign({x:w.x,z:w.z,hw:hv,hd:hu,top:0,rot:1},extra||{}))}
@@ -1674,9 +1674,10 @@ function dkUV(x,z){return{u:x*DK_DX+z*DK_DZ,v:x*DK_DZ-z*DK_DX}}
 function dkW(u,v){return{x:DK_DX*u+DK_DZ*v,z:DK_DZ*u-DK_DX*v}}
 function onDock(x,z){const q=dkUV(x,z);return q.u>DK_U0&&q.u<DK_U1&&Math.abs(q.v)<1.55}
 const C3={x:Math.sin(Math.PI/4)*205,z:Math.cos(Math.PI/4)*205};
-const I3={B:46,R0:33,R1:9,H:20,turns:2,hw:2.3,phi0:Math.PI*1.25,N:8};I3.TH=Math.PI*2*I3.turns;
+const I3={B:66,R0:52,R1:10,H:46,turns:3,hw:2.4,phi0:Math.PI*1.25,N:15,wob:3.4};I3.TH=Math.PI*2*I3.turns;
 function i3pol(x,z){const dx=x-C3.x,dz=z-C3.z;return{r:Math.hypot(dx,dz),a:Math.atan2(dx,dz)}}
-const roadR=th=>I3.R0-(I3.R0-I3.R1)*th/I3.TH,roadH=th=>I3.H*th/I3.TH;
+/* jalan gunung berkelok: spiral naik + liukan keluar-masuk */
+const roadR=th=>I3.R0-1.5-(I3.R0-1.5-I3.R1)*th/I3.TH+I3.wob*Math.sin(th*2.5)*Math.min(1,th/1.2,(I3.TH-th)/1.2),roadH=th=>I3.H*th/I3.TH;
 function i3Levels(a){let d=(a-I3.phi0)%(Math.PI*2);if(d<0)d+=Math.PI*2;const L=[];for(let k=0;k<=I3.turns;k++){const th=d+Math.PI*2*k;if(th<=I3.TH)L.push({r:roadR(th),h:roadH(th),th})}return L}
 function i3Road(r,a){for(const l of i3Levels(a))if(Math.abs(r-l.r)<I3.hw)return l;return null}
 /* pier kecil Pulau IPAS */
@@ -1784,7 +1785,7 @@ function wakeTex(){const c=document.createElement("canvas");c.width=64;c.height=
 /* ---------- Pulau IPAS ---------- */
 function buildIpas(){const G3=new THREE.Group();G3.position.set(C3.x,0,C3.z);scene.add(G3);W2.ipas=G3;
  // medan polar
- const rings=[];for(let r=0;r<=34;r+=.5)rings.push(r);for(let r=35;r<=52;r+=1)rings.push(r);const SEG=260;
+ const rings=[];for(let r=0;r<=I3.R0+1;r+=.5)rings.push(r);for(let r=Math.ceil(I3.R0+2);r<=I3.B+6;r+=1)rings.push(r);const SEG=300;
  const pos=[],col=[],uv=[],typ=[];const tmp=new THREE.Color();
  for(let i=0;i<rings.length;i++){const r=rings[i];for(let s=0;s<=SEG;s++){const a=s/SEG*Math.PI*2;const x=Math.sin(a)*r,z=Math.cos(a)*r;const h=i3T(r,a);pos.push(x,h,z);uv.push(x/3,z/3);
    const rd=r<I3.R0+.5&&r>I3.R1-.5&&i3Road(r,a);let ty=0;
@@ -1800,8 +1801,8 @@ function buildIpas(){const G3=new THREE.Group();G3.position.set(C3.x,0,C3.z);sce
  // pagar tepi jalan & batu
  const post=pbr("#6B5034",.9),rockM=pbr("#8A8178",.95);
  for(let th=1.2;th<I3.TH-.5;th+=.24){const a=I3.phi0+th,r=roadR(th)+I3.hw-.25,h=roadH(th);mesh(G.cyl(.07,.08,.9,8),post,Math.sin(a)*r,h+.45,Math.cos(a)*r,G3)}
- for(let k=0;k<70;k++){const a=Math.random()*Math.PI*2,r=I3.R1+2+Math.random()*(I3.R0-I3.R1-2);if(i3Road(r,a))continue;const h=i3T(r,a);const rk=mesh(new THREE.DodecahedronGeometry(.4+Math.random()*.9,1),rockM,Math.sin(a)*r,h-.1,Math.cos(a)*r,G3);rk.scale.y=.6+Math.random()*.5;rk.rotation.set(Math.random()*3,Math.random()*3,0)}
- let nt=0;for(let k=0;k<400&&nt<34;k++){const a=Math.random()*Math.PI*2,r=I3.R1+3+Math.random()*(I3.R0+8-I3.R1);const rd=i3Road(r,a);if(rd)continue;let near=99;i3Levels(a).forEach(l=>near=Math.min(near,Math.abs(r-l.r)-I3.hw));if(r<I3.R0&&near<1.8)continue;if(r>=I3.R0&&Math.abs(((a-I3.phi0+Math.PI*3)%(Math.PI*2))-Math.PI)<.35)continue;
+ for(let k=0;k<150;k++){const a=Math.random()*Math.PI*2,r=I3.R1+2+Math.random()*(I3.R0-I3.R1-2);if(i3Road(r,a))continue;const h=i3T(r,a);const rk=mesh(new THREE.DodecahedronGeometry(.4+Math.random()*.9,1),rockM,Math.sin(a)*r,h-.1,Math.cos(a)*r,G3);rk.scale.y=.6+Math.random()*.5;rk.rotation.set(Math.random()*3,Math.random()*3,0)}
+ let nt=0;for(let k=0;k<900&&nt<70;k++){const a=Math.random()*Math.PI*2,r=I3.R1+3+Math.random()*(I3.R0+8-I3.R1);const rd=i3Road(r,a);if(rd)continue;let near=99;i3Levels(a).forEach(l=>near=Math.min(near,Math.abs(r-l.r)-I3.hw));if(r<I3.R0&&near<1.8)continue;if(r>=I3.R0&&Math.abs(((a-I3.phi0+Math.PI*3)%(Math.PI*2))-Math.PI)<.35)continue;
   const t=treeAt(G3,Math.sin(a)*r,Math.cos(a)*r,.8+Math.random()*.5);t.position.y=i3T(r,a)-.1;nt++;if(r>=I3.R0)obstacles.push({x:C3.x+Math.sin(a)*r,z:C3.z+Math.cos(a)*r,r:.55})}
  // pier
  const pw=gemTex("wood",1)?new THREE.MeshStandardMaterial({map:gemTex("wood",1),roughness:.85}):texStd("wood","#9C7B55",1,4,.85);
@@ -1817,15 +1818,18 @@ function buildIpas(){const G3=new THREE.Group();G3.position.set(C3.x,0,C3.z);sce
  const top=labelSprite("PUNCAK IPAS","#C0392B","#FFFFFF",320);top.position.set(0,I3.H+4.4,0);top.scale.multiplyScalar(1.5);G3.add(top);
  makePole(C3.x-2.6,C3.z-2.2,6,true);W2.poles[W2.poles.length-1].g.position.y=I3.H;W2.poles[W2.poles.length-1].y0=I3.H;
  // gerbang soal
+ /* penjaga soal: NPC berdiri di tengah jalan gunung; jawab benar → ia menepi memberi jalan */
+ const NAMES=[["Kak Bayu","man"],["Bu Rina","woman"],["Pak Dodi","guy"],["Kak Laras","woman"],["Pak Hasan","man"],["Kak Tio","guy"],["Bu Sekar","woman"],["Pak Rudi","man"],["Kak Dewi","woman"],["Pak Agus","guy"],["Kak Nanda","man"],["Bu Wati","woman"],["Pak Joko","guy"],["Kak Salsa","woman"],["Prof. Arif","man"]];
+ const tints=["#2E86C1","#16A085","#D35400","#8E44AD","#27AE60","#C0392B","#F39C12","#1ABC9C","#E84393","#34495E","#6C5CE7","#00B894","#E17055","#0984E3","#B33771"];
  for(let g=0;g<I3.N;g++){const th=I3.TH*(g+1)/(I3.N+1),a=I3.phi0+th,r=roadR(th),h=roadH(th);const x=Math.sin(a)*r,z=Math.cos(a)*r;
-  const tx=Math.cos(a)*r-Math.sin(a)*(I3.R0-I3.R1)/I3.TH,tz=-Math.sin(a)*r-Math.cos(a)*(I3.R0-I3.R1)/I3.TH;const ry=Math.atan2(tx,tz);
+  const a2=I3.phi0+th+.01,r2=roadR(th+.01);const ry=Math.atan2(Math.sin(a2)*r2-x,Math.cos(a2)*r2-z);
   const gg=new THREE.Group();gg.position.set(x,h,z);gg.rotation.y=ry;G3.add(gg);
-  const woodM=pbr("#7A5230",.8);[-1,1].forEach(s=>{mesh(G.cyl(.16,.18,3.4,12),woodM,s*(I3.hw+.15),1.7,0,gg);mesh(G.sph(.22,12,10),pbr("#1E8449",.6),s*(I3.hw+.15),3.5,0,gg)});
-  const sign=labelSprite(`GERBANG ${g+1}`,"#1E8449","#FFFFFF",256);sign.position.set(0,3.6,0);gg.add(sign);
-  const bar=new THREE.Group();bar.position.set(-(I3.hw+.15),1.05,0);gg.add(bar);mesh(G.cyl(.09,.09,I3.hw*2+.3,10),pbr("#E74C3C",.5),(I3.hw+.15),0,0,bar).rotation.z=Math.PI/2;
-  [.6,1.6,2.6,3.6].forEach(x=>mesh(G.cyl(.092,.092,.3,10),pbr("#FFFFFF",.5),x,0,0,bar).rotation.z=Math.PI/2);
-  const obs=[-1.5,0,1.5].map(o=>({x:C3.x+x+Math.sin(a)*o,z:C3.z+z+Math.cos(a)*o,r:.95}));obs.forEach(o=>obstacles.push(o));
-  W2.gates.push({i:g,th,x:C3.x+x,z:C3.z+z,h,gg,bar,obs,open:false,q:null,lift:0});W2.dyn.push(bar)}
+  const [nm,kind]=NAMES[g%NAMES.length];let C=null;try{C=makeChar(BASE[kind]||kind!=="man"?kind:"guy",tints[g%tints.length],kind==="woman"?1.66:1.76,{skin:"#C68A5E",hair:"#222",style:kind==="woman"?"long":"short",shirt:tints[g%tints.length],pants:"#34495E",shoes:"#222"});C.root.rotation.y=Math.PI;gg.add(C.root)}catch(e){}
+  const sign=labelSprite(`${nm} · Soal ${g+1}`,"#1E8449","#FFFFFF",300);sign.position.set(0,2.7,0);gg.add(sign);
+  const qm=labelSprite("?","#F7D23E","#10303A",96);qm.position.set(0,3.35,0);qm.scale.multiplyScalar(.6);gg.add(qm);
+  const bar=new THREE.Group();gg.add(bar);
+  const obs=[-1.6,0,1.6].map(o=>({x:C3.x+x+Math.cos(ry)*o,z:C3.z+z-Math.sin(ry)*o,r:.95}));obs.forEach(o=>obstacles.push(o));
+  W2.gates.push({i:g,th,x:C3.x+x,z:C3.z+z,h,gg,bar,obs,open:false,q:null,lift:0,npc:{name:nm,C,qm,side:g%2?1:-1}});W2.dyn.push(gg)}
 }
 /* ---------- soal IPAS ---------- */
 const IPAS_Q=[
@@ -1848,17 +1852,17 @@ const IPAS_Q=[
   ["Gunung api yang meletus dahsyat pada tahun 1815 di Sumbawa, NTB, adalah Gunung...","Tambora",["Rinjani","Krakatau"]],["Gunung tertinggi di Nusa Tenggara Barat adalah Gunung...","Rinjani",["Tambora","Semeru"]],["Pengurai dalam ekosistem contohnya adalah...","Jamur dan bakteri",["Rumput dan padi","Elang dan ular"]],
   ["Gerhana matahari terjadi saat posisi bulan berada di antara...","Matahari dan bumi",["Bumi dan Mars","Bumi dan bintang"]]]];
 function ipasQ(){const b=GR().band;const pool=IPAS_Q[b];const used=new Set(W2.gates.map(g=>g.q&&g.q[0]));const avail=pool.filter(q=>!used.has(q[0]));const q=(avail.length?avail:pool)[Math.floor(Math.random()*(avail.length||pool.length))];return q}
-function ipasReset(){W2.gates.forEach(g=>{g.open=false;g.q=null;g.lift=0;g.bar.rotation.z=0;g.obs.forEach(o=>{if(!obstacles.includes(o))obstacles.push(o)})});W2.ipasRun={done:false,rewarded:false};if(W2.chest)W2.chest.lid.rotation.x=0}
+function ipasReset(){W2.gates.forEach(g=>{g.open=false;g.q=null;g.lift=0;if(!g.npc)g.bar.rotation.z=0;g.obs.forEach(o=>{if(!obstacles.includes(o))obstacles.push(o)})});W2.ipasRun={done:false,rewarded:false};if(W2.chest)W2.chest.lid.rotation.x=0}
 function openGateQuiz(G){setPaused(true);const QF=G.qf||ipasQ;if(!G.q)G.q=QF();const el=$("ipasBox");const b=GR().band,n=b===2?3:b===0?2:3;
  const q=G.q,opts=shuffle([q[1],...shuffle(q[2].slice()).slice(0,n-1)]);
- el.innerHTML=`<div class="mgCard ipasCard"><div class="mgVerb">${G.head?G.head():`GERBANG ${G.i+1}/${I3.N} · IPAS ${GR().label}`}</div><div class="ipasQ">${esc(q[0])}</div>
+ el.innerHTML=`<div class="mgCard ipasCard"><div class="mgVerb">${G.head?G.head():G.npc?`${esc(G.npc.name)} bertanya · Soal ${G.i+1}/${I3.N} · IPAS ${GR().label}`:`GERBANG ${G.i+1}/${I3.N} · IPAS ${GR().label}`}</div><div class="ipasQ">${esc(q[0])}</div>
   <div class="ipasOpts">${opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div><div class="ipasFb" id="ipasFb"></div>
   <div class="foot"><button class="btn-soft" id="ipasClose">Nanti dulu</button><button class="btn-soft" id="ipasRead">🔊 Bacakan</button></div></div>`;
  el.hidden=false;say(q[0],GR().rate,"id-ID");
  $("ipasRead").onclick=()=>say(q[0],GR().rate,"id-ID");$("ipasClose").onclick=()=>{el.hidden=true;setPaused(false)};
- el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
+ el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=G.npc?`<b style="color:#1E8449">Benar!</b> ${esc(G.npc.name)} memberi jalan.`:`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
    G.open=true;G.obs.forEach(o=>{const k=obstacles.indexOf(o);if(k>=0)obstacles.splice(k,1)});SAVE.coins+=2;persist();updateStats();
-   setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
+   setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(G.npc?(left?`Hebat! Sisa ${left} penjaga soal lagi.`:"Semua soal terjawab! Naik ke puncak!"):left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
   else{bt.classList.add("wrong");blip("bad");$("ipasFb").innerHTML=`<b style="color:#C0392B">Belum tepat.</b> Jawaban benar: <b>${esc(q[1])}</b>. Coba soal lain!`;el.querySelectorAll(".opt").forEach(x=>x.disabled=true);
    setTimeout(()=>{G.q=QF();openGateQuiz(G)},1800)}})}
 /* ---------- hewan ---------- */
@@ -1928,7 +1932,9 @@ function world2Update(dt,t,pp){
  // ayunan
  W2.swings.forEach(S=>{if(!(ACT&&ACT.type==="swing"&&ACT.S===S)){S.vel+=(-9.8/S.L*Math.sin(S.ang))*dt;S.vel*=Math.pow(.6,dt);S.ang+=S.vel*dt}S.piv.rotation.x=S.ang});
  // gerbang IPAS
- W2.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want){G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*1.5);G.bar.rotation.z=G.lift*Math.PI/2*.95}});
+ W2.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want){G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*1.2);if(!G.npc)G.bar.rotation.z=G.lift*Math.PI/2*.95}
+  if(G.npc&&G.npc.C&&Math.abs(G.x-pp.x)+Math.abs(G.z-pp.z)<60){const N=G.npc,C=N.C;C.root.position.x=N.side*(I3.hw+.7)*G.lift;C.root.rotation.y=Math.PI+N.side*G.lift*1.2;N.qm.visible=!G.open;
+   animChar(C,dt,{speed:G.lift>0&&G.lift<1?2:0,wave:!G.open&&Math.hypot(G.x-pp.x,G.z-pp.z)<6,happy:G.open&&G.lift>=1})}});
  // hewan
  W2.animals.forEach(a=>{const d=Math.hypot(pp.x-a.x,pp.z-a.z);a.m.visible=d<QUAL.far+10;if(!a.m.visible)return;const U=a.m.userData;
   if(a.happy>0){a.happy-=dt;a.m.position.y=a.y0+Math.abs(Math.sin(a.happy*12))*.12;const want=Math.atan2(pp.x-a.x,pp.z-a.z);a.h+=Math.atan2(Math.sin(want-a.h),Math.cos(want-a.h))*Math.min(1,dt*6);a.m.rotation.y=a.h;
@@ -1963,7 +1969,12 @@ function findNearAct(pos){if(SWIM||driving)return null;let best=null,bd=99;const
  if(CL.hang){const d=Math.hypot(CL.hang.x-pos.x,CL.hang.z-pos.z);if(d<2.2&&pos.y>CL.Y-1)cand("glider",CL.hang,d,"Terbang")}
  const on=odongNear(pos);if(on)cand("odong",OD,on.d,"Naik");const sc=socNear(pos);if(sc)cand("soccer",SOC,sc.d,"Main Bola");
  const sn=shopNear(pos);if(sn){const d=Math.hypot(sn.ref.x-pos.x,sn.ref.z-pos.z);if(d<bd)best=sn}
+ if(!best&&pos.y<.8){if(FRAME%6===0||!W2.shoreT){W2.shoreT=1;W2.shore=shoreSpot(pos)}if(W2.shore&&Math.hypot(W2.shore.x-pos.x,W2.shore.z-pos.z)<.6)best={type:"fish",ref:W2.shore,label:"Mancing"}}
  return best}
+/* memancing di tepi laut mana saja: cari arah air terdekat dari tempat berdiri */
+function shoreSpot(pos){if(!walkable(pos.x,pos.z)||inMath(pos.x,pos.z)||onMathBridge(pos.x,pos.z))return null;const f=player.root.rotation.y;let best=null,bs=-9;
+ for(let k=0;k<16;k++){const a=k/16*Math.PI*2;const W=d=>{const x=pos.x+Math.sin(a)*d,z=pos.z+Math.cos(a)*d;return waterAt(x,z)&&canEnterWater(x,z)};let near=false;for(let d=.8;d<=5.5;d+=.5)if(W(d)){near=true;break}const ok=near&&W(7)&&W(8.5);
+  if(ok){const sc=Math.cos(a-f);if(sc>bs){bs=sc;best={x:pos.x,z:pos.z,h:a,name:"Tepi Laut",dyn:true}}}}return best}
 function startAct(n){if(!n)return;const pos=player.root.position;
  if(n.type==="gate")return openGateQuiz(n.ref);
  if(n.type==="pet"){const a=n.ref;a.happy=1.8;ACT={type:"pet",a,t:1.6};player.root.rotation.y=Math.atan2(a.x-pos.x,a.z-pos.z);for(let k=0;k<4;k++)setTimeout(()=>heartAt(a.x+(Math.random()-.5)*.4,a.m.position.y+a.A.h*2,a.z+(Math.random()-.5)*.4),k*250);
@@ -1986,7 +1997,7 @@ function actJump(){if(!ACT)return;const pos=player.root.position;
  if(ACT.type==="odong"){odongExit();return}
  if(ACT.type==="soccer"){socAction();return}
  if(ACT.type==="umb"){return}}
-function endAct(){ACT=null;player.root.rotation.x=0;player.root.rotation.z=0;if(player.gs)player.gs.visible=true;$("jumpBtn").textContent="Lompat";const tb=$("talkBtn");tb.textContent="Bicara";tb.classList.remove("play","pulse");tb.disabled=true}
+function endAct(){const wasBoat=ACT&&ACT.type==="fish"&&ACT.S&&ACT.S.boat;ACT=null;if(wasBoat)setTimeout(boatRemount,0);player.root.rotation.x=0;player.root.rotation.z=0;if(player.gs)player.gs.visible=true;$("jumpBtn").textContent="Lompat";const tb=$("talkBtn");tb.textContent="Bicara";tb.classList.remove("play","pulse");tb.disabled=true}
 function bonesOf(C){if(!C.rb){C.rb={};C.obj&&C.obj.traverse(o=>{if(o.isBone){const m=o.name.match(/(Hips|Spine|LeftUpLeg|LeftLeg|RightUpLeg|RightLeg|LeftArm|RightArm|LeftForeArm|RightForeArm|LeftShoulder|RightShoulder|RightHand|Head)$/);if(m&&!C.rb[m[1]])C.rb[m[1]]=o}})}return C.rb}
 function actUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec(),t=clock.elapsedTime;
  if(ACT.type==="pet"){ACT.t-=dt;animChar(player,dt,{speed:0,talk:true});if(ACT.t<=0)endAct();return}
@@ -2057,7 +2068,7 @@ function fishStart(S){ACT={type:"fish",S,phase:"cast",t:.7};const pos=player.roo
  W2.rod.visible=true;W2.bobber.visible=false;W2.line.visible=true;W2.bang.visible=false;
  const bx=S.x+Math.sin(S.h)*7,bz=S.z+Math.cos(S.h)*7;ACT.bx=bx;ACT.bz=bz;
  $("jumpBtn").textContent="Selesai";const tb=$("talkBtn");tb.disabled=false;tb.textContent="Tarik!";tb.classList.add("play");blip("jump")}
-function fishUpdate(dt){const pos=player.root.position,t=clock.elapsedTime,S=ACT.S;pos.set(S.x,0,S.z);player.root.rotation.y=S.h;
+function fishUpdate(dt){const pos=player.root.position,t=clock.elapsedTime,S=ACT.S;if(S.boat){S.x=S.boat.x+Math.sin(S.boat.h)*-.6;S.z=S.boat.z+Math.cos(S.boat.h)*-.6;S.y=S.boat.m.position.y+.86}pos.set(S.x,S.y||0,S.z);player.root.rotation.y=S.h;
  animChar(player,dt,{speed:0});if(player.gltf){const B=bonesOf(player);player.root.updateMatrixWorld(true);_rax.set(1,0,0).applyQuaternion(player.root.quaternion).normalize();rotBone(B.RightArm,ACT.phase==="reel"?-1.3+Math.sin(t*14)*.1:-1.0);rotBone(B.RightForeArm,-.6);rotBone(B.LeftArm,-.8);rotBone(B.LeftForeArm,-.9)}
  const b=W2.bobber;ACT.t-=dt;
  if(ACT.phase==="cast"){if(ACT.t<=0){ACT.phase="wait";ACT.t=2+Math.random()*3.5;b.visible=true;b.position.set(ACT.bx,-.4,ACT.bz);blip("coin")}}
@@ -2067,6 +2078,9 @@ function fishUpdate(dt){const pos=player.root.position,t=clock.elapsedTime,S=ACT
   W2.rod.position.copy(_v3);W2.rod.rotation.order="YXZ";W2.rod.rotation.y=S.h;W2.rod.rotation.x=ACT.phase==="cast"?-.2-ACT.t:ACT.phase==="bite"?.75+Math.sin(t*20)*.05:.95;W2.rod.updateMatrixWorld(true)}
  if(W2.rodTip&&W2.rod.visible){W2.rodTip.getWorldPosition(_v3);const a=W2.line.geometry.attributes.position.array;a[0]=_v3.x;a[1]=_v3.y;a[2]=_v3.z;const e=b.visible?b.position:_v3;a[3]=e.x;a[4]=e.y;a[5]=e.z;W2.line.geometry.attributes.position.needsUpdate=true;W2.line.geometry.computeBoundingSphere()}}
 function fishTalk(){if(!ACT||ACT.type!=="fish")return;if(ACT.phase==="bite"){W2.bang.visible=false;$("talkBtn").classList.remove("pulse");reelStart()}else if(ACT.phase==="wait"){toast("Sabar... tunggu tanda ! muncul",true)}}
+function boatFish(){if(!driving||!car||!car.cfg.boat)return;if(Math.abs(car.speed)>1.5){toast("Hentikan perahu dulu, baru bisa memancing.");return}car.speed=0;driving=false;player.root.visible=true;$("carBtn").hidden=true;
+ fishStart({x:car.x,z:car.z,h:car.h+Math.PI/2,y:car.m.position.y+.86,boat:car,name:"Speedboat"})}
+function boatRemount(){if(!car||!car.cfg.boat)return;driving=true;player.root.visible=car.cfg.ride;W2.near=null;W2.nearKey="";$("talkBtn").disabled=false;$("talkBtn").textContent="Mancing";$("carBtn").hidden=false;$("carBtn").textContent="Turun";$("jumpBtn").textContent="Rem"}
 function fishStop(){if(W2.rod){W2.rod.visible=false;W2.bobber.visible=false;W2.line.visible=false;W2.bang.visible=false}reelClose(true);endAct()}
 /* reel mini game */
 let REEL=null;
@@ -2101,7 +2115,7 @@ function w2Objective(tg){{const c=cloudObjective(tg)||ninjaObjective(tg);if(c)re
  if(SWIM)return`Kamu sedang berenang! <span class="small">Gerakkan joystick untuk berenang, kembali ke pantai untuk berjalan.</span>`;
  if(onIpas(tg.x,tg.z)){const left=W2.gates.filter(g=>!g.open);if(!left.length)return W2.ipasRun.rewarded?`Pulau IPAS selesai! <span class="small">Pakai sayap di lemari PAKAIAN TERBANG lalu terbang ke Negeri Pancasila!</span>`:`Semua gerbang terbuka! <span class="y">Naik ke puncak</span>: buka peti harta & pakai sayap di lemari PAKAIAN TERBANG.`;
   if(!left.length&&0){}
-  const g=left[0];const d=Math.round(Math.hypot(g.x-tg.x,g.z-tg.z));return`Daki jalan gunung. <span class="y">Gerbang ${g.i+1}/${I3.N}</span>: dekati lalu jawab soal IPAS.<span class="small">${d} m · Soal mengikuti kelasmu</span>`}
+  const g=left[0];const d=Math.round(Math.hypot(g.x-tg.x,g.z-tg.z));return`Daki jalan gunung yang berkelok. <span class="y">${g.npc?esc(g.npc.name):"Gerbang"} · Soal ${g.i+1}/${I3.N}</span>: dekati lalu jawab soal IPAS.<span class="small">${d} m · Soal mengikuti kelasmu</span>`}
  return null}
 function w2Loc(tg){if(inNinja(tg.x,tg.z))return["ninja","<b>Arena Ninja</b><span>Lintasan halang rintang</span>"];if(tg.y>CL.Y-6)return["cloud","<b>Negeri Awan</b><span>Dunia Bahasa Indonesia</span>"];if(driving&&car&&car.type==="boat")return["boat","<b>Laut Biru</b><span>Berlayar dengan speedboat</span>"];if(SWIM)return["swim","<b>Laut</b><span>Berenang</span>"];
  if(onIpas(tg.x,tg.z))return["ipas","<b>Pulau IPAS</b><span>Gunung pengetahuan alam & sosial</span>"];if(onDock(tg.x,tg.z))return["dock","<b>Dermaga Speedboat</b><span>Naik speedboat · Mancing di ujung dermaga</span>"];return null}
@@ -3409,6 +3423,134 @@ const CHIBI={
   spotC:"#2B2B2B",spots:[[.1,.24,.02,.06],[-.09,.2,-.1,.07],[.05,.27,-.12,.05],[-.11,.25,.08,.045]],tuft:true,tuftC:"#2B2B2B"}),
  chicken:makeChick};
 
+/* ===== BANK SOAL TAMBAHAN: IPAS & Bahasa Indonesia jadi 36 soal per jenjang (108 soal per mapel), diambil acak ===== */
+IPAS_Q[0].push(
+ ["Alat indra untuk mendengar adalah...","Telinga",["Mata","Kulit"]],
+ ["Alat indra untuk mengecap rasa adalah...","Lidah",["Hidung","Telinga"]],
+ ["Kulit berguna untuk merasakan...","Panas, dingin, dan kasar",["Warna","Suara"]],
+ ["Hewan yang menyusui anaknya adalah...","Sapi",["Ayam","Ikan"]],
+ ["Kupu-kupu berasal dari...","Ulat",["Cacing","Semut"]],
+ ["Matahari terbenam di sebelah...","Barat",["Timur","Utara"]],
+ ["Bagian tumbuhan yang biasanya berwarna hijau adalah...","Daun",["Akar","Bunga"]],
+ ["Benda yang terapung di air adalah...","Gabus",["Paku","Kelereng"]],
+ ["Es yang dibiarkan di tempat panas akan...","Mencair",["Membeku","Mengeras"]],
+ ["Hewan yang hidup di darat dan di air adalah...","Katak",["Kambing","Burung"]],
+ ["Sebelum makan, kita harus...","Mencuci tangan",["Tidur dulu","Bermain lumpur"]],
+ ["Tubuh kita membutuhkan ... agar kuat dan sehat.","Makanan bergizi dan olahraga",["Permen saja","Begadang"]],
+ ["Hewan yang bergerak dengan melata adalah...","Ular",["Kuda","Burung"]],
+ ["Kita bernapas menggunakan...","Hidung dan paru-paru",["Telinga","Tangan"]],
+ ["Bulan terlihat terang pada waktu...","Malam hari",["Siang hari","Pagi hari"]],
+ ["Contoh benda cair adalah...","Air",["Batu","Kayu"]],
+ ["Sampah plastik sebaiknya dibuang ke...","Tempat sampah",["Sungai","Laut"]],
+ ["Tumbuhan yang buahnya bisa dimakan adalah...","Pohon mangga",["Rumput liar","Pohon cemara"]],
+ ["Bunyi “kukuruyuk” berasal dari hewan...","Ayam jago",["Kucing","Sapi"]],
+ ["Musim di Indonesia ada dua, yaitu musim hujan dan musim...","Kemarau",["Salju","Gugur"]]);
+IPAS_Q[1].push(
+ ["Perubahan wujud dari padat menjadi cair disebut...","Mencair",["Membeku","Mengembun"]],
+ ["Perubahan wujud dari gas menjadi cair disebut...","Mengembun",["Menguap","Menyublim"]],
+ ["Kapur barus yang lama-lama habis mengalami peristiwa...","Menyublim",["Mencair","Membeku"]],
+ ["Hewan pemakan tumbuhan dan daging disebut...","Omnivora",["Herbivora","Karnivora"]],
+ ["Contoh hewan herbivora adalah...","Kambing",["Harimau","Elang"]],
+ ["Metamorfosis sempurna dialami oleh...","Kupu-kupu",["Belalang","Kecoak"]],
+ ["Bagian bunga yang menghasilkan serbuk sari adalah...","Benang sari",["Putik","Kelopak"]],
+ ["Gaya yang terjadi saat kita mendorong meja disebut gaya...","Otot",["Magnet","Listrik"]],
+ ["Gaya gesek terjadi antara ban sepeda dan...","Jalan",["Udara di atas","Matahari"]],
+ ["Cahaya dapat menembus benda yang...","Bening",["Gelap","Tebal dan keras"]],
+ ["Pelangi terjadi karena cahaya matahari...","Dibiaskan oleh titik air",["Dipantulkan cermin","Ditelan awan"]],
+ ["Sumber energi listrik dari angin disebut pembangkit listrik tenaga...","Bayu",["Surya","Air"]],
+ ["Contoh sumber daya alam yang tidak dapat diperbarui adalah...","Minyak bumi",["Air","Hutan"]],
+ ["Hutan yang gundul dapat menyebabkan...","Banjir dan tanah longsor",["Udara segar","Hujan salju"]],
+ ["Alat untuk menunjukkan arah mata angin adalah...","Kompas",["Termometer","Penggaris"]],
+ ["Alat untuk mengukur suhu adalah...","Termometer",["Barometer","Kompas"]],
+ ["Daerah di sekitar kota yang banyak sawah biasanya disebut...","Desa",["Pelabuhan","Bandara"]],
+ ["Kegiatan menanam padi termasuk pekerjaan di bidang...","Pertanian",["Perikanan","Pertambangan"]],
+ ["Tempat untuk menabung uang dengan aman adalah...","Bank",["Pasar","Terminal"]],
+ ["Pulau tempat Kota Bima berada adalah Pulau...","Sumbawa",["Lombok","Bali"]]);
+IPAS_Q[2].push(
+ ["Darah dipompa jantung melalui pembuluh...","Nadi",["Balik","Kapiler saja"]],
+ ["Organ pernapasan pada ikan adalah...","Insang",["Paru-paru","Trakea"]],
+ ["Organ pengeluaran yang menyaring darah dan menghasilkan urine adalah...","Ginjal",["Hati","Lambung"]],
+ ["Sel darah yang berfungsi melawan kuman adalah sel darah...","Putih",["Merah","Keping"]],
+ ["Penyerapan sari makanan terjadi di...","Usus halus",["Kerongkongan","Mulut"]],
+ ["Hasil fotosintesis berupa oksigen dan...","Glukosa (zat gula)",["Karbon dioksida","Garam"]],
+ ["Bumi mengelilingi matahari disebut...","Revolusi",["Rotasi","Gravitasi"]],
+ ["Lama bumi mengelilingi matahari satu kali adalah sekitar...","365 hari",["24 jam","30 hari"]],
+ ["Planet yang dikenal dengan cincinnya yang indah adalah...","Saturnus",["Mars","Venus"]],
+ ["Planet merah adalah julukan untuk planet...","Mars",["Jupiter","Neptunus"]],
+ ["Rangkaian listrik yang lampunya tetap menyala walau satu lampu putus adalah rangkaian...","Paralel",["Seri","Tunggal"]],
+ ["Alat yang mengubah energi listrik menjadi energi gerak adalah...","Kipas angin",["Lampu","Setrika"]],
+ ["Cermin yang digunakan sebagai spion kendaraan adalah cermin...","Cembung",["Cekung","Datar"]],
+ ["Lapisan bumi paling luar tempat kita tinggal disebut...","Kerak bumi",["Inti bumi","Mantel"]],
+ ["Getaran di permukaan bumi akibat pergeseran lempeng disebut...","Gempa bumi",["Banjir","Angin topan"]],
+ ["Indonesia terletak di antara dua samudra, yaitu Samudra Hindia dan Samudra...","Pasifik",["Atlantik","Arktik"]],
+ ["Mata uang yang digunakan di Indonesia adalah...","Rupiah",["Ringgit","Dolar"]],
+ ["Kegiatan menyalurkan barang dari produsen ke konsumen disebut...","Distribusi",["Produksi","Konsumsi"]],
+ ["Hewan yang hampir punah dan hanya hidup di Pulau Komodo dan sekitarnya adalah...","Komodo",["Gajah","Harimau Sumatra"]],
+ ["Simbiosis yang saling menguntungkan disebut simbiosis...","Mutualisme",["Parasitisme","Komensalisme"]]);
+BINDO_Q[0].push(
+ ["Lawan kata “tinggi” adalah...","Pendek",["Besar","Panjang"]],
+ ["Lawan kata “siang” adalah...","Malam",["Pagi","Sore"]],
+ ["Lawan kata “bersih” adalah...","Kotor",["Rapi","Wangi"]],
+ ["Kata “sepatu” terdiri dari berapa suku kata?","Tiga",["Dua","Empat"]],
+ ["Huruf sebelum M adalah...","L",["N","K"]],
+ ["Kalimat yang diakhiri tanda seru (!) disebut kalimat...","Seru atau perintah",["Tanya","Berita"]],
+ ["Kata yang ditulis dengan benar adalah...","Sepeda",["Sepedah","Spda"]],
+ ["Ibu membeli dua ... roti.","buah",["ekor","orang"]],
+ ["Ayah membaca ... koran.","selembar",["seekor","sebiji"]],
+ ["Kata sapaan untuk guru perempuan adalah...","Ibu",["Kakak","Paman"]],
+ ["Ucapan saat bertemu teman di pagi hari adalah...","Selamat pagi",["Selamat malam","Selamat tidur"]],
+ ["Ucapan saat meminta maaf adalah...","Maaf, aku salah",["Terima kasih","Sama-sama"]],
+ ["Jawaban saat orang berterima kasih adalah...","Sama-sama",["Maaf","Permisi"]],
+ ["Persamaan kata “cantik” adalah...","Indah",["Jelek","Kotor"]],
+ ["Huruf konsonan adalah huruf...","Selain a, i, u, e, o",["a, i, u, e, o","Angka 1 sampai 5"]],
+ ["Gabungan huruf “ny” ada pada kata...","Nyamuk",["Nanas","Kuda"]],
+ ["Kata yang berarti tempat untuk tidur adalah...","Kasur",["Piring","Sendok"]],
+ ["Nama hari setelah Senin adalah...","Selasa",["Rabu","Minggu"]],
+ ["Nama bulan pertama dalam setahun adalah...","Januari",["Februari","Desember"]],
+ ["Kalimat “Ani pergi ke sekolah.” termasuk kalimat...","Berita",["Tanya","Perintah"]]);
+BINDO_Q[1].push(
+ ["Sinonim kata “cerdas” adalah...","Pintar",["Malas","Lambat"]],
+ ["Antonim kata “ramai” adalah...","Sepi",["Riuh","Penuh"]],
+ ["Kata baku yang benar adalah...","Aktivitas",["Aktifitas","Aktiviti"]],
+ ["Kata baku yang benar adalah...","Kreatif",["Kreativ","Kratif"]],
+ ["Kata baku yang benar adalah...","Ijazah",["Ijasah","Izasah"]],
+ ["Kata tanya untuk menanyakan waktu adalah...","Kapan",["Di mana","Siapa"]],
+ ["Kata tanya untuk menanyakan alasan adalah...","Mengapa",["Berapa","Siapa"]],
+ ["Kata “menulis” mendapat awalan...","me-",["ber-","ter-"]],
+ ["Kata “ditendang” mendapat awalan...","di-",["me-","ke-"]],
+ ["Huruf kapital digunakan pada awal...","Kalimat",["Setiap suku kata","Tengah kata"]],
+ ["Tokoh yang berwatak baik dalam cerita disebut tokoh...","Protagonis",["Antagonis","Figuran"]],
+ ["Tokoh yang berwatak jahat dalam cerita disebut tokoh...","Antagonis",["Protagonis","Tritagonis"]],
+ ["Cerita yang menceritakan kehidupan seseorang disebut...","Biografi",["Fabel","Pantun"]],
+ ["Pantun memiliki rima atau sajak...","a-b-a-b",["a-a-b-b","a-b-c-d"]],
+ ["Satu bait pantun terdiri atas ... baris.","Empat",["Dua","Enam"]],
+ ["Kalimat perintah biasanya diakhiri tanda...","Seru (!)",["Tanya (?)","Koma (,)"]],
+ ["Kata “bermain” artinya...","Melakukan permainan",["Menjual mainan","Memukul"]],
+ ["Kesimpulan dari sebuah teks biasanya terdapat di bagian...","Akhir",["Judul","Tengah kalimat"]],
+ ["Kata “sekolah” jika diberi imbuhan ber- menjadi...","Bersekolah",["Disekolah","Persekolahan"]],
+ ["Lawan kata “maju” adalah...","Mundur",["Cepat","Naik"]]);
+BINDO_Q[2].push(
+ ["Kata baku yang benar adalah...","Analisis",["Analisa","Analises"]],
+ ["Kata baku yang benar adalah...","Sistem",["Sistim","Sisteem"]],
+ ["Kata baku yang benar adalah...","Objek",["Obyek","Objeck"]],
+ ["Kata baku yang benar adalah...","Jadwal",["Jadual","Jatwal"]],
+ ["Teks yang menjelaskan langkah-langkah membuat sesuatu disebut teks...","Prosedur",["Narasi","Persuasi"]],
+ ["Teks yang berisi pendapat penulis tentang suatu masalah disebut teks...","Eksposisi",["Fabel","Puisi"]],
+ ["Majas yang membandingkan dengan kata “seperti” disebut majas...","Simile (perumpamaan)",["Hiperbola","Personifikasi"]],
+ ["Majas pada “wajahnya pucat seperti kapas” adalah...","Simile (perumpamaan)",["Metafora","Litotes"]],
+ ["Alur cerita yang berurutan dari awal sampai akhir disebut alur...","Maju",["Mundur","Campuran"]],
+ ["Sudut pandang orang pertama ditandai dengan kata...","Aku atau saya",["Dia","Mereka"]],
+ ["Kalimat tidak langsung tidak menggunakan tanda...","Petik",["Titik","Koma"]],
+ ["Surat yang ditujukan kepada teman atau keluarga disebut surat...","Pribadi",["Dinas","Lamaran"]],
+ ["Bagian surat yang berisi maksud penulis disebut...","Isi surat",["Salam pembuka","Tanggal surat"]],
+ ["Kata “perpustakaan” mendapat imbuhan...","per-an",["ke-an","pe-an"]],
+ ["Wawancara adalah kegiatan tanya jawab untuk mendapatkan...","Informasi",["Hadiah","Hukuman"]],
+ ["Iklan yang bertujuan mengajak masyarakat berbuat baik disebut iklan...","Layanan masyarakat",["Penawaran","Penjualan"]],
+ ["Kata ilmiah yang berarti “dugaan sementara” adalah...","Hipotesis",["Kesimpulan","Data"]],
+ ["Puisi yang tidak terikat aturan rima dan jumlah baris disebut puisi...","Bebas (modern)",["Pantun","Syair"]],
+ ["Syair memiliki rima akhir...","a-a-a-a",["a-b-a-b","a-a-b-b"]],
+ ["Ringkasan adalah penyajian karangan dalam bentuk...","Singkat",["Panjang","Bergambar saja"]]);
+
 
 /* =====================================================
    GTA-STYLE OVERRIDES & SAVE MIGRATION
@@ -3429,7 +3571,7 @@ const ANIM_URL=MBASE+"models/anims.json";
 const BASE={},CLIPS={};let MODELS_OK=false;
 const HERO_MODEL={boy:{kind:"boy"},girl:{kind:"girl"}};
 const FEMALE=["Mia","Ms. Lina","Ava","Sari","Nina","Dr. Hana","Maya","Rina","Nenek Ani","Tika"];
-const TARGET_H={boy:1.32,girl:1.25,woman:1.66,guy:1.76};
+const TARGET_H={boy:1.32,girl:1.25,woman:1.66,guy:1.76,man:1.76};
 function fixHips(clip,keepY){clip.tracks.forEach(t=>{if(/Hips\.position$/.test(t.name)){const v=t.values;const x0=v[0],y0=v[1],z0=v[2];for(let i=0;i<v.length;i+=3){v[i]=x0;v[i+2]=z0;if(!keepY)v[i+1]=y0}}});return clip}
 function loadModels(onProgress){
  return new Promise(resolve=>{
@@ -3876,7 +4018,8 @@ function tick(){
  if(driving&&!dragging&&!camKeys){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
  else if(W2.fly&&!dragging&&!camKeys){const want=W2.fly.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.2)}
  const cd0=driving?Math.max(camDist,8.5):W2.fly?Math.max(camDist,9):camDist,ch=driving?1.6:1.25*(player.scale||1);
- const cq=cineCam(cd0,pitch),cd=cq?cq.cd:cd0,pt=cq?cq.pitch:pitch,lk=cq?cq.lift:0;
+ const cdI=(!driving&&onIpas(target.x,target.z)&&i3pol(target.x,target.z).r<I3.B)?1.35:1;
+ const cq=cineCam(cd0*cdI,pitch),cd=cq?cq.cd:cd0*cdI,pt=cq?cq.pitch:pitch,lk=cq?cq.lift:0;
  const tx=target.x+Math.sin(yaw)*cd*Math.cos(pt),tz=target.z+Math.cos(yaw)*cd*Math.cos(pt),ty=target.y+ch+cd*Math.sin(pt);
  let fx=tx,fy=ty,fz=tz;{const ox=target.x,oy=target.y+ch,oz=target.z;let safe=1;for(let k=1;k<=12;k++){const f=k/12,x=ox+(tx-ox)*f,y=oy+(ty-oy)*f,z=oz+(tz-oz)*f;
   let hit=false;if(onIpas(x,z)){const q=i3pol(x,z);if(y<i3T(q.r,q.a)+.5)hit=true}for(const p of PLATS){if(hit)break;if(y<p.top+.25&&y>(p.bottom||0)-.2&&insidePlat(p,x,z,.25)){hit=true;break}}
@@ -3983,7 +4126,7 @@ function toggleCar(){
  if(driving){driving=false;if(player.gs)player.gs.visible=true;const C=car.cfg,off=C.ride?1.1:1.9,rx=Math.cos(car.h),rz=-Math.sin(car.h);
   let px=car.x-rx*off,pz=car.z-rz*off;if(!walkable(px,pz)){px=car.x+rx*off;pz=car.z+rz*off}if(!walkable(px,pz)){px=car.x;pz=car.z}
   player.root.position.set(px,0,pz);player.root.visible=true;car.speed=0;$("jumpBtn").textContent="Lompat";$("carBtn").textContent=C.label;blip();return}
- if(car&&Math.hypot(car.x-player.root.position.x,car.z-player.root.position.z)<3.4){driving=true;player.root.visible=car.cfg.ride;nearNpc=-1;nearPk=-1;nearKiosk=-1;W2.near=null;W2.nearKey="";SWIM=false;$("talkBtn").disabled=true;$("talkBtn").textContent="Bicara";$("talkBtn").classList.remove("play");$("carBtn").hidden=false;$("carBtn").textContent=car.cfg.ride?"Turun":"Keluar";$("jumpBtn").textContent="Rem";blip("good")}
+ if(car&&Math.hypot(car.x-player.root.position.x,car.z-player.root.position.z)<3.4){driving=true;player.root.visible=car.cfg.ride;nearNpc=-1;nearPk=-1;nearKiosk=-1;W2.near=null;W2.nearKey="";SWIM=false;$("talkBtn").disabled=true;$("talkBtn").textContent="Bicara";$("talkBtn").classList.remove("play");$("carBtn").hidden=false;$("carBtn").textContent=car.cfg.ride?"Turun":"Keluar";$("jumpBtn").textContent="Rem";if(car.cfg.boat){$("talkBtn").disabled=false;$("talkBtn").textContent="Mancing"}blip("good")}
 }
 function jump(){if(paused)return;if(ACT)return actJump();if(SWIM)return diveToggle();if(driving){keys.Space=true;setTimeout(()=>keys.Space=false,400);return}
  if(onGround){vy=8.2;onGround=false;jumps=1;blip("jump")}else if(jumps<2){vy=7.4;jumps=2;blip("jump")}}
@@ -3995,7 +4138,7 @@ function updateHelp(){const h=$("help");let k="",html="";
  if(ACT&&ACT.type==="fly"){k="fly";html="Terbang: Belok <kbd>A</kbd><kbd>D</kbd> · Menukik <kbd>W</kbd> · Melambat <kbd>S</kbd> · Tahan <kbd>Spasi</kbd> / <b>Kepak</b> untuk naik"}
  else if(ACT){k="act"+ACT.type+(ACT.phase||"");html=ACT.type==="soccer"?(SOC.role==="kick"?"Tekan <kbd>Spasi</kbd> / <b>Tendang</b> saat lingkaran kuning ada di sasaran · <kbd>E</kbd> keluar":"Geser <kbd>A</kbd> <kbd>D</kbd>, tekan <kbd>Spasi</kbd> untuk menepis · lingkaran merah = arah bola · <kbd>E</kbd> keluar"):ACT.type==="climb"?"Panjat: Naik <kbd>W</kbd> · Turun <kbd>S</kbd> · Lompat turun <kbd>Spasi</kbd>":ACT.type==="swing"?"Ayunan: Dorong <kbd>W</kbd> · Rem <kbd>S</kbd> · Turun <kbd>Spasi</kbd>":ACT.type==="fish"?(ACT.phase==="bite"?"Ada yang makan umpan! Tekan <kbd>E</kbd> / <b>Tarik!</b>":"Tunggu tanda <b style='color:#E74C3C'>!</b> lalu tekan <kbd>E</kbd> · Berhenti <kbd>Spasi</kbd>"):"";if(!html)k=""}
  else if(SWIM){k="swim"+(W2.diveWant>0?1:0);html=W2.diveWant>0?"Menyelam: gerakkan <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Naik ke permukaan <kbd>Spasi</kbd> / <b>Naik</b> · Awas napas!":"Berenang: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Cepat <kbd>Shift</kbd> · Menyelam <kbd>Spasi</kbd> / <b>Selam</b>"}
- else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":n.type==="soccer"?"Tekan <kbd>E</kbd> untuk <b style=\"color:#7CFC9A\">main bola</b>: pilih jadi kiper atau penendang":n.type==="odong"?"Tekan <kbd>E</kbd> untuk naik <b style=\"color:#FFD54F\">odong-odong</b>":n.type!=="gate"?"Tekan <kbd>E</kbd> untuk mulai":`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`}
+ else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":n.type==="soccer"?"Tekan <kbd>E</kbd> untuk <b style=\"color:#7CFC9A\">main bola</b>: pilih jadi kiper atau penendang":n.type==="odong"?"Tekan <kbd>E</kbd> untuk naik <b style=\"color:#FFD54F\">odong-odong</b>":n.type!=="gate"?"Tekan <kbd>E</kbd> untuk mulai":(n.ref.npc?`Tekan <kbd>E</kbd> untuk bicara dengan <b style="color:#5DD39E">${esc(n.ref.npc.name)}</b> (soal IPAS ${n.ref.i+1})`:`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`)}
  else if(driving){k="drive"+car.type;html=`${esc(car.cfg.label)}: Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · ${car.cfg.ride?"Turun":"Keluar"} <kbd>F</kbd>`}
  else if(nearNpc>=0){k="npc"+nearNpc;html=`Tekan <kbd>E</kbd> untuk ngobrol dengan <b style="color:#F7D23E">${esc(AREAS[nearNpc].npc.name)}</b>`}
  else if(nearKiosk>=0){const K=KIOSKS[nearKiosk];k="kiosk"+nearKiosk;html=`Tekan <kbd>E</kbd> untuk main <b style="color:#FF8FD1">${esc(K.name)}</b>${K.subj==="en"?" (Bahasa Inggris)":""}`}
@@ -4055,7 +4198,7 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
 /* ---------- input ---------- */
 addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;keys[e.code]=true;
  if(e.code==="Space"){e.preventDefault();if(!driving&&!e.repeat)jump()}
- if(e.code==="KeyE"&&!paused&&!driving&&(nearNpc>=0||nearPk>=0||nearKiosk>=0||W2.near||ACT))talk();
+ if(e.code==="KeyE"&&!paused&&((driving&&car&&car.cfg.boat)||(!driving&&(nearNpc>=0||nearPk>=0||nearKiosk>=0||W2.near||ACT))))talk();
  if(e.code==="KeyF"&&!e.repeat)toggleCar();
  if(e.code==="KeyG"&&!paused&&!driving&&!e.repeat)dance();
  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)&&!paused)e.preventDefault()});
@@ -4080,7 +4223,7 @@ $("talkBtn").addEventListener("click",()=>talk());
 function dance(){if(paused||driving)return;dancing=dancing>0?0:9;if(dancing&&!player.gltf)toast("Joget!",true)}
 
 /* ---------- quest hooks (GTA style) ---------- */
-function talk(){if(paused||driving)return;if(ACT){if(ACT.type==="fish")fishTalk();if(ACT.type==="odong")odHorn();if(ACT.type==="soccer")socExit();return}if(nearNpc<0&&nearPk<0&&nearKiosk<0&&W2.near)return startAct(W2.near);if(nearKiosk>=0)return startMG(nearKiosk);if(nearPk>=0)return startPk(nearPk);if(nearNpc>=0)startQuest(nearNpc)}
+function talk(){if(paused)return;if(driving){if(car&&car.cfg.boat)boatFish();return}if(ACT){if(ACT.type==="fish")fishTalk();if(ACT.type==="odong")odHorn();if(ACT.type==="soccer")socExit();return}if(nearNpc<0&&nearPk<0&&nearKiosk<0&&W2.near)return startAct(W2.near);if(nearKiosk>=0)return startMG(nearKiosk);if(nearPk>=0)return startPk(nearPk);if(nearNpc>=0)startQuest(nearNpc)}
 function pkAvatar(i,mood){return `<img class="ava ${mood||""}" src="${pkPortrait(i)}" alt="${esc(PK[i].name)}" width="192" height="192">`}
 function startPk(i){setPaused(true);const P=PK[i],g=GR(),B=P.b[g.band];
  /* PPKn: soal pilihan ganda saja, tanpa ucapan */
