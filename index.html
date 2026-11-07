@@ -2928,8 +2928,9 @@ function loadModels(onProgress){
   const timer=setTimeout(()=>{fail=true;resolve(false)},120000);
   const done=()=>{left--;if(!left&&!fail){clearTimeout(timer);MODELS_OK=!!(CLIPS.idle&&CLIPS.walk&&CLIPS.run);resolve(MODELS_OK)}};
   const report=()=>onProgress&&onProgress(names.reduce((s,k)=>s+(prog[k]||0),0)/names.length);
-  fetch(ANIM_URL).then(r=>{if(!r.ok)throw 0;return r.json()}).then(A=>{for(const k in A){const c=THREE.AnimationClip.parse(A[k]);CLIPS[k]=fixHips(c,!["jump"].includes(k))}done()}).catch(()=>{if(!fail){fail=true;clearTimeout(timer);resolve(false)}});
-  names.forEach(n=>L.load(MODEL_URL[n],g=>{
+  const EMB=window.EMB_MODELS,b64buf=t=>{const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer};
+  (EMB?Promise.resolve().then(()=>JSON.parse(new TextDecoder().decode(b64buf(EMB.anims)))):fetch(ANIM_URL).then(r=>{if(!r.ok)throw 0;return r.json()})).then(A=>{for(const k in A){const c=THREE.AnimationClip.parse(A[k]);CLIPS[k]=fixHips(c,!["jump"].includes(k))}done()}).catch(()=>{if(!fail){fail=true;clearTimeout(timer);resolve(false)}});
+  names.forEach(n=>(EMB?(u,ok,pr,er)=>{try{L.parse(b64buf(EMB[n]),"",ok,er)}catch(e){er(e)}}:L.load.bind(L))(MODEL_URL[n],g=>{
     const sc=g.scene;let hips=null;sc.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false}if(o.isBone&&!hips&&/Hips$/.test(o.name))hips=o});
     sc.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(sc);
     BASE[n]={scene:sc,h:Math.max(.5,box.max.y-box.min.y),prefix:hips?hips.name.replace(/Hips$/,""):"mixamorig",hipY:hips?hips.position.y:0};
