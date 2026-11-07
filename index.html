@@ -374,7 +374,7 @@ input{-webkit-user-select:text;user-select:text}
     <button class="act" id="jumpBtn" aria-label="Lompat">Lompat</button>
     <button class="act talk" id="talkBtn" disabled aria-label="Bicara">Bicara</button>
   </div>
-  <div class="keysHint">Jalan <b>WASD</b> · Lari <b>Shift</b> · Lompat <b>Spasi</b> (2x di udara) · Bicara <b>E</b> · Mobil <b>F</b> · Joget <b>G</b> · Seret untuk memutar kamera</div>
+  <div class="keysHint">Jalan <b>WASD</b> · Lari <b>Shift</b> · Lompat <b>Spasi</b> (2x di udara) · Bicara <b>E</b> · Mobil <b>F</b> · Joget <b>G</b> · Seret mouse atau tombol <b>panah</b> untuk memutar kamera</div>
 </div>
 
 <!-- START -->
@@ -404,7 +404,7 @@ input{-webkit-user-select:text;user-select:text}
     <p class="status" id="loadStatus">Menyiapkan model 3D...</p>
     <div class="chunky howto">
       <b>Cara main</b>
-      <div>Jalan <kbd>W A S D</kbd>, lari <kbd>Shift</kbd>, lompat <kbd>Spasi</kbd> (tekan lagi di udara untuk lompat ganda). Di HP pakai joystick dan tombol layar.</div>
+      <div>Jalan <kbd>W A S D</kbd>, lari <kbd>Shift</kbd>, lompat <kbd>Spasi</kbd> (tekan lagi di udara untuk lompat ganda). Putar kamera dengan tombol <kbd>panah</kbd> ← → ↑ ↓ atau seret mouse. Di HP pakai joystick dan tombol layar.</div>
       <div>Masuk ke <b style="font-family:var(--body);font-size:1rem">lingkaran kuning</b> di depan warga lalu tekan <kbd>E</kbd> untuk memulai misi ngobrol. Ucapanmu dinilai otomatis.</div>
       <div>Naik mobil, motor, atau sepeda di dekat alun-alun dengan tombol <kbd>F</kbd>. Coba juga Taman Lompat dan Menara Parkour!</div>
       <div>Ikuti <b style="font-family:var(--body);font-size:1rem">Jalan ke Negeri Pancasila</b> lewat jembatan panjang untuk belajar PPKn bersama 7 guru.</div>
@@ -1829,11 +1829,31 @@ function openGateQuiz(G){setPaused(true);const QF=G.qf||ipasQ;if(!G.q)G.q=QF();c
    setTimeout(()=>{G.q=QF();openGateQuiz(G)},1800)}})}
 /* ---------- hewan ---------- */
 const ANIMALS={cat:{id:"Kucing",en:"cat",snd:"Meong!",body:"#E6913C",belly:"#F7E2C6",h:.32,len:.5,legs:4,spd:1.1},
- dog:{id:"Anjing",en:"dog",snd:"Guk guk!",body:"#8D5B3A",belly:"#E8D2B6",h:.45,len:.75,legs:4,spd:1.6},
+ dog:{id:"Anjing",en:"dog",snd:"Guk guk!",body:"#D9A15A",belly:"#FFF6E6",h:.26,len:.4,legs:4,spd:1.5},
  chicken:{id:"Ayam",en:"chicken",snd:"Kukuruyuk!",body:"#F4F1EA",belly:"#FFFFFF",h:.28,len:.36,legs:2,spd:.8},
  goat:{id:"Kambing",en:"goat",snd:"Mbeee!",body:"#EFEAE0",belly:"#D9D2C3",h:.6,len:.85,legs:4,spd:.9},
  cow:{id:"Sapi",en:"cow",snd:"Mooo!",body:"#3B2B22",belly:"#F2EDE6",h:.95,len:1.5,legs:4,spd:.7}};
-function makeAnimal(type){const A=ANIMALS[type],g=new THREE.Group(),body=pbr(A.body,.92),belly=pbr(A.belly,.95),dark=pbr("#1A1A1A",.5),pink=pbr("#E8A0A0",.8);
+/* anak anjing mungil bergaya chibi (desain orisinal): kepala besar, telinga terkulai, kalung lonceng */
+function makePuppy(){const g=new THREE.Group(),torso=new THREE.Group();g.add(torso);const fur=pbr("#D9A15A",.9),cream=pbr("#FFF4E2",.92),ear=pbr("#9A5A2C",.9),dark=pbr("#1B1410",.25),pink=pbr("#F29AA6",.7),legs=[];
+ const b=mesh(G.sph(.15,20,16),fur,0,.2,-.02,torso);b.scale.set(.95,.88,1.25);
+ const ch=mesh(G.sph(.1,16,12),cream,0,.17,.08,torso);ch.scale.set(1,1.1,.9);
+ [[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sz])=>{const p=new THREE.Group();p.position.set(sx*.075,.13,sz*.09-.01);torso.add(p);
+  mesh(G.cap(.036,.05),fur,0,-.045,0,p);const paw=mesh(G.sph(.042,12,10),cream,0,-.1,.01,p);paw.scale.set(1,.7,1.2);legs.push(p)});
+ const head=new THREE.Group();head.position.set(0,.37,.14);torso.add(head);
+ const hd=mesh(G.sph(.145,22,18),fur,0,0,0,head);hd.scale.set(1.08,.98,1);
+ const mz=mesh(G.sph(.075,16,12),cream,0,-.045,.105,head);mz.scale.set(1.15,.8,.9);
+ mesh(G.sph(.024,10,8),dark,0,-.022,.172,head);
+ const tg=mesh(G.sph(.026,10,8),pink,0,-.085,.13,head);tg.scale.set(1,.45,1.2);
+ [-1,1].forEach(s=>{const e=mesh(G.sph(.03,12,10),dark,s*.058,.028,.118,head);e.scale.set(1,1.15,.7);
+  mesh(G.sph(.009,6,5),pbr("#FFFFFF",.2),s*.058+.008,.04,.138,head);
+  const bl=mesh(G.sph(.022,8,6),pink,s*.09,-.03,.1,head);bl.scale.set(1,.55,.4);
+  const er=new THREE.Group();er.position.set(s*.115,.07,-.01);head.add(er);er.rotation.z=s*.5;const e2=mesh(G.sph(.075,14,10),ear,0,-.06,0,er);e2.scale.set(.42,1.05,.75)});
+ const tuft=mesh(G.sph(.04,10,8),fur,0,.14,.02,head);tuft.scale.set(1,.6,1);
+ const col=mesh(new THREE.TorusGeometry(.085,.016,8,20),pbr("#D7263D",.5),0,.27,.11,torso);col.rotation.x=Math.PI/2-.5;
+ mesh(G.sph(.024,10,8),pbr("#E8C33A",.25,.8),0,.215,.18,torso);
+ const tail=new THREE.Group();tail.position.set(0,.25,-.19);torso.add(tail);const tl=mesh(G.cap(.03,.09),fur,0,.05,-.02,tail);tl.rotation.x=-.7;const tt=mesh(G.sph(.034,10,8),cream,0,.11,-.06,tail);
+ g.userData={legs,head,tail,torso};g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false}});return g}
+function makeAnimal(type){if(type==="dog")return makePuppy();const A=ANIMALS[type],g=new THREE.Group(),body=pbr(A.body,.92),belly=pbr(A.belly,.95),dark=pbr("#1A1A1A",.5),pink=pbr("#E8A0A0",.8);
  const H=A.h,L=A.len,legs=[];const torso=new THREE.Group();g.add(torso);
  if(A.legs===4){const b=mesh(G.cap(H*.42,L*.55),body,0,H+H*.1,0,torso);b.rotation.x=Math.PI/2;
   const bl=mesh(G.cap(H*.36,L*.45),belly,0,H-H*.02,0,torso);bl.rotation.x=Math.PI/2;bl.scale.set(.9,1,.95);
@@ -1934,7 +1954,7 @@ function endAct(){ACT=null;player.root.rotation.x=0;player.root.rotation.z=0;if(
 function bonesOf(C){if(!C.rb){C.rb={};C.obj&&C.obj.traverse(o=>{if(o.isBone){const m=o.name.match(/(Hips|Spine|LeftUpLeg|LeftLeg|RightUpLeg|RightLeg|LeftArm|RightArm|LeftForeArm|RightForeArm|LeftShoulder|RightShoulder|RightHand|Head)$/);if(m&&!C.rb[m[1]])C.rb[m[1]]=o}})}return C.rb}
 function actUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec(),t=clock.elapsedTime;
  if(ACT.type==="pet"){ACT.t-=dt;animChar(player,dt,{speed:0,talk:true});if(ACT.t<=0)endAct();return}
- if(ACT.type==="climb"){const P=ACT.P,y0=P.y0||0,top=y0+P.h-2.1;const climbUp=keys.KeyW||keys.ArrowUp||joyVec.y>.3,down=keys.KeyS||keys.ArrowDown||joyVec.y<-.3;
+ if(ACT.type==="climb"){const P=ACT.P,y0=P.y0||0,top=y0+P.h-2.1;const climbUp=keys.KeyW||joyVec.y>.3,down=keys.KeyS||joyVec.y<-.3;
   let mv=0;if(climbUp)mv=P.bean?3.4:1.5;else if(down)mv=P.bean?-4:-2.2;if(P.bean&&mv)ACT.a+=mv*dt*.13;ACT.y=Math.max(y0,Math.min(top,ACT.y+mv*dt));if(mv)ACT.ph+=dt*7*Math.sign(mv);
   const hug=P.bean?P.hug:.2*(player.scale||1);pos.set(P.x+Math.sin(ACT.a)*hug,ACT.y,P.z+Math.cos(ACT.a)*hug);player.root.rotation.y=ACT.a+Math.PI;vy=0;onGround=true;
   animChar(player,dt,{speed:0});if(player.gltf)hugPose(ACT.ph,!!mv)
@@ -1943,7 +1963,7 @@ function actUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec(),t=clock
   else if(ACT.y>=top-.01&&!P.topped){P.topped=true;SAVE.xp+=10;persist();updateStats();blip("win");confetti(25);toast("Kamu sampai di puncak tiang! Hormat bendera Merah Putih! +10 XP")}
   if(ACT.y<=y0+.001&&down&&!climbUp){}
   return}
- if(ACT.type==="swing"){const S=ACT.S;const push=(keys.KeyW||keys.ArrowUp||joyVec.y>.3)?1:0,brake=(keys.KeyS||keys.ArrowDown||joyVec.y<-.3)?1:0;
+ if(ACT.type==="swing"){const S=ACT.S;const push=(keys.KeyW||joyVec.y>.3)?1:0,brake=(keys.KeyS||joyVec.y<-.3)?1:0;
   S.vel+=(-9.8/S.L*Math.sin(S.ang))*dt;if(push)S.vel+=Math.sign(S.vel||1)*2.2*dt*Math.cos(S.ang);if(brake)S.vel*=Math.pow(.2,dt);S.vel*=Math.pow(.92,dt);S.ang=Math.max(-1.2,Math.min(1.2,S.ang+S.vel*dt));
   S.piv.rotation.x=S.ang;S.piv.updateMatrixWorld(true);_v3.set(0,-S.L+.05,0);S.piv.localToWorld(_v3);
   player.root.rotation.order="YXZ";player.root.rotation.y=0;player.root.rotation.x=S.ang;pos.set(_v3.x,_v3.y,_v3.z);vy=0;onGround=true;
@@ -3694,10 +3714,12 @@ function tick(){
   if(v.cfg.ride){const lean=(driving&&v===car)?-v.steer*Math.min(1,Math.abs(v.speed)/8)*.55:0;v.m.rotation.z=lerp(v.m.rotation.z,lean,.12)}
   if(v.m.userData.wheels&&v.speed)v.m.userData.wheels.forEach(w=>w.rotation.x+=v.speed*dt/.33)});
  world2Update(dt,t,pp);cineUpdate(dt,t);treeUpdate(t);
- // camera
+ // camera (panah keyboard memutar & menaikkan/menurunkan pandangan, sama seperti seret mouse)
+ const camKeys=!paused&&(keys.ArrowLeft||keys.ArrowRight||keys.ArrowUp||keys.ArrowDown);
+ if(camKeys){yaw-=((keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0))*dt*2.4;pitch=Math.max(.05,Math.min(1.1,pitch-((keys.ArrowUp?1:0)-(keys.ArrowDown?1:0))*dt*1.3))}
  const target=driving?{x:car.x,y:0,z:car.z}:player.root.position;
- if(driving&&!dragging){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
- else if(W2.fly&&!dragging){const want=W2.fly.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.2)}
+ if(driving&&!dragging&&!camKeys){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
+ else if(W2.fly&&!dragging&&!camKeys){const want=W2.fly.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.2)}
  const cd0=driving?Math.max(camDist,8.5):W2.fly?Math.max(camDist,9):camDist,ch=driving?1.6:1.25*(player.scale||1);
  const cq=cineCam(cd0,pitch),cd=cq?cq.cd:cd0,pt=cq?cq.pitch:pitch,lk=cq?cq.lift:0;
  const tx=target.x+Math.sin(yaw)*cd*Math.cos(pt),tz=target.z+Math.cos(yaw)*cd*Math.cos(pt),ty=target.y+ch+cd*Math.sin(pt);
@@ -3728,7 +3750,7 @@ function tick(){
  updateHelp();updateObjective(target);if(FRAME%2===0)drawRadar(target);adaptQuality(dt);
  if(!cineRender())renderer.render(scene,camera);
 }
-function inputVec(){let ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joyVec.x;let iz=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+joyVec.y;const len=Math.hypot(ix,iz);if(len>1){ix/=len;iz/=len}return{ix,iz,len:Math.min(1,len)}}
+function inputVec(){let ix=(keys.KeyD?1:0)-(keys.KeyA?1:0)+joyVec.x;let iz=(keys.KeyW?1:0)-(keys.KeyS?1:0)+joyVec.y;const len=Math.hypot(ix,iz);if(len>1){ix/=len;iz/=len}return{ix,iz,len:Math.min(1,len)}}
 function movePlayer(dt){
  const {ix,iz,len}=inputVec();
  const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
