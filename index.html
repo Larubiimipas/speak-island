@@ -1078,13 +1078,7 @@ function table(g,x,z,umb){cyl(.6,.6,.08,"#FFFFFF",x,.78,z,g);cyl(.06,.06,.78,"#8
  [-1,1].forEach(s=>box(.45,.45,.45,"#C9822B",x+s*1,.23,z,g));
  if(umb){cyl(.04,.04,2.2,"#FFFFFF",x,1.1,z,g);mesh(new THREE.ConeGeometry(1.4,.6,8),lam(umb),x,2.3,z,g)}}
 function bench(g,x,z,ry){const b=new THREE.Group();b.position.set(x,0,z);b.rotation.y=ry||0;g.add(b);box(1.8,.1,.5,"#A0522D",0,.45,0,b);box(1.8,.4,.08,"#A0522D",0,.75,-.22,b);[-.75,.75].forEach(s=>box(.1,.45,.45,"#555555",s,.22,0,b))}
-function treeAt(g,x,z,s,fruit){const t=new THREE.Group();t.position.set(x,0,z);t.rotation.y=Math.random()*6;g.add(t);s=s||1;
- const bark=TEXC.barkM||(TEXC.barkM=texStd("wood","#6B4A32",1,3,.95));
- mesh(new THREE.CylinderGeometry(.13*s,.26*s,2.4*s,9),bark,0,1.2*s,0,t);
- const br=mesh(new THREE.CylinderGeometry(.06*s,.1*s,1.2*s,6),bark,.3*s,2.1*s,0,t);br.rotation.z=-.7;
- const lm=LEAF[(Math.random()*LEAF.length)|0];
- const n=3+((Math.random()*2)|0);for(let k=0;k<n;k++){const r=(1.15-k*.1)*s*(.85+Math.random()*.3);const m=mesh(blobGeo(k%4),lm,(Math.random()-.5)*1.2*s,2.5*s+k*.42*s,(Math.random()-.5)*1.2*s,t);m.scale.setScalar(r)}
- if(fruit)for(let k=0;k<7;k++){const a=k*.9;ball(.12,fruit,Math.cos(a)*1.05*s,2.3*s+Math.sin(k)*.4,Math.sin(a)*1.05*s,t)}return t}
+/* treeAt: lihat part_tree.js (pohon realistis) */
 
 const BUILD={
  gate(g,F,A){[-3.2,3.2].forEach(x=>{box(.8,4.4,.8,"#E8D5A8",x,2.2,-1,g);obs(F,x,-1,.7)});box(7.4,.9,.9,A.color,0,4.6,-1,g);
@@ -1153,6 +1147,87 @@ const BUILD={
   table(g,3.8,.6);ball(.35,"#FAD7A0",3.8,1.05,.6,g);obs(F,3.8,.6,1.2)}
 };
 
+
+/* ===== POHON REALISTIS: batang bercabang + gugus daun bertekstur + bergoyang tertiup angin ===== */
+const TREEW={u:{value:0},tpl:null,palm:null,mats:null};
+function treeCanvas(w,h,fn){const c=document.createElement("canvas");c.width=w;c.height=h;fn(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t}
+function leafTex(hue){return treeCanvas(256,256,(x,w,h)=>{x.clearRect(0,0,w,h);
+ for(let i=0;i<64;i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*92,cx=128+Math.cos(a)*r*.8,cy=128+Math.sin(a)*r*.8,L=34+Math.random()*30,W=12+Math.random()*9,ang=a+(Math.random()-.5)*1.4;
+  x.save();x.translate(cx,cy);x.rotate(ang);const l=18+Math.random()*20,g=x.createLinearGradient(-L/2,0,L/2,0);
+  g.addColorStop(0,`hsl(${hue+Math.random()*16-8},${45+Math.random()*15}%,${l*.7}%)`);g.addColorStop(1,`hsl(${hue+8+Math.random()*10},${50+Math.random()*15}%,${l+8}%)`);
+  x.fillStyle=g;x.beginPath();x.moveTo(-L/2,0);x.quadraticCurveTo(0,-W,L/2,0);x.quadraticCurveTo(0,W,-L/2,0);x.fill();
+  x.strokeStyle="rgba(230,255,200,.28)";x.lineWidth=1.2;x.beginPath();x.moveTo(-L/2,0);x.lineTo(L/2,0);x.stroke();x.restore()}})}
+function barkTex(){const t=treeCanvas(128,256,(x,w,h)=>{x.fillStyle="#5B4532";x.fillRect(0,0,w,h);
+ for(let i=0;i<900;i++){const px=Math.random()*w,py=Math.random()*h,l=8+Math.random()*40;x.strokeStyle=Math.random()<.5?`rgba(30,20,12,${.2+Math.random()*.35})`:`rgba(150,125,95,${.12+Math.random()*.2})`;
+  x.lineWidth=1+Math.random()*2.5;x.beginPath();x.moveTo(px,py);x.lineTo(px+(Math.random()-.5)*4,py+l);x.stroke()}});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function palmBarkTex(){const t=treeCanvas(64,256,(x,w,h)=>{x.fillStyle="#7B6449";x.fillRect(0,0,w,h);for(let y=0;y<h;y+=16){x.fillStyle="rgba(40,28,16,.45)";x.fillRect(0,y,w,3);x.fillStyle="rgba(200,175,140,.25)";x.fillRect(0,y+4,w,2)}
+ for(let i=0;i<300;i++){x.fillStyle=`rgba(30,20,10,${Math.random()*.25})`;x.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*3,1+Math.random()*6)}});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function frondTex(){return treeCanvas(128,512,(x,w,h)=>{x.clearRect(0,0,w,h);const cx=w/2;
+ for(let y=10;y<h-6;y+=5){const k=1-y/h,len=(18+48*Math.sin(Math.PI*Math.min(1,(y/h)*1.1)))*(.9+Math.random()*.2);const l=26+Math.random()*14;
+  x.strokeStyle=`hsl(${88+Math.random()*14},${48+Math.random()*12}%,${l}%)`;x.lineWidth=3.2;x.lineCap="round";
+  [-1,1].forEach(s=>{x.beginPath();x.moveTo(cx,y);x.quadraticCurveTo(cx+s*len*.5,y-4,cx+s*len,y-14-k*6);x.stroke()})}
+ x.strokeStyle="#8C8A4A";x.lineWidth=4;x.beginPath();x.moveTo(cx,0);x.lineTo(cx,h);x.stroke()})}
+function swayMat(mat){mat.onBeforeCompile=sh=>{sh.uniforms.uWind=TREEW.u;
+ sh.vertexShader="attribute float sw;\nuniform float uWind;\n"+sh.vertexShader.replace("#include <begin_vertex>",
+ "#include <begin_vertex>\n vec4 wq=modelMatrix*vec4(position,1.);float ph=uWind*1.6+wq.x*.19+wq.z*.15;\n transformed.x+=(sin(ph)*.09+sin(ph*2.7+wq.y*.8)*.035)*sw;transformed.z+=(cos(ph*.83)*.07+cos(ph*3.1+wq.x)*.03)*sw;transformed.y+=sin(ph*2.2)*.02*sw;")};
+ mat.customProgramCacheKey=()=>"treeSway";return mat}
+function treeMats(){if(TREEW.mats)return TREEW.mats;const bt=barkTex();
+ const leaf=h=>swayMat(new THREE.MeshStandardMaterial({map:leafTex(h),alphaTest:.45,side:THREE.DoubleSide,roughness:.78,metalness:0}));
+ TREEW.mats={bark:new THREE.MeshStandardMaterial({map:bt,color:"#B8A48C",roughness:.95}),leaf:[leaf(98),leaf(108),leaf(86)],
+  palmBark:new THREE.MeshStandardMaterial({map:palmBarkTex(),color:"#9A8468",roughness:.95}),frond:swayMat(new THREE.MeshStandardMaterial({map:frondTex(),alphaTest:.4,side:THREE.DoubleSide,roughness:.75})),
+  coco:new THREE.MeshStandardMaterial({color:"#5E6B2A",roughness:.6})};return TREEW.mats}
+// tabung meruncing di sepanjang kurva
+function taperTube(curve,r0,r1,tub,rad){const g=new THREE.TubeGeometry(curve,tub,1,rad,false);const P=g.attributes.position,c=new THREE.Vector3(),v=new THREE.Vector3();
+ for(let i=0;i<=tub;i++){const u=i/tub;curve.getPointAt(u,c);const r=r0+(r1-r0)*u;for(let j=0;j<=rad;j++){const k=i*(rad+1)+j;v.fromBufferAttribute(P,k).sub(c).multiplyScalar(r).add(c);P.setXYZ(k,v.x,v.y,v.z)}}
+ g.computeVertexNormals();const sw=new Float32Array(P.count);g.setAttribute("sw",new THREE.BufferAttribute(sw,1));
+ const uv=g.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,uv.getX(k)*2,uv.getY(k)*(curve.getLength()/1.5));return g}
+function leafCard(cards,c,size,center,ry){// kartu daun menghadap acak; normal diarahkan keluar dari pusat tajuk agar bayangan lembut
+ const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*Math.PI,Math.random()*Math.PI*2,Math.random()*Math.PI));
+ const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b])=>new THREE.Vector3(a*size/2,b*size/2,0).applyQuaternion(q).add(c));
+ cards.push({pts,center,ry})}
+function cardsGeo(cards,hMin,hMax){const n=cards.length,pos=new Float32Array(n*12),nor=new Float32Array(n*12),uv=new Float32Array(n*8),sw=new Float32Array(n*4),idx=[];const t=new THREE.Vector3();
+ cards.forEach((C,i)=>{C.pts.forEach((p,j)=>{pos.set([p.x,p.y,p.z],i*12+j*3);t.copy(p).sub(C.center);t.y*=.6;t.y+=.35*C.ry;t.normalize();nor.set([t.x,t.y,t.z],i*12+j*3);
+  sw[i*4+j]=Math.min(1,Math.max(0,(p.y-hMin)/(hMax-hMin)))*.9+.1});uv.set([0,0,1,0,1,1,0,1],i*8);const b=i*4;idx.push(b,b+1,b+2,b,b+2,b+3)});
+ const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));g.setAttribute("normal",new THREE.BufferAttribute(nor,3));g.setAttribute("uv",new THREE.BufferAttribute(uv,2));g.setAttribute("sw",new THREE.BufferAttribute(sw,1));g.setIndex(idx);return g}
+function trnd(a,b){return a+Math.random()*(b-a)}
+function buildBroadleaf(kind){const wood=[],cards=[],crown=new THREE.Vector3();const ends=[];
+ const H=kind===1?trnd(3.4,4):trnd(2.4,3),lean=new THREE.Vector3(trnd(-.15,.15),1,trnd(-.15,.15)).normalize();
+ function grow(p0,dir,len,r0,depth){const bend=new THREE.Vector3(trnd(-.3,.3),trnd(-.05,.2),trnd(-.3,.3));const p1=p0.clone().addScaledVector(dir,len*.5).addScaledVector(bend,len*.15),p2=p0.clone().addScaledVector(dir,len).addScaledVector(bend,len*.3);
+  const cv=new THREE.CatmullRomCurve3([p0,p1,p2]);const r1=r0*(depth===0?.55:.45);wood.push(taperTube(cv,r0,r1,depth===0?8:5,depth===0?9:6));
+  if(depth>=2||(depth===1&&Math.random()<.25)){ends.push(p2);return}
+  const n=depth===0?(kind===1?4:5):trnd(2,3)|0;for(let i=0;i<n;i++){const u=depth===0?trnd(.55,.95):trnd(.4,.9);const at=cv.getPointAt(u);const a=i/n*Math.PI*2+trnd(-.4,.4);
+   const up=depth===0?(kind===1?trnd(.9,1.4):trnd(.45,.8)):trnd(.3,.9);const d=new THREE.Vector3(Math.cos(a),up,Math.sin(a)).normalize();
+   grow(at,d,len*(depth===0?(kind===1?.55:.75):.6)*trnd(.8,1.15),r0*(1-u*.5)*(depth===0?.55:.6),depth+1)}}
+ grow(new THREE.Vector3(0,-.05,0),lean,H,kind===1?.2:.26,0);
+ ends.forEach(e=>crown.add(e));crown.multiplyScalar(1/ends.length);
+ let hMin=1e9,hMax=-1e9;ends.forEach(e=>{hMin=Math.min(hMin,e.y);hMax=Math.max(hMax,e.y)});hMin-=1.2;hMax+=1;
+ ends.forEach(e=>{const k=kind===1?10:12;for(let i=0;i<k;i++){const c=e.clone().add(new THREE.Vector3(trnd(-.85,.85),trnd(-.5,.6),trnd(-.85,.85)));leafCard(cards,c,trnd(1.4,2.0),crown,1)}});
+ // isi tengah tajuk supaya rimbun
+ for(let i=0;i<(kind===1?18:28);i++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*(kind===1?1.3:2.0);leafCard(cards,crown.clone().add(new THREE.Vector3(Math.cos(a)*r,trnd(-.6,.8),Math.sin(a)*r)),trnd(1.6,2.2),crown,1)}
+ const wg=THREE.BufferGeometryUtils.mergeBufferGeometries(wood,false);wood.forEach(g=>g.dispose());
+ return{wood:wg,leaf:cardsGeo(cards,hMin,hMax),crown,top:hMax}}
+function buildPalm(){const lean=trnd(.25,.5),H=trnd(5.2,6.4),a=Math.random()*Math.PI*2;const top=new THREE.Vector3(Math.cos(a)*lean*H*.35,H,Math.sin(a)*lean*H*.35);
+ const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(0,-.05,0),new THREE.Vector3(top.x*.15,H*.4,top.z*.15),new THREE.Vector3(top.x*.55,H*.75,top.z*.55),top]);
+ const trunk=taperTube(cv,.24,.16,12,9);const uv=trunk.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,uv.getX(k)*.5,uv.getY(k)*.6);
+ // pelepah: pita melengkung ke bawah
+ const fr=[];const N=13;for(let i=0;i<N;i++){const az=i/N*Math.PI*2+trnd(-.2,.2),L=trnd(2.6,3.3),W=trnd(.9,1.15),up=i%3===0?trnd(.35,.7):trnd(-.1,.3);
+  const g=new THREE.PlaneGeometry(W,L,1,10);g.translate(0,L/2,0);const P=g.attributes.position;
+  const swv=new Float32Array(P.count);for(let k=0;k<P.count;k++){const x=P.getX(k),y=P.getY(k),u=y/L;swv[k]=.15+u*1.1;const ang=up-u*u*1.5;const r=y;P.setXYZ(k,x*(1-u*.35)+Math.abs(x)*0,Math.sin(ang)*r*.9+(Math.abs(x)/W)*-.15*u,Math.cos(ang)*r*.9)}
+  g.rotateY(az);g.translate(top.x,top.y,top.z);g.computeVertexNormals();g.setAttribute("sw",new THREE.BufferAttribute(swv,1));fr.push(g)}
+ const fg=THREE.BufferGeometryUtils.mergeBufferGeometries(fr,false);
+ const cg=[];for(let i=0;i<5;i++){const b=i/5*Math.PI*2;const s=new THREE.SphereGeometry(.16,10,8);s.translate(top.x+Math.cos(b)*.24,top.y-.25,top.z+Math.sin(b)*.24);cg.push(s)}
+ const co=THREE.BufferGeometryUtils.mergeBufferGeometries(cg,false);return{wood:trunk,frond:fg,coco:co,top}}
+function treeTemplates(){if(TREEW.tpl)return;treeMats();TREEW.tpl=[];for(let i=0;i<6;i++)TREEW.tpl.push(buildBroadleaf(i%3===2?1:0));TREEW.palm=[buildPalm(),buildPalm(),buildPalm()]}
+function treeAt(g,x,z,s,fruit){treeTemplates();const M=TREEW.mats,T=TREEW.tpl[(Math.random()*TREEW.tpl.length)|0];s=(s||1)*.95;
+ const t=new THREE.Group();t.position.set(x,0,z);t.rotation.y=Math.random()*6;t.scale.setScalar(s);g.add(t);
+ const w=new THREE.Mesh(T.wood,M.bark);w.castShadow=true;w.receiveShadow=true;t.add(w);
+ const l=new THREE.Mesh(T.leaf,M.leaf[(Math.random()*3)|0]);l.castShadow=true;l.receiveShadow=true;t.add(l);
+ if(fruit){const fm=std(fruit,.5);for(let k=0;k<9;k++){const a=k*.7;const b=new THREE.Mesh(G.sph(.11,8,6),fm);b.position.set(T.crown.x+Math.cos(a)*trnd(.9,1.6),T.crown.y+trnd(-.9,-.2),T.crown.z+Math.sin(a)*trnd(.9,1.6));t.add(b)}}
+ return t}
+function palmAt(g,x,z,s){treeTemplates();const M=TREEW.mats,P=TREEW.palm[(Math.random()*TREEW.palm.length)|0];const t=new THREE.Group();t.position.set(x,0,z);t.rotation.y=Math.random()*6;t.scale.setScalar(s||1);g.add(t);
+ const w=new THREE.Mesh(P.wood,M.palmBark);w.castShadow=true;t.add(w);const f=new THREE.Mesh(P.frond,M.frond);f.castShadow=true;f.receiveShadow=true;t.add(f);
+ const c=new THREE.Mesh(P.coco,M.coco);c.castShadow=true;t.add(c);return t}
+function treeUpdate(t){TREEW.u.value=t}
 
 /* =====================================================
    QUEST (percakapan)
@@ -1624,7 +1699,7 @@ function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.materia
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
  if(water&&water.material){water.material.roughness=.08;water.material.metalness=.55;water.material.envMapIntensity=1.1;water.material.needsUpdate=true}}
 /* bendera kain berkibar */
-function clothFlag(w,h){const geo=new THREE.PlaneGeometry(w,h,28,14);geo.translate(w/2,0,0);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:flagTexture(),side:THREE.DoubleSide,roughness:.85}));m.castShadow=true;m.userData.base=Float32Array.from(geo.attributes.position.array);m.userData.w=w;return m}
+function clothFlag(w,h,tex){const geo=new THREE.PlaneGeometry(w,h,28,14);geo.translate(w/2,0,0);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:tex||flagTexture(),side:THREE.DoubleSide,roughness:.85}));m.castShadow=true;m.userData.base=Float32Array.from(geo.attributes.position.array);m.userData.w=w;return m}
 function makePole(x,z,h,withFlag){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
  const steel=pbr("#DADFE3",.25,.85);mesh(G.cyl(.55,.7,.4,24),pbr("#B8B2A6",.9),0,.2,0,g);mesh(G.cyl(.075,.1,h,16),steel,0,h/2+.2,0,g);mesh(G.sph(.14,16,12),pbr("#E3B341",.25,.9),0,h+.3,0,g);
  const rope=mesh(G.cyl(.008,.008,h,4),pbr("#F2F2F2",.9),.11,h/2+.2,0,g,true);
@@ -1633,6 +1708,9 @@ function makePole(x,z,h,withFlag){const g=new THREE.Group();g.position.set(x,0,z
 function buildFlags(){
  if(FLAG){FLAG.visible=false;const fp=i2pos(Math.PI,7);makePole(fp.x+.0001,fp.z,11,true);FLAG=null}
  makePole(-6.5,4,9,true)}
+/* bendera kain apa pun yang ikut tertiup angin */
+function windFlag(parent,x,y,z,w,h,tex,ry){const f=clothFlag(w,h,tex);f.position.set(x,y,z);f.rotation.y=ry||0;parent.add(f);W2.flags.push(f);W2.dyn.push(f);return f}
+function textFlagTex(bg,fg,txt){const c=document.createElement("canvas");c.width=128;c.height=84;const g=c.getContext("2d");g.fillStyle=bg;g.fillRect(0,0,128,84);g.fillStyle=fg;g.font="900 34px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,64,44);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
 /* ayunan */
 function buildSwing(){const P={x:-11.5,z:19.5};const g=new THREE.Group();g.position.set(P.x,0,P.z);scene.add(g);
  const steel=pbr("#2F6DB5",.35,.6),chain=pbr("#C9CED3",.3,.9);const H=2.55,W=3.6;
@@ -1790,7 +1868,7 @@ function heartAt(x,y,z){const c=document.createElement("canvas");c.width=c.heigh
 const _v3=new THREE.Vector3();
 function world2Update(dt,t,pp){
  // bendera
- W2.flags.forEach(f=>{const d=Math.hypot(pp.x-f.parent.position.x,pp.z-f.parent.position.z);if(d>70)return;const a=f.geometry.attributes.position.array,b=f.userData.base,w=f.userData.w;
+ W2.flags.forEach(f=>{const wp=f.userData.wp||(f.userData.wp=f.getWorldPosition(new THREE.Vector3()));const d=Math.hypot(pp.x-wp.x,pp.z-wp.z);if(d>70)return;const a=f.geometry.attributes.position.array,b=f.userData.base,w=f.userData.w;
   for(let k=0;k<a.length;k+=3){const x=b[k],y=b[k+1],u=x/w;a[k+2]=(Math.sin(x*2.4-t*5.4+y*.9)*.3+Math.sin(x*5.3-t*8.6+y*.4)*.08)*(.25+u*.9);a[k+1]=y-u*u*.12+Math.sin(x*3-t*4)*.03*u}
   f.geometry.attributes.position.needsUpdate=true;if(FRAME%2===0)f.geometry.computeVertexNormals()});
  // ayunan
@@ -2478,7 +2556,7 @@ function buildNinja(){const g=new THREE.Group();scene.add(g);NJ.g=g;
  const ar=new THREE.Group();ar.position.set(96.4,0,0);g.add(ar);[-4,4].forEach(z=>mesh(G.cyl(.2,.2,4.2,12),pbr("#263238",.5,.4),0,2.1,z,ar));mesh(RB(.5,.9,8.6,.1),pbr("#263238",.5,.4),0,4.3,0,ar);
  const st=labelSprite("ARENA NINJA · Lintasan Halang Rintang","#263238","#FFEB3B",520);st.position.set(0,5.6,0);st.scale.multiplyScalar(1.5);ar.add(st);
  [[107,-5.5,"Batu Loncat"],[121,-5.5,"Palang Berputar"],[137,-5.5,"Pijakan Bergerak"],[150,-5.5,"Tembok Lengkung"]].forEach(([x,z,t])=>{const s=labelSprite(t,"#37474F","#FFFFFF",256);s.position.set(x,2.2,z);g.add(s)});
- NJ.cps.forEach((x,i)=>{if(!i)return;const f=mesh(G.cyl(.04,.04,1.6,6),steel,x,1.4,-2.6,g,true);const fl=mesh(G.box(.02,.4,.6),pbr("#43A047",.6),x,2,-2.3,g,true)});
+ NJ.cps.forEach((x,i)=>{if(!i)return;const f=mesh(G.cyl(.04,.04,1.6,6),steel,x,1.4,-2.6,g,true);windFlag(g,x,2.0,-2.6,.7,.46,textFlagTex("#2E9E44","#FFFFFF","CP "+i),-Math.PI/2)});
  const tmr=document.createElement("div");tmr.id="njTimer";tmr.hidden=true;document.body.appendChild(tmr)}
 function njRespawn(msg){if(!NJ.run)NJ.cp=0;const x=NJ.cps[NJ.cp];player.root.position.set(x,.6,0);vy=0;yaw=-Math.PI/2;player.root.rotation.y=Math.PI/2;if(msg)toast(msg,true);blip("bad")}
 function ninjaUpdate(dt,t,pp,fl){NJ.armAng+=dt*1.6;if(NJ.arm)NJ.arm.arm.rotation.y=NJ.armAng;
@@ -2542,7 +2620,7 @@ const OD={TH0:25*Math.PI/180,RP:44.0,RL:47.5,th:25*Math.PI/180,r:44.0,v:0,state:
 function odP(th,r){return{x:Math.sin(th)*r,z:Math.cos(th)*r}}
 function odCanvasTex(w,h,draw){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t}
 function buildOdong(){
- const g=new THREE.Group();scene.add(g);OD.g=g;const body=new THREE.Group();g.add(body);OD.body=body;
+ const g=new THREE.Group();scene.add(g);OD.g=g;W2.dyn.push(g);const body=new THREE.Group();g.add(body);OD.body=body;
  const paint=pbr("#FFC107",.25,.35),paint2=pbr("#E53935",.28,.3),chrome=pbr("#E0E0E0",.18,.95),black=pbr("#1C1C1C",.7),
   glass=new THREE.MeshStandardMaterial({color:"#9FD3F0",roughness:.05,metalness:.6,transparent:true,opacity:.35}),seatM=pbr("#1565C0",.55),wood=pbr("#8D6E63",.7);
  // ---- kepala mobil ----
@@ -2572,7 +2650,7 @@ function buildOdong(){
  const stripe=odCanvasTex(512,512,(c,w,h)=>{for(let i=0;i<8;i++){c.fillStyle=i%2?"#FFFFFF":"#E53935";c.fillRect(i*w/8,0,w/8,h)}});stripe.wrapS=stripe.wrapT=THREE.RepeatWrapping;
  mesh(RB(2.24,.1,4.5,.04),new THREE.MeshStandardMaterial({map:stripe,roughness:.8}),0,2.55,-.58,body);
  // rumbai kanopi (segitiga)
- const fr=new THREE.Group();body.add(fr);const frM=[pbr("#FDD835",.7),pbr("#1E88E5",.7)];let fi=0;
+ const fr=new THREE.Group();body.add(fr);OD.fr=fr;const frM=[pbr("#FDD835",.7),pbr("#1E88E5",.7)];let fi=0;
  const addFr=(x,z,ry)=>{const m=mesh(new THREE.ConeGeometry(.09,.2,3),frM[fi++%2],x,2.4,z,fr,true);m.rotation.set(Math.PI,ry,0)};
  for(let z=1.65;z>-2.8;z-=.22){addFr(-1.12,z,0);addFr(1.12,z,0)}for(let x=-1.0;x<=1.01;x+=.22){addFr(x,1.72,0);addFr(x,-2.84,0)}
  // lampu sirine putar di atap
@@ -2647,7 +2725,9 @@ function odStep(dt){const t=clock.elapsedTime;OD.t+=dt;
  const gp=OD.g.position,pp=player&&player.root.position,near=pp&&Math.hypot(pp.x-gp.x,pp.z-gp.z)<QUAL.far+10;
  if(near||OD.rider)odLeds(t);
  if(OD.driver&&(near||OD.rider)){const D=OD.driver;animChar(D,dt,{speed:0});if(D.gltf){const pl=player;D.root.position.y=1.1;try{player=D;D.root.updateMatrixWorld(true);sitPose(0);const Bd=bonesOf(D);setAxis(1,0,0);rotBone(Bd.LeftArm,.8);rotBone(Bd.RightArm,.8)}finally{player=pl}const B=bonesOf(D);if(B.Hips){D.root.updateMatrixWorld(true);B.Hips.getWorldPosition(_odV);OD.g.worldToLocal(_odV);D.root.position.y+=1.22-_odV.y}}}}
-function odongUpdate(dt){if(!OD.g||OD.rider)return;odStep(dt)}
+function odongFringe(){if(!OD.fr)return;const t=clock.elapsedTime,w=.18+Math.min(1,Math.abs(OD.v||0)/5)*.5;
+ OD.fr.children.forEach((m,i)=>{m.rotation.x=Math.PI+Math.sin(t*7+i*.7)*w*.55+(OD.v>.5?-w*.4:0);m.rotation.z=Math.sin(t*5.3+i*1.3)*w*.35})}
+function odongUpdate(dt){if(!OD.g)return;odongFringe();if(OD.rider)return;odStep(dt)}
 function odongNear(pos){if(!OD.g||OD.v>.4||SWIM)return null;const gp=OD.g.position;const d=Math.hypot(pos.x-gp.x,pos.z-gp.z);return d<3.4&&pos.y<1.2?{d,label:"Naik"}:null}
 function odongStart(){const S=OD.seats[0];OD.rider=true;OD.seat=S;OD.laps=0;OD.dist=0;ACT={type:"odong"};if(OD.state==="park"||OD.state==="ret"){OD.state=OD.v<.5?"board":"go";OD.t=0}
  $("jumpBtn").textContent="Turun";const tb=$("talkBtn");tb.disabled=false;tb.textContent="Klakson";tb.classList.add("play");blip("good");
@@ -3375,8 +3455,7 @@ function buildWorld(){
   return obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+margin)};
  while(placed<110&&tries<4000){tries++;const r=12+Math.random()*76,a=Math.random()*Math.PI*2,x=Math.sin(a)*r,z=Math.cos(a)*r;
   if(!freeSpot(x,z,r,a,2))continue;
-  if(r>81){const t=new THREE.Group();t.position.set(x,0,z);scene.add(t);const tr=cyl(.16,.24,4.6,"#8A5A33",0,2.3,0,t,7);tr.rotation.z=.12;
-   for(let k=0;k<7;k++){const pv=new THREE.Group();pv.position.set(.28,4.5,0);pv.rotation.y=k*Math.PI*2/7;t.add(pv);const lf=mesh(G.box(.5,.05,2.4),std("#2E8B57",.8),0,0,1.1,pv);lf.rotation.x=.38}}
+  if(r>81){palmAt(scene,x,z,.85+Math.random()*.3)}
   else treeAt(scene,x,z,.9+Math.random()*.6);
   obstacles.push({x,z,r:.55});placed++}
  const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(.07,.42,4),std("#3F7F32",1),1800);const fl=new THREE.InstancedMesh(G.sph(.09,6,5),new THREE.MeshLambertMaterial(),420);
@@ -3426,7 +3505,8 @@ function buildPlayground(){
  block(.8,23.4,2.4,2,3,"#9B59B6");
  const slide=box(1.1,.12,4.6,"#F39C12",.8,1.5,26.1,scene);slide.rotation.x=.68;
  [[-.2,-.5],[1.8,-.5]].forEach(([dx])=>cyl(.06,.06,3,"#7F8C8D",.8+dx-.0,1.5,22.6,scene,6));
- const sw=new THREE.Group();sw.position.set(-.4,0,18.6);scene.add(sw);[-1,1].forEach(x=>cyl(.06,.06,2.6,"#C0392B",x,1.3,0,sw,8));const tb=cyl(.06,.06,2.2,"#C0392B",0,2.6,0,sw,8);tb.rotation.z=Math.PI/2;box(.55,.06,.3,"#2C3E50",0,.6,0,sw);[-.22,.22].forEach(x=>cyl(.012,.012,2,"#555555",x,1.6,0,sw,4));obstacles.push({x:-1.4,z:18.6,r:.2},{x:.6,z:18.6,r:.2});
+ const sw=new THREE.Group();sw.position.set(-.4,0,18.6);scene.add(sw);[-1,1].forEach(x=>cyl(.06,.06,2.6,"#C0392B",x,1.3,0,sw,8));const tb=cyl(.06,.06,2.2,"#C0392B",0,2.6,0,sw,8);tb.rotation.z=Math.PI/2;
+ {const piv=new THREE.Group();piv.position.set(0,2.6,0);sw.add(piv);const L=2.0;[-.22,.22].forEach(x=>cyl(.012,.012,L,"#9AA3AA",x,-L/2,0,piv,4));box(.55,.06,.3,"#2C3E50",0,-L,0,piv);W2.swings.push({x:-.4,z:18.6,piv,L,ang:0,vel:0,seatY:2.6-L});W2.dyn.push(piv)}obstacles.push({x:-1.4,z:18.6,r:.2},{x:.6,z:18.6,r:.2});
  const s=labelSprite("TAMAN LOMPAT","#E67E22","#FFFFFF",320);s.position.set(C.x,5.6,C.z);s.scale.multiplyScalar(1.4);scene.add(s);
  addStar(.8,23.4,4.2);
 }
@@ -3549,15 +3629,15 @@ function mergeStatic(){
  const groups=new Map(),victims=[];const CH=48;const v=new THREE.Vector3();
  scene.traverse(o=>{if(!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||Array.isArray(o.material)||!o.geometry||!o.visible||isSkipped(o))return;
   const g=o.geometry;if(!g.attributes.position||!g.attributes.normal)return;
-  o.getWorldPosition(v);const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");
+  o.getWorldPosition(v);const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,g.attributes.sw?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");
   let G2=groups.get(key);if(!G2){G2={mat:o.material,cast:o.castShadow,recv:o.receiveShadow,list:[]};groups.set(key,G2)}
-  const c=g.clone();for(const n in c.attributes)if(!["position","normal","uv"].includes(n))c.deleteAttribute(n);c.morphAttributes={};c.clearGroups();c.applyMatrix4(o.matrixWorld);G2.list.push(c);victims.push(o)});
+  const c=g.clone();for(const n in c.attributes)if(!["position","normal","uv","sw"].includes(n))c.deleteAttribute(n);c.morphAttributes={};c.clearGroups();c.applyMatrix4(o.matrixWorld);G2.list.push(c);victims.push(o)});
  let made=0;groups.forEach(G2=>{if(G2.list.length<2){G2.list.forEach(c=>c.dispose());G2.skipped=true;return}
   const m=THREE.BufferGeometryUtils.mergeBufferGeometries(G2.list,false);G2.list.forEach(c=>c.dispose());if(!m){G2.failed=true;return}
   const me=new THREE.Mesh(m,G2.mat);me.castShadow=G2.cast;me.receiveShadow=G2.recv;me.matrixAutoUpdate=false;scene.add(me);G2.done=true;made++});
  // hapus mesh asli hanya yang berhasil digabung
  const okKeys=new Set();groups.forEach((G2,k)=>{if(G2.done)okKeys.add(k)});
- victims.forEach(o=>{o.getWorldPosition(v);const g=o.geometry;const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");if(okKeys.has(key)&&o.parent)o.parent.remove(o)});
+ victims.forEach(o=>{o.getWorldPosition(v);const g=o.geometry;const key=[o.material.uuid,g.index?1:0,g.attributes.uv?1:0,g.attributes.sw?1:0,o.castShadow?1:0,o.receiveShadow?1:0,Math.floor(v.x/CH),Math.floor(v.z/CH)].join("|");if(okKeys.has(key)&&o.parent)o.parent.remove(o)});
  window.MERGED=made;
 }
 
@@ -3613,7 +3693,7 @@ function tick(){
  VEH.forEach(v=>{v.m.position.set(v.x,0,v.z);v.m.rotation.y=v.h;
   if(v.cfg.ride){const lean=(driving&&v===car)?-v.steer*Math.min(1,Math.abs(v.speed)/8)*.55:0;v.m.rotation.z=lerp(v.m.rotation.z,lean,.12)}
   if(v.m.userData.wheels&&v.speed)v.m.userData.wheels.forEach(w=>w.rotation.x+=v.speed*dt/.33)});
- world2Update(dt,t,pp);cineUpdate(dt,t);
+ world2Update(dt,t,pp);cineUpdate(dt,t);treeUpdate(t);
  // camera
  const target=driving?{x:car.x,y:0,z:car.z}:player.root.position;
  if(driving&&!dragging){const want=car.h+Math.PI;yaw+=Math.atan2(Math.sin(want-yaw),Math.cos(want-yaw))*Math.min(1,dt*2.5)}
@@ -3738,7 +3818,7 @@ function updateHelp(){const h=$("help");let k="",html="";
  if(ACT&&ACT.type==="fly"){k="fly";html="Terbang: Belok <kbd>A</kbd><kbd>D</kbd> · Menukik <kbd>W</kbd> · Melambat <kbd>S</kbd> · Tahan <kbd>Spasi</kbd> / <b>Kepak</b> untuk naik"}
  else if(ACT){k="act"+ACT.type+(ACT.phase||"");html=ACT.type==="climb"?"Panjat: Naik <kbd>W</kbd> · Turun <kbd>S</kbd> · Lompat turun <kbd>Spasi</kbd>":ACT.type==="swing"?"Ayunan: Dorong <kbd>W</kbd> · Rem <kbd>S</kbd> · Turun <kbd>Spasi</kbd>":ACT.type==="fish"?(ACT.phase==="bite"?"Ada yang makan umpan! Tekan <kbd>E</kbd> / <b>Tarik!</b>":"Tunggu tanda <b style='color:#E74C3C'>!</b> lalu tekan <kbd>E</kbd> · Berhenti <kbd>Spasi</kbd>"):"";if(!html)k=""}
  else if(SWIM){k="swim"+(W2.diveWant>0?1:0);html=W2.diveWant>0?"Menyelam: gerakkan <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Naik ke permukaan <kbd>Spasi</kbd> / <b>Naik</b> · Awas napas!":"Berenang: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Cepat <kbd>Shift</kbd> · Menyelam <kbd>Spasi</kbd> / <b>Selam</b>"}
- else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`}
+ else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":n.type==="odong"?"Tekan <kbd>E</kbd> untuk naik <b style=\"color:#FFD54F\">odong-odong</b>":n.type!=="gate"?"Tekan <kbd>E</kbd> untuk mulai":`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`}
  else if(driving){k="drive"+car.type;html=`${esc(car.cfg.label)}: Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · ${car.cfg.ride?"Turun":"Keluar"} <kbd>F</kbd>`}
  else if(nearNpc>=0){k="npc"+nearNpc;html=`Tekan <kbd>E</kbd> untuk ngobrol dengan <b style="color:#F7D23E">${esc(AREAS[nearNpc].npc.name)}</b>`}
  else if(nearKiosk>=0){const K=KIOSKS[nearKiosk];k="kiosk"+nearKiosk;html=`Tekan <kbd>E</kbd> untuk main <b style="color:#FF8FD1">${esc(K.name)}</b>${K.subj==="en"?" (Bahasa Inggris)":""}`}
