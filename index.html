@@ -1384,7 +1384,7 @@ function mgNext(){MG.qi++;MG.lock=0;MG.hook=null;mgStat();
  if(MG.qi>=MG.qs.length)return mgEnd(true);
  const q=MG.qs[MG.qi];MG.q=q;
  $("mgVerb").textContent=MG.G.verb+(MG.subj==="en"?" dengan kata Inggris yang benar!":" dengan jawaban yang benar!");
- $("mgPrompt").textContent=q.prompt;$("mgSay").hidden=!(q.listen||MG.subj!=="en");
+ $("mgPrompt").textContent=q.prompt;$("mgSay").hidden=!(MG.subj==="en"&&q.listen);
  if(q.listen)setTimeout(()=>MG&&MG.q===q&&say(q.ok,GR().rate),250);
  const W=MG.W,H=MG.H,n=q.opts.length;MG.objs=[];
  const lanes=shuffle([...Array(n).keys()]);
@@ -1857,9 +1857,9 @@ function openGateQuiz(G){setPaused(true);const QF=G.qf||ipasQ;if(!G.q)G.q=QF();c
  const q=G.q,opts=shuffle([q[1],...shuffle(q[2].slice()).slice(0,n-1)]);
  el.innerHTML=`<div class="mgCard ipasCard"><div class="mgVerb">${G.head?G.head():G.npc?`${esc(G.npc.name)} bertanya · Soal ${G.i+1}/${I3.N} · IPAS ${GR().label}`:`GERBANG ${G.i+1}/${I3.N} · IPAS ${GR().label}`}</div><div class="ipasQ">${esc(q[0])}</div>
   <div class="ipasOpts">${opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div><div class="ipasFb" id="ipasFb"></div>
-  <div class="foot"><button class="btn-soft" id="ipasClose">Nanti dulu</button><button class="btn-soft" id="ipasRead">🔊 Bacakan</button></div></div>`;
- el.hidden=false;say(q[0],GR().rate,"id-ID");
- $("ipasRead").onclick=()=>say(q[0],GR().rate,"id-ID");$("ipasClose").onclick=()=>{el.hidden=true;setPaused(false)};
+  <div class="foot"><button class="btn-soft" id="ipasClose">Nanti dulu</button></div></div>`;
+ el.hidden=false;
+ $("ipasClose").onclick=()=>{el.hidden=true;setPaused(false)};
  el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=G.npc?`<b style="color:#1E8449">Benar!</b> ${esc(G.npc.name)} memberi jalan.`:`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
    G.open=true;G.obs.forEach(o=>{const k=obstacles.indexOf(o);if(k>=0)obstacles.splice(k,1)});SAVE.coins+=2;persist();updateStats();
    setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(G.npc?(left?`Hebat! Sisa ${left} penjaga soal lagi.`:"Semua soal terjawab! Naik ke puncak!"):left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
@@ -4232,10 +4232,9 @@ function startPk(i){setPaused(true);const P=PK[i],g=GR(),B=P.b[g.band];
 function pkMC(r){const P=PK[Q.i],g=GR(),S=$("scene");const nOpt=g.band===0?2:g.band===1?3:4;const opts=shuffle([r.ok,...shuffle(r.no).slice(0,nOpt-1)]);
  S.innerHTML=`<div class="kind">Pelajaran PPKn · ${esc(P.topic)} · Kelas ${SAVE.kelas||"-"}</div>
  <div class="npcRow">${pkAvatar(Q.i)}<div class="bubble"><div class="en">${esc(r.q)}</div><div class="id">${esc(P.name)}</div></div></div>
- <div class="tiny"><button id="pl">${ICON.play}Dengar</button></div>
  <div class="hint">Pilih jawaban yang benar:</div>
  <div class="opts">${opts.map((o,k)=>`<button class="chunky opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>`;
- $("pl").onclick=()=>say(r.q,g.rate,"id-ID");say(r.q,g.rate,"id-ID");let locked=false;
+ let locked=false;
  S.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(locked)return;const o=opts[+b.dataset.k];
   if(o===r.ok){locked=true;b.classList.add("good");right();toast(Q.combo>2?"Combo x"+Q.combo+"!":"Benar!");setTimeout(next,750)}
   else{b.classList.add("bad");b.disabled=true;S.querySelector(".ava").outerHTML=pkAvatar(Q.i,"sad");if(wrong())locked=true}})}
