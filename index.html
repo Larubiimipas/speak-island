@@ -1245,6 +1245,351 @@ function palmAt(g,x,z,s){treeTemplates();const M=TREEW.mats,P=TREEW.palm[(Math.r
  const c=new THREE.Mesh(P.coco,M.coco);c.castShadow=true;t.add(c);return t}
 function treeUpdate(t){TREEW.u.value=t}
 
+/* ---------- soal Pendidikan Agama Islam (PAI) SD: [soal, jawaban benar, [pengecoh]] ---------- */
+const PAI_Q=[
+ [ // kelas 1–2
+  ["Rukun Islam ada ... perkara.","5",["6","4","3"]],
+  ["Rukun Iman ada ... perkara.","6",["5","4","7"]],
+  ["Rukun Islam yang pertama adalah...","Mengucapkan dua kalimat syahadat",["Puasa","Zakat","Haji"]],
+  ["Salat wajib dalam sehari semalam ada ... waktu.","5",["3","7","2"]],
+  ["Kitab suci umat Islam adalah...","Al-Qur'an",["Kamus","Buku cerita","Majalah"]],
+  ["Nabi dan rasul terakhir adalah Nabi...","Muhammad saw.",["Adam as.","Nuh as.","Musa as."]],
+  ["Sebelum makan kita membaca...","Bismillah",["Alhamdulillah","Astagfirullah","Subhanallah"]],
+  ["Setelah selesai makan kita mengucapkan...","Alhamdulillah",["Bismillah","Astagfirullah","Innalillahi"]],
+  ["Saat bertemu teman, kita mengucapkan salam...","Assalamu'alaikum",["Selamat tinggal","Alhamdulillah","Astagfirullah"]],
+  ["Jawaban salam \"Assalamu'alaikum\" adalah...","Wa'alaikumussalam",["Assalamu'alaikum","Bismillah","Masya Allah"]],
+  ["Tempat ibadah umat Islam adalah...","Masjid",["Pasar","Kantor","Lapangan"]],
+  ["Sebelum salat, kita bersuci dengan cara...","Berwudu",["Makan","Bermain","Tidur"]],
+  ["Huruf hijaiyah yang pertama adalah...","Alif",["Ba","Ta","Jim"]],
+  ["Asmaul Husna \"Ar-Rahman\" artinya Allah Maha...","Pengasih",["Melihat","Mendengar","Kaya"]],
+  ["Asmaul Husna \"Ar-Rahim\" artinya Allah Maha...","Penyayang",["Kuasa","Melihat","Mengetahui"]],
+  ["Salat Subuh dikerjakan pada waktu...","Pagi sebelum matahari terbit",["Siang hari","Sore hari","Tengah malam"]],
+  ["Salat Subuh terdiri dari ... rakaat.","2",["3","4","1"]],
+  ["Salat Magrib terdiri dari ... rakaat.","3",["2","4","5"]],
+  ["Salat Isya terdiri dari ... rakaat.","4",["2","3","5"]],
+  ["Umat Islam wajib berpuasa pada bulan...","Ramadan",["Syawal","Muharam","Rajab"]],
+  ["Hari raya setelah berpuasa sebulan penuh di bulan Ramadan adalah...","Idulfitri",["Iduladha","Tahun Baru Islam","Maulid Nabi"]],
+  ["Malaikat yang bertugas menyampaikan wahyu adalah Malaikat...","Jibril",["Mikail","Israfil","Malik"]],
+  ["Ibu Nabi Muhammad saw. bernama...","Aminah",["Khadijah","Fatimah","Halimah"]],
+  ["Ayah Nabi Muhammad saw. bernama...","Abdullah",["Abu Thalib","Abdul Muthalib","Abu Bakar"]],
+  ["Nabi Muhammad saw. lahir di kota...","Makkah",["Madinah","Thaif","Jakarta"]],
+  ["Surah pertama dalam Al-Qur'an adalah...","Al-Fatihah",["An-Nas","Al-Ikhlas","Al-Kautsar"]],
+  ["Surah terakhir dalam Al-Qur'an adalah...","An-Nas",["Al-Fatihah","Al-Falaq","Al-Baqarah"]],
+  ["Surah Al-Ikhlas mengajarkan bahwa Allah itu...","Maha Esa (satu)",["Ada dua","Ada banyak","Memiliki anak"]],
+  ["Ketika bersin, kita mengucapkan...","Alhamdulillah",["Astagfirullah","Innalillahi","Bismillah"]],
+  ["Ketika mendengar ada orang meninggal dunia, kita mengucapkan...","Innalillahi wa inna ilaihi raji'un",["Alhamdulillah","Masya Allah","Subhanallah"]],
+  ["Ucapan untuk memohon ampun kepada Allah adalah...","Astagfirullah",["Alhamdulillah","Insya Allah","Bismillah"]],
+  ["Ketika berjanji akan melakukan sesuatu, kita mengucapkan...","Insya Allah",["Astagfirullah","Innalillahi","Alhamdulillah"]],
+  ["Saat masuk kamar mandi, kita mendahulukan kaki...","Kiri",["Kanan","Keduanya bersamaan","Mana saja"]],
+  ["Saat masuk masjid, kita mendahulukan kaki...","Kanan",["Kiri","Keduanya bersamaan","Mana saja"]],
+  ["Makan dan minum sebaiknya menggunakan tangan...","Kanan",["Kiri","Dua tangan","Kaki"]],
+  ["Anak yang saleh selalu ... kepada kedua orang tuanya.","Berbakti dan hormat",["Membantah","Berbohong","Marah"]],
+  ["Yang menciptakan langit, bumi, dan seluruh isinya adalah...","Allah swt.",["Manusia","Malaikat","Raja"]]
+ ],
+ [ // kelas 3–4
+  ["Salat Zuhur terdiri dari ... rakaat.","4",["2","3","5"]],
+  ["Salat Asar terdiri dari ... rakaat.","4",["2","3","5"]],
+  ["Jumlah seluruh rakaat salat wajib dalam sehari semalam adalah...","17",["15","20","11"]],
+  ["Saat salat, kita menghadap kiblat, yaitu ke arah...","Ka'bah di Makkah",["Masjid Nabawi di Madinah","Matahari terbit","Gunung Rinjani"]],
+  ["Panggilan untuk memberi tahu waktu salat sudah tiba disebut...","Azan",["Iqamah","Takbir","Doa"]],
+  ["Seruan tanda salat berjamaah akan segera dimulai disebut...","Iqamah",["Azan","Salam","Wirid"]],
+  ["Gerakan yang mengakhiri salat adalah...","Salam",["Rukuk","Sujud","Takbir"]],
+  ["Salat dimulai dengan...","Takbiratul ihram",["Salam","Tasyahud akhir","Sujud"]],
+  ["Surah Al-Fatihah dibaca dalam salat pada saat...","Berdiri",["Rukuk","Sujud","Duduk di antara dua sujud"]],
+  ["Malaikat yang mencatat amal baik manusia adalah Malaikat...","Rakib",["Atid","Malik","Ridwan"]],
+  ["Malaikat yang mencatat amal buruk manusia adalah Malaikat...","Atid",["Rakib","Jibril","Mikail"]],
+  ["Malaikat penjaga pintu surga adalah Malaikat...","Ridwan",["Malik","Munkar","Izrail"]],
+  ["Malaikat penjaga neraka adalah Malaikat...","Malik",["Ridwan","Jibril","Rakib"]],
+  ["Malaikat yang bertugas meniup sangkakala adalah Malaikat...","Israfil",["Izrail","Mikail","Atid"]],
+  ["Malaikat yang bertugas membagi rezeki dan menurunkan hujan adalah Malaikat...","Mikail",["Jibril","Israfil","Malik"]],
+  ["Kitab Taurat diturunkan kepada Nabi...","Musa as.",["Daud as.","Isa as.","Ibrahim as."]],
+  ["Kitab Zabur diturunkan kepada Nabi...","Daud as.",["Musa as.","Isa as.","Sulaiman as."]],
+  ["Kitab Injil diturunkan kepada Nabi...","Isa as.",["Musa as.","Daud as.","Yahya as."]],
+  ["Nabi yang membelah laut dengan tongkatnya atas izin Allah adalah Nabi...","Musa as.",["Nuh as.","Yunus as.","Ibrahim as."]],
+  ["Nabi yang membuat kapal besar sebelum datang banjir adalah Nabi...","Nuh as.",["Ibrahim as.","Sulaiman as.","Hud as."]],
+  ["Nabi yang pernah berada di dalam perut ikan besar adalah Nabi...","Yunus as.",["Yusuf as.","Ayub as.","Ismail as."]],
+  ["Nabi yang tidak terbakar ketika dibakar api adalah Nabi...","Ibrahim as.",["Ismail as.","Musa as.","Nuh as."]],
+  ["Nabi yang dapat memahami bahasa hewan adalah Nabi...","Sulaiman as.",["Nuh as.","Yahya as.","Harun as."]],
+  ["Nabi pertama yang diciptakan Allah adalah Nabi...","Adam as.",["Nuh as.","Idris as.","Ibrahim as."]],
+  ["Nabi yang terkenal sangat sabar ketika diuji sakit adalah Nabi...","Ayub as.",["Yunus as.","Luth as.","Saleh as."]],
+  ["Jumlah nabi dan rasul yang wajib kita ketahui adalah...","25",["20","30","12"]],
+  ["Sifat wajib rasul \"siddiq\" artinya...","Jujur",["Cerdas","Menyampaikan","Dapat dipercaya"]],
+  ["Sifat wajib rasul \"amanah\" artinya...","Dapat dipercaya",["Jujur","Cerdas","Pemberani"]],
+  ["Sifat wajib rasul \"tablig\" artinya...","Menyampaikan",["Jujur","Cerdas","Sabar"]],
+  ["Sifat wajib rasul \"fatanah\" artinya...","Cerdas",["Jujur","Menyampaikan","Dapat dipercaya"]],
+  ["Makan sahur dilakukan pada waktu...","Sebelum terbit fajar",["Siang hari","Setelah Magrib","Setelah Zuhur"]],
+  ["Orang yang berpuasa berbuka saat...","Matahari terbenam (waktu Magrib)",["Matahari terbit","Tengah hari","Waktu Asar"]],
+  ["Zakat yang wajib dikeluarkan pada bulan Ramadan sebelum salat Idulfitri adalah zakat...","Fitrah",["Mal","Profesi","Pertanian"]],
+  ["Surah Al-Ikhlas terdiri dari ... ayat.","4",["3","5","7"]],
+  ["Surah Al-Fatihah terdiri dari ... ayat.","7",["5","6","8"]],
+  ["Asmaul Husna \"Al-'Alim\" artinya Allah Maha...","Mengetahui",["Kaya","Kuasa","Pemaaf"]],
+  ["Asmaul Husna \"As-Sami'\" artinya Allah Maha...","Mendengar",["Melihat","Mengetahui","Pengasih"]],
+  ["Asmaul Husna \"Al-Basir\" artinya Allah Maha...","Melihat",["Mendengar","Kaya","Adil"]]
+ ],
+ [ // kelas 5–6
+  ["Wahyu pertama diterima Nabi Muhammad saw. di...","Gua Hira",["Gua Tsur","Masjidil Haram","Bukit Uhud"]],
+  ["Wahyu pertama yang diterima Nabi Muhammad saw. adalah Surah...","Al-'Alaq ayat 1–5",["Al-Fatihah ayat 1–7","Al-Muddassir ayat 1–7","An-Nas ayat 1–6"]],
+  ["Peristiwa turunnya Al-Qur'an pertama kali disebut...","Nuzulul Qur'an",["Isra Mikraj","Hijrah","Fathu Makkah"]],
+  ["Al-Qur'an terdiri dari ... surah.","114",["113","116","30"]],
+  ["Al-Qur'an terbagi menjadi ... juz.","30",["40","114","25"]],
+  ["Al-Qur'an pertama kali diturunkan pada bulan...","Ramadan",["Rajab","Syawal","Muharam"]],
+  ["Malam yang lebih baik daripada seribu bulan disebut...","Lailatul Qadar",["Malam Nisfu Syakban","Malam Takbiran","Malam Jumat"]],
+  ["Perjalanan Nabi dari Masjidil Haram ke Masjidil Aqsa dalam satu malam disebut...","Isra",["Mikraj","Hijrah","Umrah"]],
+  ["Perintah salat lima waktu diterima Nabi Muhammad saw. pada peristiwa...","Isra Mikraj",["Hijrah","Perang Badar","Fathu Makkah"]],
+  ["Nabi Muhammad saw. berhijrah dari Makkah ke...","Madinah",["Thaif","Syam","Yaman"]],
+  ["Masjid pertama yang dibangun Nabi Muhammad saw. saat hijrah adalah Masjid...","Quba",["Nabawi","Al-Aqsa","Istiqlal"]],
+  ["Gua tempat Nabi Muhammad saw. bersembunyi saat hijrah adalah Gua...","Tsur",["Hira","Kahfi","Uhud"]],
+  ["Sahabat yang menemani Nabi Muhammad saw. berhijrah adalah...","Abu Bakar as-Siddiq",["Umar bin Khattab","Ali bin Abi Thalib","Usman bin Affan"]],
+  ["Khalifah pertama setelah Nabi Muhammad saw. wafat adalah...","Abu Bakar as-Siddiq",["Umar bin Khattab","Usman bin Affan","Ali bin Abi Thalib"]],
+  ["Khalifah kedua dari Khulafaur Rasyidin adalah...","Umar bin Khattab",["Abu Bakar as-Siddiq","Usman bin Affan","Ali bin Abi Thalib"]],
+  ["Khalifah yang menyusun mushaf Al-Qur'an standar (Mushaf Usmani) adalah...","Usman bin Affan",["Umar bin Khattab","Ali bin Abi Thalib","Abu Bakar as-Siddiq"]],
+  ["Khalifah keempat dari Khulafaur Rasyidin adalah...","Ali bin Abi Thalib",["Usman bin Affan","Umar bin Khattab","Abu Bakar as-Siddiq"]],
+  ["Istri pertama Nabi Muhammad saw. adalah...","Khadijah",["Aisyah","Hafsah","Fatimah"]],
+  ["Kakek yang mengasuh Nabi Muhammad saw. setelah ibunya wafat adalah...","Abdul Muthalib",["Abu Thalib","Abu Lahab","Abdullah"]],
+  ["Nabi Muhammad saw. lahir pada tahun yang dikenal sebagai Tahun...","Gajah",["Hijriah","Duka Cita","Kuda"]],
+  ["Hukum bacaan nun mati atau tanwin bertemu huruf ba disebut...","Iqlab",["Izhar","Ikhfa","Idgam"]],
+  ["Huruf izhar halqi berjumlah ... huruf.","6",["5","4","15"]],
+  ["Nun mati atau tanwin bertemu huruf ya, nun, mim, atau wau dibaca...","Idgam bigunnah",["Izhar","Iqlab","Idgam bilagunnah"]],
+  ["Nun mati atau tanwin bertemu huruf lam atau ra dibaca...","Idgam bilagunnah",["Idgam bigunnah","Ikhfa","Iqlab"]],
+  ["Rukun Iman yang kelima adalah iman kepada...","Hari akhir",["Rasul-rasul Allah","Qada dan qadar","Kitab-kitab Allah"]],
+  ["Rukun Iman yang keenam adalah iman kepada...","Qada dan qadar",["Hari akhir","Malaikat","Rasul-rasul Allah"]],
+  ["Zakat yang dikeluarkan dari harta yang sudah mencapai nisab dan haul disebut zakat...","Mal",["Fitrah","Fidyah","Kurban"]],
+  ["Orang yang berhak menerima zakat disebut...","Mustahik",["Muzaki","Amil","Imam"]],
+  ["Orang yang wajib mengeluarkan zakat disebut...","Muzaki",["Mustahik","Amil","Makmum"]],
+  ["Petugas yang mengumpulkan dan membagikan zakat disebut...","Amil",["Muzaki","Mustahik","Muazin"]],
+  ["Wukuf, puncak ibadah haji, dilaksanakan di...","Padang Arafah",["Mina","Muzdalifah","Madinah"]],
+  ["Salat Jumat terdiri dari ... rakaat.","2",["4","3","1"]],
+  ["Ibadah menyembelih hewan ternak pada hari raya Iduladha disebut...","Kurban",["Akikah","Zakat","Fidyah"]],
+  ["Tahun Baru Islam diperingati setiap tanggal...","1 Muharam",["1 Syawal","10 Zulhijah","27 Rajab"]],
+  ["Sikap berserah diri kepada Allah setelah berusaha dan berdoa disebut...","Tawakal",["Riya","Takabur","Hasad"]],
+  ["Sikap rendah hati dan tidak sombong disebut...","Tawaduk",["Takabur","Riya","Kikir"]],
+  ["Memamerkan amal ibadah agar dipuji orang lain disebut...","Riya",["Ikhlas","Tawaduk","Syukur"]],
+  ["Sifat sombong dan merasa lebih hebat dari orang lain disebut...","Takabur",["Tawaduk","Sabar","Ikhlas"]]
+ ]];
+/* ================= PULAU IMAN: jalan lentera → Hutan Misteri (kuburan & hantu) → Masjid Nurul Ilmi (Pendidikan Agama Islam) ================= */
+const IA=Math.PI*13/12,IDX=Math.sin(IA),IDZ=Math.cos(IA),ID=250,IR=48;
+const C4={x:IDX*ID,z:IDZ*ID};
+const ISL={gates:[],ghosts:[],bats:[],wisps:[],grid:null,gd:null,N:10,UC:22,CR:13,HW:2.3,S:0,run:{rewarded:false},boo:0,dome:null,moon:null,saved:null,hemi:null};
+const IG={res:.5,n:0};
+function iUV(x,z){return{u:x*IDX+z*IDZ,v:x*IDZ-z*IDX}}
+function iW(u,v){return{x:IDX*u+IDZ*v,z:IDZ*u-IDX*v}}
+function iL(ul,v){return iW(ID+ul,v)} /* koordinat lokal pulau → dunia */
+/* jalur hutan berkelok: dari pantai (u=-IR) ke tepi lapangan masjid */
+function islPathPt(t){const u0=-IR+1,u1=ISL.UC-ISL.CR+1;const env=Math.min(1,t*6,(1-t)*6);return{u:u0+(u1-u0)*t,v:15*Math.sin(t*Math.PI*3)*env}}
+function islPrep(){if(ISL.grid)return;const S=[];let L=0,pr=null;for(let k=0;k<=420;k++){const p=islPathPt(k/420);if(pr)L+=Math.hypot(p.u-pr.u,p.v-pr.v);p.s=L;S.push(p);pr=p}ISL.path=S;ISL.len=L;
+ const n=Math.ceil(IR*2/IG.res)+1;IG.n=n;const g=new Uint8Array(n*n),gd=new Float32Array(n*n);
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){const u=-IR+i*IG.res,v=-IR+j*IG.res,r=Math.hypot(u,v);let d=99;
+  if(r<IR+.5)for(let k=0;k<S.length-1;k++){const a=S[k],b=S[k+1];const ex=b.u-a.u,ev=b.v-a.v,l2=ex*ex+ev*ev;let tt=((u-a.u)*ex+(v-a.v)*ev)/l2;tt=tt<0?0:tt>1?1:tt;const dd=Math.hypot(u-a.u-ex*tt,v-a.v-ev*tt);if(dd<d)d=dd}
+  gd[i*n+j]=d;let c=0;if(r<IR-.6){if(d<ISL.HW)c=1;if(Math.hypot(u-ISL.UC,v)<ISL.CR)c=2;if(u<-IR+4&&Math.abs(v)<2.6)c=3}g[i*n+j]=c}
+ ISL.grid=g;ISL.gd=gd}
+function islCell(ul,v){const i=Math.round((ul+IR)/IG.res),j=Math.round((v+IR)/IG.res);if(i<0||j<0||i>=IG.n||j>=IG.n)return 0;return ISL.grid[i*IG.n+j]}
+function islDist(ul,v){const i=Math.round((ul+IR)/IG.res),j=Math.round((v+IR)/IG.res);if(i<0||j<0||i>=IG.n||j>=IG.n)return 99;return ISL.gd[i*IG.n+j]}
+function onIslBridge(x,z,w){const q=iUV(x,z);return q.u>80&&q.u<ID-IR+4&&Math.abs(q.v)<(w||2.3)}
+function islZone(x,z){return Math.hypot(x-C4.x,z-C4.z)<IR+4||onIslBridge(x,z,4)}
+function islWalk(x,z){if(onIslBridge(x,z))return true;if(!ISL.grid)return false;const q=iUV(x,z);return islCell(q.u-ID,q.v)>0}
+function islLand(x,z){return Math.hypot(x-C4.x,z-C4.z)<IR||onIslBridge(x,z,3.4)}
+function onIsl(x,z){return Math.hypot(x-C4.x,z-C4.z)<IR+6}
+/* ---------- model ---------- */
+function ghostMesh(tint,op){const g=new THREE.Group();
+ const pts=[[0,1.12],[.18,1.1],[.32,1.03],[.42,.9],[.47,.72],[.48,.5],[.5,.28],[.54,.08],[.55,0]].map(([x,y])=>new THREE.Vector2(x,y));
+ const geo=new THREE.LatheGeometry(pts,28);const P=geo.attributes.position;for(let k=0;k<P.count;k++){const y=P.getY(k);if(y<.12){const a=Math.atan2(P.getX(k),P.getZ(k));P.setY(k,y+Math.sin(a*7)*.07*(1-y/.12))}}geo.computeVertexNormals();
+ const mat=new THREE.MeshStandardMaterial({color:tint||"#F5F2FF",emissive:"#A79FE0",emissiveIntensity:.6,roughness:.55,transparent:true,opacity:op||.9,side:THREE.DoubleSide,depthWrite:false});
+ const body=new THREE.Mesh(geo,mat);g.add(body);const dk=new THREE.MeshBasicMaterial({color:"#1C1530",transparent:true});
+ [-.15,.15].forEach(x=>{const e=new THREE.Mesh(G.sph(.075,10,8),dk);e.position.set(x,.78,.43);e.scale.set(1,1.5,.5);g.add(e);
+  const ch=new THREE.Mesh(G.sph(.06,8,6),new THREE.MeshBasicMaterial({color:"#FF9EC4",transparent:true,opacity:.7}));ch.position.set(x*1.75,.66,.4);ch.scale.set(1.3,.7,.4);g.add(ch)});
+ const mo=new THREE.Mesh(G.sph(.065,10,8),dk);mo.position.set(0,.6,.45);mo.scale.set(1.2,1.1,.4);g.add(mo);
+ const arms=[];[-1,1].forEach(s=>{const a=new THREE.Mesh(G.sph(.13,10,8),mat);a.position.set(s*.5,.55,.05);a.scale.set(1.5,.7,.7);g.add(a);arms.push(a)});
+ g.userData={mat,dk,arms};g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false}});return g}
+function setGhostOp(gh,o){const U=gh.userData;U.mat.opacity=o;U.dk.opacity=Math.min(1,o*1.1)}
+function pumpkin(p,x,z,ry,s){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;g.scale.setScalar(s||1);p.add(g);
+ const om=pbr("#E8730C",.6);for(let k=0;k<6;k++){const r=mesh(G.sph(.2,14,10),om,Math.sin(k/6*Math.PI*2)*.1,.2,Math.cos(k/6*Math.PI*2)*.1,g);r.scale.set(.9,.95,.9)}
+ mesh(G.cyl(.025,.035,.14,6),pbr("#4E6B2A",.8),0,.42,0,g);
+ const glow=new THREE.MeshBasicMaterial({color:new THREE.Color(3,1.6,.35)});const tri=new THREE.Shape();tri.moveTo(-.05,0);tri.lineTo(.05,0);tri.lineTo(0,.075);tri.lineTo(-.05,0);const tg=new THREE.ShapeGeometry(tri);
+ [-.08,.08].forEach(x=>{const e=new THREE.Mesh(tg,glow);e.position.set(x,.24,.275);g.add(e)});
+ const ms=new THREE.Shape();ms.moveTo(-.12,0);ms.quadraticCurveTo(0,-.09,.12,0);ms.lineTo(.07,.02);ms.lineTo(.04,-.01);ms.lineTo(0,.02);ms.lineTo(-.04,-.01);ms.lineTo(-.07,.02);ms.lineTo(-.12,0);
+ const m=new THREE.Mesh(new THREE.ShapeGeometry(ms),glow);m.position.set(0,.15,.28);g.add(m);return g}
+let _islTpl=null;
+function islTreeTpl(){if(_islTpl)return _islTpl;const T=[];
+ for(let n=0;n<5;n++){const wood=[];const H=trnd(3.6,5.2);
+  function grow(p0,dir,len,r0,depth){const bend=new THREE.Vector3(trnd(-.5,.5),trnd(-.2,.15),trnd(-.5,.5));const p1=p0.clone().addScaledVector(dir,len*.5).addScaledVector(bend,len*.25),p2=p0.clone().addScaledVector(dir,len).addScaledVector(bend,len*.4);
+   const cv=new THREE.CatmullRomCurve3([p0,p1,p2]);wood.push(taperTube(cv,r0,r0*(depth===0?.5:.3),depth===0?8:5,depth===0?8:5));if(depth>=2)return;
+   const k=depth===0?trnd(4,6)|0:trnd(2,4)|0;for(let i=0;i<k;i++){const u=depth===0?trnd(.45,.95):trnd(.3,.9);const at=cv.getPointAt(u);const a=Math.random()*Math.PI*2;
+    const d=new THREE.Vector3(Math.cos(a),depth===0?trnd(.2,.9):trnd(-.3,.6),Math.sin(a)).normalize();grow(at,d,len*(depth===0?.55:.5)*trnd(.8,1.2),r0*(1-u*.5)*.5,depth+1)}}
+  grow(new THREE.Vector3(0,-.1,0),new THREE.Vector3(trnd(-.2,.2),1,trnd(-.2,.2)).normalize(),H,trnd(.22,.32),0);
+  T.push(THREE.BufferGeometryUtils.mergeBufferGeometries(wood,false))}
+ const pine=[];[[1.7,2.2,1.4],[1.35,1.9,2.5],[.95,1.6,3.5]].forEach(([r,h,y])=>{const c=new THREE.ConeGeometry(r,h,9);c.translate(0,y,0);pine.push(c)});
+ const trunk=new THREE.CylinderGeometry(.13,.18,1.6,7);trunk.translate(0,.8,0);
+ _islTpl={dead:T,pine:THREE.BufferGeometryUtils.mergeBufferGeometries(pine,false),trunk,
+  bark:new THREE.MeshStandardMaterial({map:treeMats().bark.map,color:"#6A5A55",roughness:1}),pineM:new THREE.MeshStandardMaterial({color:"#1E3A2C",roughness:.95}),
+  trunkM:pbr("#3B2C22",.95)};return _islTpl}
+function grave(p,x,z,ry){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry+trnd(-.12,.12);p.add(g);
+ const stone=pbr("#9C978E",.95),earth=pbr("#4A3B2C",1);mesh(RB(1.05,.16,2.1,.05),stone,0,.08,0,g);const md=mesh(RB(.85,.28,1.85,.14),earth,0,.2,0,g);
+ const nisan=(zz,h)=>{const n=new THREE.Group();n.position.set(0,.16,zz);n.rotation.x=trnd(-.15,.15);n.rotation.z=trnd(-.15,.15);g.add(n);mesh(G.box(.36,h,.1),pbr("#D9D3C7",.9),0,h/2,0,n);
+  const cap=mesh(G.cyl(.18,.18,.1,12,1),pbr("#D9D3C7",.9),0,h,0,n);cap.rotation.x=Math.PI/2;mesh(G.sph(.06,8,6),pbr("#D9D3C7",.9),0,h+.2,0,n)};
+ nisan(-.85,trnd(.45,.65));nisan(.85,trnd(.35,.5));
+ if(Math.random()<.5){const fm=std("#F7F3E8",.6);for(let k=0;k<5;k++)mesh(G.sph(.05,6,5),fm,trnd(-.3,.3),.36,trnd(-.7,.7),g,true)}return g}
+function kamboja(p,x,z){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=Math.random()*6;p.add(g);const T=islTreeTpl();const w=new THREE.Mesh(T.dead[(Math.random()*T.dead.length)|0],pbr("#8E8A80",.95));w.scale.setScalar(.75);g.add(w);
+ const lf=std("#3F6B34",.8),fl=new THREE.MeshStandardMaterial({color:"#FFF8E7",emissive:"#3A3420",roughness:.6});for(let k=0;k<16;k++){const a=Math.random()*6.28,r=trnd(.4,1.6);const y=trnd(2.4,3.6);mesh(G.sph(trnd(.22,.34),8,6),lf,Math.cos(a)*r,y,Math.sin(a)*r,g).scale.y=.6;
+  for(let f=0;f<2;f++)mesh(G.sph(.08,6,5),fl,Math.cos(a)*r+trnd(-.2,.2),y+.15,Math.sin(a)*r+trnd(-.2,.2),g,true)}return g}
+function fogTex(){const c=document.createElement("canvas");c.width=c.height=128;const x=c.getContext("2d");const gr=x.createRadialGradient(64,64,4,64,64,62);gr.addColorStop(0,"rgba(255,255,255,.9)");gr.addColorStop(.5,"rgba(255,255,255,.35)");gr.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gr;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)}
+function moonTex(){const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");const gr=x.createRadialGradient(128,128,40,128,128,128);gr.addColorStop(0,"rgba(255,248,220,1)");gr.addColorStop(.42,"rgba(255,244,205,1)");gr.addColorStop(.47,"rgba(255,230,170,.35)");gr.addColorStop(1,"rgba(255,220,150,0)");x.fillStyle=gr;x.fillRect(0,0,256,256);
+ x.fillStyle="rgba(200,190,160,.35)";[[105,100,14],[150,140,20],[120,160,10],[160,95,9]].forEach(([a,b,r])=>{x.beginPath();x.arc(a,b,r,0,7);x.fill()});const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+/* ---------- bangun ---------- */
+function buildIslam(){islPrep();const g=new THREE.Group();g.position.set(C4.x,0,C4.z);g.rotation.y=IA;scene.add(g);ISL.g=g;
+ /* frame lokal grup: sumbu z lokal = arah keluar (u), x lokal = v → posisi lokal (v,y,u) */
+ const LP=(ul,v)=>({x:v,z:ul});
+ // tanah pulau dengan warna jalur / hutan / lapangan
+ const SZ=(IR+14)*2,SEG=176;const geo=new THREE.PlaneGeometry(SZ,SZ,SEG,SEG);geo.rotateX(-Math.PI/2);const P=geo.attributes.position,col=[],c=new THREE.Color();
+ for(let k=0;k<P.count;k++){const v=P.getX(k),ul=P.getZ(k),r=Math.hypot(ul,v);let y=.02;if(r>IR-1)y=.02-Math.min(3.2,(r-IR+1)*.55);P.setY(k,y);
+  const d=islDist(ul,v),cl=Math.hypot(ul-ISL.UC,v),n=.9+Math.random()*.12;
+  if(r>IR-2.2)c.set("#BCAA82");else if(cl<ISL.CR+.5)c.set(cl<ISL.CR-1.5?"#5E9C47":"#4E7E3C");else if(d<ISL.HW+.2)c.set(d<ISL.HW-.6?"#7A6650":"#5E513F");else if(ul<-IR+4.5&&Math.abs(v)<3)c.set("#7A6650");else c.set(Math.random()<.5?"#2E3324":"#3A3226");
+  col.push(c.r*n,c.g*n,c.b*n)}
+ geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3));geo.computeVertexNormals();const gm=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));gm.receiveShadow=true;g.add(gm);
+ // pohon hutan
+ const T=islTreeTpl();let nt=0;for(let k=0;k<3000&&nt<190;k++){const a=Math.random()*6.28,r=Math.sqrt(Math.random())*(IR-1.5),ul=Math.cos(a)*r,v=Math.sin(a)*r;
+  if(islDist(ul,v)<ISL.HW+1.6||Math.hypot(ul-ISL.UC,v)<ISL.CR+2.2||(ul<-IR+6&&Math.abs(v)<4))continue;const p=LP(ul,v);const t=new THREE.Group();t.position.set(p.x,0,p.z);t.rotation.y=Math.random()*6;t.scale.setScalar(trnd(.85,1.3));g.add(t);
+  if(Math.random()<.62){const m=new THREE.Mesh(T.dead[(Math.random()*T.dead.length)|0],T.bark);m.castShadow=true;t.add(m)}else{const m=new THREE.Mesh(T.pine,T.pineM);m.castShadow=true;t.add(m);t.add(new THREE.Mesh(T.trunk,T.trunkM));t.scale.multiplyScalar(trnd(1,1.4))}nt++}
+ // kuburan di sisi jalan
+ [.16,.4,.62,.84].forEach((tt,ci)=>{const S=ISL.path[Math.round(tt*(ISL.path.length-1))],S2=ISL.path[Math.round(tt*(ISL.path.length-1))+2];const tu=S2.u-S.u,tv=S2.v-S.v,tl=Math.hypot(tu,tv);const nu=-tv/tl,nv=tu/tl;const side=ci%2?1:-1;
+  for(let k=0;k<6;k++){const off=ISL.HW+1.6+(k%2)*2.6,al=(Math.floor(k/2)-1)*2.6;const ul=S.u+nu*off*side+tu/tl*al,v=S.v+nv*off*side+tv/tl*al;if(Math.hypot(ul,v)>IR-3)continue;const p=LP(ul,v);grave(g,p.x,p.z,Math.atan2(tv,tu)*0+Math.atan2(nv,nu))}
+  const ku=S.u+nu*(ISL.HW+7)*side,kv=S.v+nv*(ISL.HW+7)*side;if(Math.hypot(ku,kv)<IR-3){const p=LP(ku,kv);kamboja(g,p.x,p.z)}
+  // pagar kayu tua
+  const fw=pbr("#4B3B2D",1);for(let k=-2;k<=2;k++){const ul=S.u+nu*(ISL.HW+.55)*side+tu/tl*k*1.3,v=S.v+nv*(ISL.HW+.55)*side+tv/tl*k*1.3;const p=LP(ul,v);const po=mesh(G.box(.1,.9+Math.random()*.3,.1),fw,p.x,.45,p.z,g);po.rotation.z=trnd(-.15,.15)}
+  {const ul=S.u+nu*(ISL.HW+.55)*side,v=S.v+nv*(ISL.HW+.55)*side;const p=LP(ul,v);const rl=mesh(G.box(.05,.08,5.4),fw,p.x,.7,p.z,g);rl.rotation.y=Math.atan2(tv,tu);rl.rotation.x=.05}
+  const sg=labelSprite("MAKAM TUA","#3A2F4A","#E0D7F5",240);const sp=LP(S.u+nu*(ISL.HW+.9)*side,S.v+nv*(ISL.HW+.9)*side);sg.position.set(sp.x,1.6,sp.z);sg.scale.multiplyScalar(.75);g.add(sg)});
+ // labu lentera di sepanjang jalan
+ for(let s=6,k=0;s<ISL.len-4;s+=7,k++){const S=ISL.path.find(p=>p.s>=s);const S2=ISL.path[Math.min(ISL.path.length-1,ISL.path.indexOf(S)+2)];const tu=S2.u-S.u,tv=S2.v-S.v,tl=Math.hypot(tu,tv)||1;const side=k%2?1:-1;
+  const ul=S.u-tv/tl*(ISL.HW+.35)*side,v=S.v+tu/tl*(ISL.HW+.35)*side;const p=LP(ul,v);pumpkin(g,p.x,p.z,Math.atan2(-(v-S.v),-(ul-S.u))+0,trnd(.9,1.2))}
+ // gerbang hutan
+ {const p=LP(-IR+3,0);const ga=new THREE.Group();ga.position.set(p.x,0,p.z);g.add(ga);const wd=pbr("#3E2F25",1);
+  [-2.9,2.9].forEach(x=>{const po=mesh(G.cyl(.22,.3,4.6,8),wd,x,2.3,0,ga);po.rotation.z=x*.02;pumpkin(ga,x,0,0,1.2).position.z=-.6});mesh(G.box(6.6,.35,.35),wd,0,4.4,0,ga).rotation.z=.04;
+  const lb=labelSprite("HUTAN MISTERI","#4A148C","#FFB74D",380);lb.position.set(0,5.2,0);lb.scale.multiplyScalar(1.5);ga.add(lb);
+  const lb2=labelSprite("Jawab soal hantu · Masjid di ujung hutan","#311B92","#FFFFFF",520);lb2.position.set(0,3.6,-.4);lb2.scale.multiplyScalar(.85);ga.add(lb2);
+  [-2.9,2.9].forEach(x=>{const w=g.localToWorld(new THREE.Vector3(p.x+x,0,p.z));ISL.gObs=ISL.gObs||[];obstacles.push({x:C4.x+IDX*(-IR+3)+IDZ*x*1,z:C4.z+IDZ*(-IR+3)-IDX*x,r:.35})})}
+ // kabut tanah
+ const ft=fogTex();for(let k=0;k<34;k++){let ul,v;for(let t=0;t<20;t++){const a=Math.random()*6.28,r=Math.sqrt(Math.random())*(IR-6);ul=Math.cos(a)*r;v=Math.sin(a)*r;if(Math.hypot(ul-ISL.UC,v)>ISL.CR+3)break}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:ft,color:"#CFC6EE",transparent:true,opacity:.26,depthWrite:false}));m.rotation.x=-Math.PI/2;const s=trnd(6,11);m.scale.set(s,s,1);const p=LP(ul,v);m.position.set(p.x,trnd(.25,.6),p.z);m.renderOrder=2;g.add(m);ISL.wisps.push({m,sp:trnd(-.08,.08)});W2.dyn.push(m)}
+ buildMosque(g,LP);
+ // hantu penanya di jalan
+ const NM=["Hantu Cilok","Hantu Klepon","Hantu Cimol","Hantu Lupis","Hantu Serabi","Hantu Onde","Hantu Getuk","Hantu Bakwan","Hantu Kerupuk","Hantu Lemper"];
+ const tints=["#F5F2FF","#EAF6FF","#FFF0F6","#F0FFF4","#FFF8E6"];
+ for(let i=0;i<ISL.N;i++){const s=ISL.len*(i+1)/(ISL.N+1.4)+3;const k=ISL.path.findIndex(p=>p.s>=s);const S=ISL.path[k],S2=ISL.path[k+2];const tu=S2.u-S.u,tv=S2.v-S.v,tl=Math.hypot(tu,tv);
+  const p=LP(S.u,S.v);const gg=new THREE.Group();gg.position.set(p.x,0,p.z);gg.rotation.y=Math.atan2(-tv,-tu);g.add(gg);
+  const gh=ghostMesh(tints[i%tints.length]);gh.scale.setScalar(1.25);gh.position.y=.6;gg.add(gh);
+  const sign=labelSprite(`${NM[i]} · Soal ${i+1}`,"#4A148C","#FFFFFF",330);sign.position.set(0,2.65,0);gg.add(sign);
+  const qm=labelSprite("?","#FFB74D","#2A1240",96);qm.position.set(0,3.3,0);qm.scale.multiplyScalar(.6);gg.add(qm);
+  const w=iL(S.u,S.v);const nx=(-tv/tl),nz=(tu/tl);const obs=[-1.6,0,1.6].map(o=>{const q=iL(S.u+nx*o,S.v+nz*o);return{x:q.x,z:q.z,r:.95}});obs.forEach(o=>obstacles.push(o));
+  const G0={i,x:w.x,z:w.z,h:0,gg,bar:new THREE.Group(),obs,open:false,q:null,lift:0,qf:islQ,list:ISL.gates,gh,sign,qm,ph:Math.random()*6,name:NM[i],
+   head:()=>`${NM[i]} bertanya · Soal ${i+1}/${ISL.N} · Agama Islam ${GR().label}`,okTxt:`${NM[i]} kabur ketakutan! Jalan terbuka.`,
+   leftMsg:l=>`Hebat! Sisa ${l} hantu lagi.`,doneMsg:"Semua hantu kabur! Lanjutkan ke masjid di ujung hutan."};ISL.gates.push(G0);W2.dyn.push(gg)}
+ // hantu bergentayangan
+ for(let k=0;k<12;k++){const gh=ghostMesh("#EDEBFF",.6);gh.scale.setScalar(trnd(.8,1.1));scene.add(gh);const H={m:gh,x:0,z:0,y:trnd(1.4,3.6),tx:0,tz:0,ph:Math.random()*6,boo:0};islGhostTarget(H,true);H.x=H.tx;H.z=H.tz;ISL.ghosts.push(H);W2.dyn.push(gh)}
+ // kelelawar
+ const batM=new THREE.MeshBasicMaterial({color:"#120E1C",side:THREE.DoubleSide});const wsh=new THREE.Shape();wsh.moveTo(0,0);wsh.lineTo(.45,.12);wsh.lineTo(.62,-.02);wsh.lineTo(.5,-.08);wsh.lineTo(.38,-.02);wsh.lineTo(.26,-.1);wsh.lineTo(.14,-.04);wsh.lineTo(0,-.08);const wg=new THREE.ShapeGeometry(wsh);
+ for(let k=0;k<10;k++){const b=new THREE.Group();const body=new THREE.Mesh(G.sph(.08,8,6),batM);body.scale.set(.8,.7,1.4);b.add(body);const L=new THREE.Group(),R=new THREE.Group();const wl=new THREE.Mesh(wg,batM);wl.rotation.x=-Math.PI/2;const wr=wl.clone();wr.scale.x=-1;L.add(wr);R.add(wl);b.add(L,R);
+  b.scale.setScalar(1.6);scene.add(b);ISL.bats.push({b,L,R,r:trnd(8,34),y:trnd(8,15),w:trnd(.25,.5)*(k%2?1:-1),a:Math.random()*6.28,ph:Math.random()*6});W2.dyn.push(b)}
+ // langit malam & bulan (tampak saat masuk hutan)
+ ISL.dome=new THREE.Mesh(new THREE.SphereGeometry(240,24,14),new THREE.MeshBasicMaterial({color:"#241C3C",side:THREE.BackSide,transparent:true,opacity:0,fog:false,depthWrite:false}));ISL.dome.renderOrder=-10;ISL.dome.visible=false;scene.add(ISL.dome);W2.dyn.push(ISL.dome);
+ ISL.moon=new THREE.Sprite(new THREE.SpriteMaterial({map:moonTex(),transparent:true,opacity:0,fog:false,depthWrite:false}));ISL.moon.scale.set(34,34,1);ISL.moon.renderOrder=-9;ISL.moon.visible=false;scene.add(ISL.moon);W2.dyn.push(ISL.moon);
+ buildIslBridge()}
+function islGhostTarget(H,any){for(let t=0;t<30;t++){const a=Math.random()*6.28,r=Math.sqrt(Math.random())*(IR-4),ul=Math.cos(a)*r,v=Math.sin(a)*r;if(Math.hypot(ul-ISL.UC,v)<ISL.CR+4)continue;if(!any&&Math.hypot(ul-H.ul,v-H.v)>22)continue;const w=iL(ul,v);H.tx=w.x;H.tz=w.z;H.ul=ul;H.v=v;return}}
+/* masjid di ujung hutan */
+function buildMosque(g,LP){const p=LP(ISL.UC+3,0);const M=new THREE.Group();M.position.set(p.x,0,p.z);g.add(M);ISL.mos=M;
+ const white=pbr("#F3EEE4",.7),marble=pbr("#E4DCCD",.5),green=pbr("#1F8A5B",.35,.25),gold=pbr("#E3B341",.25,.85),dark=pbr("#1C4A3A",.6),wood=pbr("#7A4E2D",.7);
+ // halaman
+ mesh(G.cyl(ISL.CR-1.2,ISL.CR-1.2,.06,48),texStd("paving","#DCD3C2",10,10,.95),0,.05,-3,M,true).receiveShadow=true;
+ mesh(RB(11,.45,9.5,.08),marble,0,.22,1.2,M);
+ // ruang utama
+ mesh(RB(9,4.6,8,.1),white,0,2.7,1.4,M);mesh(G.box(9.3,.35,8.3),green,0,5.1,1.4,M);
+ // serambi depan dengan lengkung
+ for(let k=-1;k<=1;k++){mesh(G.box(.5,3.4,.5),white,k*3.2-1.6+1.6*(k===1?0:0),2.1,-3.2,M)}[-4.4,-1.45,1.45,4.4].forEach(x=>mesh(G.box(.45,3.2,.45),white,x,2.05,-3.1,M));
+ mesh(G.box(9.4,.55,1.6),white,0,3.9,-2.5,M);mesh(G.box(9.6,.18,1.8),green,0,4.25,-2.5,M);
+ const arch=(x,z,w,h,ry)=>{const a=new THREE.Group();a.position.set(x,.45,z);a.rotation.y=ry||0;M.add(a);mesh(G.box(w,h,.12),dark,0,h/2,0,a);const t=mesh(G.cyl(w/2,w/2,.12,16,1,false),dark,0,h,0,a);t.rotation.x=Math.PI/2;t.scale.y=1;
+  const tr=mesh(new THREE.TorusGeometry(w/2+.06,.06,6,20,Math.PI),gold,0,h,.07,a)};
+ arch(0,-2.58,1.5,2,0);arch(-2.9,-2.58,1.1,1.6,0);arch(2.9,-2.58,1.1,1.6,0);
+ [-2.6,0,2.6].forEach(z=>{arch(-4.56,z+1.6,1,1.5,Math.PI/2);arch(4.56,z+1.6,1,1.5,-Math.PI/2)});
+ // kubah utama
+ mesh(G.cyl(3,3.1,1.1,32),white,0,5.8,1.4,M);const dm=mesh(new THREE.SphereGeometry(3,32,18,0,Math.PI*2,0,Math.PI/2),green,0,6.35,1.4,M);dm.scale.y=1.12;
+ mesh(G.cyl(.12,.16,.9,10),gold,0,10.1,1.4,M);mesh(G.sph(.22,12,10),gold,0,10.6,1.4,M);
+ const cres=(par,x,y,z,s)=>{const c=new THREE.Group();c.position.set(x,y,z);c.scale.setScalar(s);par.add(c);const sh=new THREE.Shape();sh.absarc(0,0,.5,0,Math.PI*2,false);const hole=new THREE.Path();hole.absarc(.2,.08,.42,0,Math.PI*2,true);sh.holes.push(hole);
+  const m=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:.08,bevelEnabled:false,curveSegments:24}),new THREE.MeshStandardMaterial({color:"#F2C94C",emissive:"#8A6A10",emissiveIntensity:.6,metalness:.8,roughness:.25}));m.position.z=-.04;m.rotation.z=.5;c.add(m);return c};
+ cres(M,0,11.3,1.4,.95);
+ // kubah kecil di sudut
+ [[-3.6,-1.6],[3.6,-1.6],[-3.6,4.4],[3.6,4.4]].forEach(([x,z])=>{mesh(G.cyl(.75,.8,.6,16),white,x,5.6,z,M);const d=mesh(new THREE.SphereGeometry(.8,16,10,0,Math.PI*2,0,Math.PI/2),green,x,5.9,z,M);d.scale.y=1.2;mesh(G.sph(.1,8,6),gold,x,6.95,z,M)});
+ // menara
+ [[-6.2,-3.4],[6.2,-3.4]].forEach(([x,z])=>{mesh(G.cyl(.65,.75,.8,16),marble,x,.4,z,M);mesh(G.cyl(.48,.55,11,16),white,x,6.3,z,M);mesh(G.cyl(.85,.6,.4,16),green,x,9.2,z,M);mesh(G.cyl(.9,.9,.1,16),gold,x,9.45,z,M);
+  for(let k=0;k<8;k++){const a=k/8*Math.PI*2;mesh(G.cyl(.04,.04,.6,6),white,x+Math.sin(a)*.82,9.8,z+Math.cos(a)*.82,M,true)}mesh(G.cyl(.42,.45,1.6,16),white,x,10.6,z,M);
+  const d=mesh(new THREE.SphereGeometry(.5,16,10,0,Math.PI*2,0,Math.PI/2),green,x,11.4,z,M);d.scale.y=1.6;mesh(G.cyl(.05,.05,.5,6),gold,x,12.4,z,M);cres(M,x,12.85,z,.45);
+  [3,6,8.4].forEach(y=>mesh(G.cyl(.56,.56,.12,16),green,x,y,z,M,true))});
+ // lampu hangat
+ const lampM=new THREE.MeshBasicMaterial({color:new THREE.Color(2.6,1.9,.9)});[[-4.4,-3.6],[4.4,-3.6],[-1.45,-3.6],[1.45,-3.6]].forEach(([x,z])=>{mesh(G.cyl(.02,.02,.4,4),dark,x,3.4,z,M,true);mesh(G.sph(.14,10,8),lampM,x,3.1,z,M,true)});
+ [[-7.5,-7],[7.5,-7],[-7.5,-1],[7.5,-1]].forEach(([x,z])=>{mesh(G.cyl(.07,.09,2.6,8),dark,x,1.3,z,M);mesh(RB(.4,.5,.4,.05),dark,x,2.75,z,M);mesh(G.box(.3,.36,.3),lampM,x,2.75,z,M,true)});
+ // bedug
+ {const bd=new THREE.Group();bd.position.set(6.4,0,1.6);M.add(bd);mesh(G.box(.12,1.3,.12),wood,-.75,.65,-.5,bd);mesh(G.box(.12,1.3,.12),wood,.75,.65,-.5,bd);mesh(G.box(.12,1.3,.12),wood,-.75,.65,.5,bd);mesh(G.box(.12,1.3,.12),wood,.75,.65,.5,bd);
+  const dr=mesh(G.cyl(.62,.62,1.6,20),pbr("#9A5B2E",.6),0,1.6,0,bd);dr.rotation.z=Math.PI/2;[-.81,.81].forEach(x=>{const s=mesh(G.cyl(.6,.6,.02,20),pbr("#E9D8B4",.8),x,1.6,0,bd);s.rotation.z=Math.PI/2})}
+ const lb=labelSprite("MASJID NURUL ILMI","#1F8A5B","#FFFFFF",400);lb.position.set(0,13.8,1.4);lb.scale.multiplyScalar(1.8);M.add(lb);
+ // halangan
+ g.updateMatrixWorld(true);const wp=v=>{const q=new THREE.Vector3(...v);M.localToWorld(q);return q};
+ const ob=(x,z,r)=>{const q=wp([x,0,z]);obstacles.push({x:q.x,z:q.z,r})};[[-2.4,0],[2.4,0],[-2.4,3],[2.4,3],[0,1.4]].forEach(([x,z])=>ob(x,z,2.4));[[-6.2,-3.4],[6.2,-3.4]].forEach(([x,z])=>ob(x,z,.85));ob(6.4,1.6,1);
+ [[-7.5,-7],[7.5,-7],[-7.5,-1],[7.5,-1]].forEach(([x,z])=>ob(x,z,.25));
+ const fr=wp([0,0,-6.5]);ISL.front={x:fr.x,z:fr.z}}
+/* jalan & jembatan lentera dari pulau utama */
+function buildIslBridge(){const u0=53.7,u1=ISLAND_R+3;
+ const pth=mesh(G.box(5,.06,u1-u0),texStd("paving","#B9AE9A",1,(u1-u0)/3,.95),IDX*(u0+u1)/2,.05,IDZ*(u0+u1)/2,scene,true);pth.rotation.y=IA;pth.receiveShadow=true;
+ const b0=86,b1=ID-IR+4,L=b1-b0,mid=(b0+b1)/2;const deck=new THREE.Group();deck.position.set(IDX*mid,0,IDZ*mid);deck.rotation.y=IA;scene.add(deck);
+ mesh(G.box(5,.4,L),texStd("wood","#7D6247",2,L/2,.85),0,-.15,0,deck,true).receiveShadow=true;
+ const rope=pbr("#8C7A5B",.9),post=pbr("#4E3B2B",.95);[-2.5,2.5].forEach(v=>{mesh(G.box(.06,.06,L),rope,v,.95,0,deck,true);for(let k=0;k<=L;k+=3)mesh(G.cyl(.07,.08,1.1,6),post,v,.5,-L/2+k,deck);for(let k=6;k<L;k+=12)mesh(G.cyl(.3,.35,4,8),post,v*.95,-2.2,-L/2+k,deck)});
+ const lm=new THREE.MeshBasicMaterial({color:new THREE.Color(2.8,1.7,.6)});for(let k=8;k<L;k+=14){const v=(k/14|0)%2?2.65:-2.65;mesh(G.cyl(.06,.08,2.6,6),post,v,1.3,-L/2+k,deck);mesh(G.box(.5,.08,.08),post,v-Math.sign(v)*.22,2.55,-L/2+k,deck);
+  mesh(G.cyl(.03,.03,.3,4),post,v-Math.sign(v)*.42,2.4,-L/2+k,deck,true);mesh(G.sph(.17,10,8),lm,v-Math.sign(v)*.42,2.18,-L/2+k,deck,true)}
+ const gate=(u,txt,col,fg)=>{const gp=new THREE.Group();gp.position.set(IDX*u,0,IDZ*u);gp.rotation.y=IA;scene.add(gp);
+  [-3.2,3.2].forEach(v=>{mesh(G.box(.7,4.6,.7),pbr("#2E2440",.8),v,2.3,0,gp);mesh(G.box(.76,.5,.76),pbr("#E8730C",.6),v,4.4,0,gp);const w=toWorldXY(IDX*u,IDZ*u,IA,v,0);obstacles.push({x:w.x,z:w.z,r:.5})});
+  mesh(G.box(7.2,.8,.8),pbr("#2E2440",.8),0,5.1,0,gp);const lb=labelSprite(txt,col,fg,500);lb.position.set(0,6.3,0);lb.scale.multiplyScalar(1.5);gp.add(lb)};
+ gate(58,"JALAN KE PULAU IMAN · Agama Islam","#4A148C","#FFB74D")}
+/* ---------- soal ---------- */
+function islQ(){const pool=PAI_Q[GR().band];const used=new Set(ISL.gates.map(g=>g.q&&g.q[0]));const av=pool.filter(q=>!used.has(q[0]));const P=av.length?av:pool;return P[Math.floor(Math.random()*P.length)]}
+function islReset(){ISL.gates.forEach(G=>{G.open=false;G.q=null;G.lift=0;G.gh.visible=true;G.obs.forEach(o=>{if(!obstacles.includes(o))obstacles.push(o)})});ISL.run={rewarded:false}}
+/* ---------- update ---------- */
+function islUpdate(dt,t,pp){if(!ISL.g)return;const dI=Math.hypot(pp.x-C4.x,pp.z-C4.z);const near=dI<IR+70;
+ // suasana
+ let St=Math.max(0,Math.min(1,(IR+22-dI)/30));if(ISL.front){const dm=Math.hypot(pp.x-ISL.front.x,pp.z-ISL.front.z);St*=.2+.8*Math.max(0,Math.min(1,(dm-9)/12))}
+ ISL.S+=(St-ISL.S)*Math.min(1,dt*1.4);if(!near)return;
+ ISL.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want)G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*.8);
+  const gh=G.gh;if(G.lift>=1){gh.visible=false;G.sign.visible=false;G.qm.visible=false;return}gh.visible=true;G.sign.visible=G.lift<.3;G.qm.visible=!G.open;
+  const lf=G.lift;gh.position.set(Math.sin(lf*6)*lf*2,.6+Math.sin(t*2.2+G.ph)*.15+lf*lf*7,0);gh.rotation.y=lf*9+Math.sin(t*1.3+G.ph)*.25;gh.rotation.z=Math.sin(t*1.7+G.ph)*.08;setGhostOp(gh,.9*(1-lf));
+  gh.userData.arms.forEach((a,k)=>a.position.y=.55+Math.sin(t*3+k*3+G.ph)*.08+(Math.hypot(G.x-pp.x,G.z-pp.z)<5&&!G.open?.18:0))});
+ ISL.ghosts.forEach(H=>{const dx=H.tx-H.x,dz=H.tz-H.z,d=Math.hypot(dx,dz);if(d<.5)islGhostTarget(H);else{H.x+=dx/d*dt*1.1;H.z+=dz/d*dt*1.1}
+  let y=H.y+Math.sin(t*1.6+H.ph)*.35;const dp=Math.hypot(H.x-pp.x,H.z-pp.z);
+  if(H.boo>0){H.boo-=dt;const k=Math.sin(Math.min(1,(1.2-H.boo)/1.2)*Math.PI);y=pp.y+1.2+k*.4;H.m.scale.setScalar(H.s0*(1+k*.5))}
+  else if(dp<3.4&&ISL.boo<=0&&onIsl(pp.x,pp.z)){H.boo=1.2;ISL.boo=7;H.s0=H.s0||H.m.scale.x;toast("👻 Boo! Jangan takut, ayo terus jalan!");blip("jump");islGhostTarget(H,true)}
+  H.m.position.set(H.x,y,H.z);H.m.rotation.y=Math.atan2(dx,dz);setGhostOp(H.m,.32+.3*(.5+.5*Math.sin(t*.9+H.ph)))});
+ if(ISL.boo>0)ISL.boo-=dt;
+ ISL.bats.forEach(B=>{B.a+=B.w*dt;const x=C4.x+Math.sin(B.a)*B.r,z=C4.z+Math.cos(B.a)*B.r;B.b.position.set(x,B.y+Math.sin(t*1.3+B.ph)*1.2,z);B.b.rotation.y=B.a+(B.w>0?Math.PI/2:-Math.PI/2);const f=Math.sin(t*16+B.ph)*.8;B.L.rotation.z=f;B.R.rotation.z=-f});
+ ISL.wisps.forEach(W=>{W.m.rotation.z+=W.sp*dt});
+ // hadiah di masjid
+ if(ISL.front&&!ISL.run.rewarded&&ISL.gates.every(g=>g.open)&&Math.hypot(pp.x-ISL.front.x,pp.z-ISL.front.z)<8){ISL.run.rewarded=true;SAVE.islam=(SAVE.islam||0)+1;SAVE.xp+=60;SAVE.coins+=6;persist();updateStats();blip("win");confetti(70);toast("Alhamdulillah! Kamu sampai di Masjid Nurul Ilmi: +60 XP · +$60")}
+ if(ISL.run.rewarded&&dI>IR+40&&!onIslBridge(pp.x,pp.z,6))islReset()}
+/* suasana malam: diterapkan tepat sebelum render lalu dikembalikan */
+function islPre(){const S=ISL.S;if(!ISL.dome)return;const on=S>.01;ISL.dome.visible=on;ISL.moon.visible=on;if(!on){ISL.saved=null;return}
+ if(!ISL.hemi)ISL.hemi=cineHemi()||{intensity:0,color:new THREE.Color()};const H=ISL.hemi,F=scene.fog;
+ ISL.saved={fc:F.color.clone(),fn:F.near,ff:F.far,si:sun.intensity,hi:H.intensity,hc:H.color.clone(),ex:renderer.toneMappingExposure};
+ if(camera.position.y>-.45){F.color.lerp(_islFog,S*.92);F.near+=(5-F.near)*S;F.far+=(66-F.far)*S}
+ sun.intensity*=1-.8*S;H.intensity*=1-.55*S;H.color.lerp(_islHemi,S*.7);renderer.toneMappingExposure*=1-.12*S;
+ ISL.dome.position.copy(camera.position);ISL.dome.material.color.copy(F.color);ISL.dome.material.opacity=Math.min(.97,S*1.05);
+ ISL.moon.position.set(camera.position.x+IDX*150-IDZ*60,camera.position.y+95,camera.position.z+IDZ*150+IDX*60);ISL.moon.material.opacity=S}
+function islPost(){const B=ISL.saved;if(!B)return;const F=scene.fog,H=ISL.hemi;F.color.copy(B.fc);F.near=B.fn;F.far=B.ff;sun.intensity=B.si;H.intensity=B.hi;H.color.copy(B.hc);renderer.toneMappingExposure=B.ex;ISL.saved=null}
+const _islFog=new THREE.Color("#2C2445"),_islHemi=new THREE.Color("#8C82C8");
+/* ---------- teks & peta ---------- */
+function islObjective(tg){const onB=onIslBridge(tg.x,tg.z,5);if(!onB&&!onIsl(tg.x,tg.z))return null;const left=ISL.gates.filter(g=>!g.open);
+ if(onB&&iUV(tg.x,tg.z).u<ID-IR-2)return`Jembatan Lentera menuju <span class="y">Pulau Iman</span> · Hutan Misteri<span class="small">Di dalam hutan, ${ISL.N} hantu akan bertanya soal Agama Islam</span>`;
+ if(!left.length)return ISL.run.rewarded?`Alhamdulillah, Pulau Iman selesai! <span class="small">Hantu akan kembali setelah kamu meninggalkan pulau.</span>`:`Semua hantu sudah kabur! <span class="y">Jalan terus ke Masjid Nurul Ilmi</span> di ujung hutan.`;
+ const g=left[0];const d=Math.round(Math.hypot(g.x-tg.x,g.z-tg.z));return`Susuri Hutan Misteri. <span class="y">${esc(g.name)} · Soal ${g.i+1}/${ISL.N}</span>: dekati lalu jawab soal Agama Islam.<span class="small">${d} m · Masjid ada di ujung hutan</span>`}
+function islLoc(tg){if(ISL.front&&Math.hypot(tg.x-ISL.front.x,tg.z-ISL.front.z)<14)return["mosque","<b>Masjid Nurul Ilmi</b><span>Pulau Iman · Agama Islam</span>"];
+ if(onIsl(tg.x,tg.z))return["islam","<b>Pulau Iman · Hutan Misteri</b><span>Pendidikan Agama Islam</span>"];if(onIslBridge(tg.x,tg.z,5)&&iUV(tg.x,tg.z).u>88)return["islb","<b>Jembatan Lentera</b><span>Jalan ke Pulau Iman</span>"];return null}
+function islMap(g,X,Y,s){g.strokeStyle="#8C7A5B";g.lineWidth=Math.max(1.5,5*s);g.beginPath();g.moveTo(X(IDX*53.7),Y(IDZ*53.7));g.lineTo(X(IDX*(ID-IR)),Y(IDZ*(ID-IR)));g.stroke();
+ const c=(x,z,r,col)=>{g.fillStyle=col;g.beginPath();g.arc(X(x),Y(z),Math.max(.5,r*s),0,7);g.fill()};c(C4.x,C4.z,IR+2,"#BCAA82");c(C4.x,C4.z,IR-2,"#2F3B29");
+ g.strokeStyle="#9C8566";g.lineWidth=Math.max(1.2,4*s);g.beginPath();ISL.path&&ISL.path.forEach((p,k)=>{const w=iL(p.u,p.v);k?g.lineTo(X(w.x),Y(w.z)):g.moveTo(X(w.x),Y(w.z))});g.stroke();
+ const m=iL(ISL.UC,0);c(m.x,m.z,ISL.CR,"#5E9C47");c(m.x,m.z,4.5,"#F3EEE4");c(m.x,m.z,2.6,"#1F8A5B")}
+
 /* =====================================================
    QUEST (percakapan)
    ===================================================== */
@@ -1699,18 +2044,18 @@ function onIpas(x,z){return i3pol(x,z).r<I3.B+10}
 function landAt(x,z){const r0=Math.hypot(x,z);if(r0<ISLAND_R)return true;if(x>NJ.x0-1&&x<NJ.x1+2&&Math.abs(z)<NJ.zw+2)return true;if(onDock(x,z))return true;
  if(Math.hypot(x-C2.x,z-C2.z)<R2-2)return true;{const q=axisUV(x,z);if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<3.4)return true}
  if(onMathBridge(x,z))return true;{const q=mUV(x,z);if(q.u>MU0-3&&q.u<mU(MATH_N)+MS.end+3&&Math.abs(q.v)<MS.inner+3)return true}
- {const p=i3pol(x,z);if(p.r<I3.B)return true}if(onPier3(x,z))return true;return false}
+ {const p=i3pol(x,z);if(p.r<I3.B)return true}if(onPier3(x,z))return true;if(islLand(x,z))return true;return false}
 function waterAt(x,z){return Math.hypot(x,z)<460&&!landAt(x,z)}
 function boatOK(x,z,rad){if(!waterAt(x,z))return false;for(let k=0;k<6;k++){const a=k*Math.PI/3;if(!waterAt(x+Math.sin(a)*rad,z+Math.cos(a)*rad))return false}return true}
-function shoreDepth(x,z){/* 0 di tepi pantai → 1 di laut dalam */let d=Math.hypot(x,z)-ISLAND_R;d=Math.min(d,Math.hypot(x-C2.x,z-C2.z)-(R2-2));d=Math.min(d,i3pol(x,z).r-I3.B);
+function shoreDepth(x,z){/* 0 di tepi pantai → 1 di laut dalam */let d=Math.hypot(x,z)-ISLAND_R;d=Math.min(d,Math.hypot(x-C2.x,z-C2.z)-(R2-2));d=Math.min(d,i3pol(x,z).r-I3.B);d=Math.min(d,Math.hypot(x-C4.x,z-C4.z)-IR);
  if(onDock(x,z)||onPier3(x,z))d=0;return Math.min(1,Math.max(0,d/3.2))}
-function canEnterWater(x,z){if(onMathBridge(x,z)||inMath(x,z))return false;const q=axisUV(x,z);if(q.u>84&&Math.abs(q.v)<4&&Math.hypot(x-C2.x,z-C2.z)>R2-2)return false;return true}
+function canEnterWater(x,z){if(onMathBridge(x,z)||inMath(x,z))return false;if(onIslBridge(x,z,4))return false;const q=axisUV(x,z);if(q.u>84&&Math.abs(q.v)<4&&Math.hypot(x-C2.x,z-C2.z)>R2-2)return false;return true}
 /* ---------- bahan realistis ---------- */
 function pbr(c,r,m,extra){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:r==null?.8:r,metalness:m||0},extra||{}))}
 const GEMTEX={};function gemTex(key,rep){const src=(window.REAL_TEX||{})[key];if(!src)return null;const k=key+rep;if(GEMTEX[k])return GEMTEX[k];const t=new THREE.TextureLoader().load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return GEMTEX[k]=t}
 /* ---------- bangun semuanya ---------- */
 function buildWorld2(){
- initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();cineInit();initBag();buildSoccer();
+ initShopUI();initMp();buildShops();realismUp();buildCloudWorld();buildNinja();buildOdong();buildThermals();buildFlags();buildSwing();buildDock();buildIpas();buildWardrobe();buildAnimals();buildSea();cineInit();initBag();buildSoccer();buildIslam();
  W2.ripple=new THREE.Mesh(new THREE.RingGeometry(.45,.75,32),new THREE.MeshBasicMaterial({color:"#FFFFFF",transparent:true,opacity:.5,depthWrite:false}));W2.ripple.rotation.x=-Math.PI/2;W2.ripple.visible=false;scene.add(W2.ripple);W2.dyn.push(W2.ripple)}
 function realismUp(){try{if(THREE.PMREMGenerator&&sky&&sky.material&&sky.material.uniforms){const pm=new THREE.PMREMGenerator(renderer);const s2=new THREE.Scene();const sk=sky.clone();sk.material=sky.material;s2.add(sk);
   const rt=pm.fromScene(s2,0,.1,1000);scene.environment=rt.texture;scene.traverse(o=>{if(o.isHemisphereLight)o.intensity*=.75});pm.dispose()}}catch(e){console.warn("env",e)}
@@ -1860,9 +2205,9 @@ function openGateQuiz(G){setPaused(true);const QF=G.qf||ipasQ;if(!G.q)G.q=QF();c
   <div class="foot"><button class="btn-soft" id="ipasClose">Nanti dulu</button></div></div>`;
  el.hidden=false;
  $("ipasClose").onclick=()=>{el.hidden=true;setPaused(false)};
- el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=G.npc?`<b style="color:#1E8449">Benar!</b> ${esc(G.npc.name)} memberi jalan.`:`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
+ el.querySelectorAll(".opt").forEach(bt=>bt.onclick=()=>{const v=bt.dataset.o;if(v===q[1]){bt.classList.add("right");blip("good");$("ipasFb").innerHTML=G.okTxt?`<b style="color:#1E8449">Benar!</b> ${esc(G.okTxt)}`:G.npc?`<b style="color:#1E8449">Benar!</b> ${esc(G.npc.name)} memberi jalan.`:`<b style="color:#1E8449">Benar!</b> Gerbang terbuka.`;
    G.open=true;G.obs.forEach(o=>{const k=obstacles.indexOf(o);if(k>=0)obstacles.splice(k,1)});SAVE.coins+=2;persist();updateStats();
-   setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(G.npc?(left?`Hebat! Sisa ${left} penjaga soal lagi.`:"Semua soal terjawab! Naik ke puncak!"):left?`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`:(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
+   setTimeout(()=>{el.hidden=true;setPaused(false);const left=(G.list||W2.gates).filter(g=>!g.open).length;toast(G.leftMsg?(left?G.leftMsg(left):G.doneMsg):G.fairy?(left?`Hebat! Sisa ${left} soal kata lagi.`:(G.doneMsg||"Selesai!")):G.npc?(left?`Hebat! Sisa ${left} penjaga soal lagi.`:"Semua soal terjawab! Naik ke puncak!"):left?(G.list===CL.gates?`Gerbang terbuka! Sisa ${left} soal kata`:`Gerbang ${G.i+1} terbuka! Sisa ${left} gerbang`):(G.doneMsg||"Semua gerbang terbuka! Naik ke puncak!"))},900)}
   else{bt.classList.add("wrong");blip("bad");$("ipasFb").innerHTML=`<b style="color:#C0392B">Belum tepat.</b> Jawaban benar: <b>${esc(q[1])}</b>. Coba soal lain!`;el.querySelectorAll(".opt").forEach(x=>x.disabled=true);
    setTimeout(()=>{G.q=QF();openGateQuiz(G)},1800)}})}
 /* ---------- hewan ---------- */
@@ -1952,7 +2297,7 @@ function world2Update(dt,t,pp){
   const wk=v.m.userData.wake;if(wk){wk.material.opacity=Math.min(.85,sp/14);wk.material.map.offset.y=(wk.material.map.offset.y-dt*sp*.05)%1}});
  // riak saat berenang
  if(W2.ripple){W2.ripple.visible=SWIM&&!driving;if(SWIM){W2.ripple.position.set(player.root.position.x,-.4,player.root.position.z);const s=1+((t*1.2)%1)*.8;W2.ripple.scale.setScalar(s);W2.ripple.material.opacity=.45*(1-((t*1.2)%1))}}
- seaUpdate(dt,t,pp);cloudUpdate(dt,t,pp);odongUpdate(dt);mpTick(dt);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
+ seaUpdate(dt,t,pp);cloudUpdate(dt,t,pp);islUpdate(dt,t,pp);odongUpdate(dt);mpTick(dt);if(!W2.looked&&player&&player.gltf){W2.looked=true;applyLook()}accUpdate();if(SHOP.pole)SHOP.pole.rotation.y+=dt*1.5;breathUpdate(dt);underwaterFx();
  // peti puncak
  if(W2.chest){const want=W2.ipasRun.rewarded?-1.2:0;W2.chest.lid.rotation.x+=(want-W2.chest.lid.rotation.x)*Math.min(1,dt*3)}
 }
@@ -1960,11 +2305,12 @@ function world2Update(dt,t,pp){
 function findNearAct(pos){if(SWIM||driving)return null;let best=null,bd=99;const cand=(type,ref,d,label)=>{if(d<bd){bd=d;best={type,ref,label}}};
  W2.poles.forEach(P=>{const d=Math.hypot(P.x-pos.x,P.z-pos.z);if(d<(P.nr||1.35)&&Math.abs(pos.y-(P.y0||0))<1.5)cand("climb",P,d,"Panjat");if(P.bean&&pos.y>P.h-4&&d<(P.nr||1.35)+.6)cand("climbdown",P,d,"Turun")});
  (CL.gates||[]).forEach(G=>{if(G.open)return;const d=Math.hypot(G.x-pos.x,G.z-pos.z);if(d<3.4&&Math.abs(pos.y-G.h)<2)cand("gate",G,d,"Jawab")});
- if(CL.umb){const d=Math.hypot(CL.umb.x-pos.x,CL.umb.z-pos.z);if(d<1.8&&pos.y>CL.Y-1)cand("umbrella",CL.umb,d,"Payung")}
+ if(CL.umb){const d=Math.hypot(CL.umb.x-pos.x,CL.umb.z-pos.z);if(d<2.4&&pos.y>CL.Y-1)cand("umbrella",CL.umb,d,"Meluncur")}
  W2.swings.forEach(S=>{const d=Math.hypot(S.x-pos.x,S.z-pos.z);if(d<1.3)cand("swing",S,d,"Ayun")});
  W2.spots.forEach(S=>{const d=Math.hypot(S.x-pos.x,S.z-pos.z);if(d<1.7)cand("fish",S,d,"Mancing")});
  W2.animals.forEach(a=>{if(!a.m.visible)return;const d=Math.hypot(a.x-pos.x,a.z-pos.z);if(d<1.5+a.A.len*.4)cand("pet",a,d,"Elus")});
  W2.gates.forEach(G=>{if(G.open)return;const d=Math.hypot(G.x-pos.x,G.z-pos.z);if(d<3.4&&Math.abs(pos.y-G.h)<2)cand("gate",G,d,"Jawab")});
+ ISL.gates.forEach(G=>{if(G.open)return;const d=Math.hypot(G.x-pos.x,G.z-pos.z);if(d<3.4&&Math.abs(pos.y-G.h)<2)cand("gate",G,d,"Jawab")});
  if(W2.wardrobe){const d=Math.hypot(W2.wardrobe.x-pos.x,W2.wardrobe.z-pos.z);if(d<2.2&&pos.y>I3.H-1)cand("wings",W2.wardrobe,d,"Pakai")}
  if(CL.hang){const d=Math.hypot(CL.hang.x-pos.x,CL.hang.z-pos.z);if(d<2.2&&pos.y>CL.Y-1)cand("glider",CL.hang,d,"Terbang")}
  const on=odongNear(pos);if(on)cand("odong",OD,on.d,"Naik");const sc=socNear(pos);if(sc)cand("soccer",SOC,sc.d,"Main Bola");
@@ -1972,7 +2318,7 @@ function findNearAct(pos){if(SWIM||driving)return null;let best=null,bd=99;const
  if(!best&&pos.y<.8){if(FRAME%6===0||!W2.shoreT){W2.shoreT=1;W2.shore=shoreSpot(pos)}if(W2.shore&&Math.hypot(W2.shore.x-pos.x,W2.shore.z-pos.z)<.6)best={type:"fish",ref:W2.shore,label:"Mancing"}}
  return best}
 /* memancing di tepi laut mana saja: cari arah air terdekat dari tempat berdiri */
-function shoreSpot(pos){if(!walkable(pos.x,pos.z)||inMath(pos.x,pos.z)||onMathBridge(pos.x,pos.z))return null;const f=player.root.rotation.y;let best=null,bs=-9;
+function shoreSpot(pos){if(onIsl(pos.x,pos.z)||!walkable(pos.x,pos.z)||inMath(pos.x,pos.z)||onMathBridge(pos.x,pos.z))return null;const f=player.root.rotation.y;let best=null,bs=-9;
  for(let k=0;k<16;k++){const a=k/16*Math.PI*2;const W=d=>{const x=pos.x+Math.sin(a)*d,z=pos.z+Math.cos(a)*d;return waterAt(x,z)&&canEnterWater(x,z)};let near=false;for(let d=.8;d<=5.5;d+=.5)if(W(d)){near=true;break}const ok=near&&W(7)&&W(8.5);
   if(ok){const sc=Math.cos(a-f);if(sc>bs){bs=sc;best={x:pos.x,z:pos.z,h:a,name:"Tepi Laut",dyn:true}}}}return best}
 function startAct(n){if(!n)return;const pos=player.root.position;
@@ -2109,7 +2455,7 @@ function reelLose(){REEL=null;blip("bad");$("reel").innerHTML=`<div class="reelC
  $("reelAgain").onclick=()=>{reelClose();if(ACT){ACT.phase="cast";ACT.t=.6;W2.bobber.visible=false}};$("reelDone").onclick=()=>fishStop()}
 function reelClose(noPause){REEL=null;$("reel").hidden=true;if(paused&&$("ipasBox").hidden&&!MG&&$("quest").hidden)setPaused(false)}
 /* ---------- objektif & label ---------- */
-function w2Objective(tg){{const c=cloudObjective(tg)||ninjaObjective(tg);if(c)return c}if(ACT&&ACT.type==="climb"&&ACT.P.bean)return`Memanjat pohon kacang ajaib… <span class="y">${Math.round(ACT.y)} / ${CL.Y} m</span><span class="small">Tahan W / joystick ke atas</span>`;if(ACT&&ACT.type==="umb")return`Turun dengan payung · ketinggian ${Math.round(tg.y)} m`;if(driving&&car&&car.type==="boat"){const d=Math.round(Math.hypot(C3.x-tg.x,C3.z-tg.z)-I3.B);return d>4?`Berlayar dengan speedboat. <span class="small">Pulau IPAS (gunung) di arah timur laut · ${d} m. Dekati pantai lalu tekan F untuk turun.</span>`:`Tekan <span class="y">F</span> untuk turun di Pulau IPAS.`}
+function w2Objective(tg){{const c=cloudObjective(tg)||ninjaObjective(tg);if(c)return c}if(!driving&&!SWIM&&!ACT){const io=islObjective(tg);if(io)return io}if(ACT&&ACT.type==="climb"&&ACT.P.bean)return`Memanjat pohon kacang ajaib… <span class="y">${Math.round(ACT.y)} / ${CL.Y} m</span><span class="small">Tahan W / joystick ke atas</span>`;if(ACT&&ACT.type==="umb")return`Meluncur dengan flying fox ke tengah kota · ketinggian ${Math.round(tg.y)} m`;if(driving&&car&&car.type==="boat"){const d=Math.round(Math.hypot(C3.x-tg.x,C3.z-tg.z)-I3.B);return d>4?`Berlayar dengan speedboat. <span class="small">Pulau IPAS (gunung) di arah timur laut · ${d} m. Dekati pantai lalu tekan F untuk turun.</span>`:`Tekan <span class="y">F</span> untuk turun di Pulau IPAS.`}
  if(W2.fly){const F=W2.fly,d=Math.round(Math.hypot(F.start.x-tg.x,F.start.z-tg.z));return`${F.kind==='wings'?'Terbang ke <span class="y">Negeri Pancasila</span>, ikuti cincin emas':'Terbang dengan <span class="y">layang gantung</span>'} · ${Math.round(tg.y)} m · ${Math.round(F.v*3.6)} km/jam${F.lift>.5?' · <b style="color:#5DD39E">ARUS NAIK ↑</b>':''}<span class="small">W menukik (lebih cepat) · S menarik naik · A/D belok · jarak ${d} m${SAVE.flyBest?` · rekor ${SAVE.flyBest} m`:''}</span>`}
  if(SWIM&&W2.dive>.5)return`Menyelam! <span class="small">Perhatikan bar napas. Lihat ikan, penyu & terumbu karang · tekan NAIK untuk ke permukaan</span>`;
  if(SWIM)return`Kamu sedang berenang! <span class="small">Gerakkan joystick untuk berenang, kembali ke pantai untuk berjalan.</span>`;
@@ -2117,7 +2463,7 @@ function w2Objective(tg){{const c=cloudObjective(tg)||ninjaObjective(tg);if(c)re
   if(!left.length&&0){}
   const g=left[0];const d=Math.round(Math.hypot(g.x-tg.x,g.z-tg.z));return`Daki jalan gunung yang berkelok. <span class="y">${g.npc?esc(g.npc.name):"Gerbang"} · Soal ${g.i+1}/${I3.N}</span>: dekati lalu jawab soal IPAS.<span class="small">${d} m · Soal mengikuti kelasmu</span>`}
  return null}
-function w2Loc(tg){if(inNinja(tg.x,tg.z))return["ninja","<b>Arena Ninja</b><span>Lintasan halang rintang</span>"];if(tg.y>CL.Y-6)return["cloud","<b>Negeri Awan</b><span>Dunia Bahasa Indonesia</span>"];if(driving&&car&&car.type==="boat")return["boat","<b>Laut Biru</b><span>Berlayar dengan speedboat</span>"];if(SWIM)return["swim","<b>Laut</b><span>Berenang</span>"];
+function w2Loc(tg){{const il=!SWIM&&!driving&&islLoc(tg);if(il)return il}if(inNinja(tg.x,tg.z))return["ninja","<b>Arena Ninja</b><span>Lintasan halang rintang</span>"];if(tg.y>CL.Y-6)return["cloud","<b>Negeri Awan</b><span>Dunia Bahasa Indonesia</span>"];if(driving&&car&&car.type==="boat")return["boat","<b>Laut Biru</b><span>Berlayar dengan speedboat</span>"];if(SWIM)return["swim","<b>Laut</b><span>Berenang</span>"];
  if(onIpas(tg.x,tg.z))return["ipas","<b>Pulau IPAS</b><span>Gunung pengetahuan alam & sosial</span>"];if(onDock(tg.x,tg.z))return["dock","<b>Dermaga Speedboat</b><span>Naik speedboat · Mancing di ujung dermaga</span>"];return null}
 function w2Summit(pos){if(!onIpas(pos.x,pos.z))return;const p=i3pol(pos.x,pos.z);
  if(p.r<I3.R1+1&&pos.y>I3.H-1&&!W2.ipasRun.rewarded&&W2.gates.every(g=>g.open)){W2.ipasRun.rewarded=true;SAVE.ipas=(SAVE.ipas||0)+1;SAVE.xp+=60;SAVE.coins+=6;persist();updateStats();blip("win");confetti(60);toast("Puncak IPAS! Peti harta terbuka: +60 XP · +$60")}}
@@ -2359,7 +2705,7 @@ function shopCamera(dt){if(!SHOP.cam||!player)return false;const p=player.root.p
 const BMAP={open:false,cx:0,cz:0,sc:1.6,drag:null,pinch:null};
 const MAP_LABELS=()=>[[0,0,"KOTA SPEAK ISLAND",1],[OD.halte?OD.halte.x:0,OD.halte?OD.halte.z:0,"Halte Odong-Odong",3],[C2.x,C2.z,"NEGERI PANCASILA",1],[C3.x,C3.z,"PULAU IPAS",1],[mW(mU(5),0).x,mW(mU(5),0).z,"PULAU MATEMATIKA",1],
  [BR_DX*140,BR_DZ*140,"Jembatan Garuda",2],[mW(100,0).x,mW(100,0).z,"Jembatan Angka",2],[dkW(DK_U1,0).x,dkW(DK_U1,0).z,"Dermaga Speedboat",2],[dkW(DK_U0-4.5,-4).x,dkW(DK_U0-4.5,-4).z,"Pasar Ikan",3],
- [0,19,"Taman Lompat",3],[0,-19,"Menara Parkour",3],[10.6,10.6,"Pangkas Rambut",3],[10.6,-10.6,"Toko Baju",3],[-11.5,19.5,"Ayunan",3],[-6.5,4,"Tiang Bendera",3],[C3.x,C3.z+0.001,"Puncak & Pakaian Terbang",3],[CL.c.x,CL.c.z,"NEGERI AWAN (atas awan)",1],[125,0,"Arena Ninja",2],[BEAN.x,BEAN.z,"Pohon Kacang Ajaib",2]];
+ [0,19,"Taman Lompat",3],[0,-19,"Menara Parkour",3],[10.6,10.6,"Pangkas Rambut",3],[10.6,-10.6,"Toko Baju",3],[-11.5,19.5,"Ayunan",3],[-6.5,4,"Tiang Bendera",3],[C3.x,C3.z+0.001,"Puncak & Pakaian Terbang",3],[CL.c.x,CL.c.z,"NEGERI AWAN (atas awan)",1],[C4.x,C4.z,"PULAU IMAN (Agama Islam)",1],[iL(ISL.UC,0).x,iL(ISL.UC,0).z,"Masjid Nurul Ilmi",3],[IDX*150,IDZ*150,"Jembatan Lentera",2],[125,0,"Arena Ninja",2],[BEAN.x,BEAN.z,"Pohon Kacang Ajaib",2]];
 function openMap(){BMAP.open=true;const p=player.root.position;BMAP.cx=p.x;BMAP.cz=p.z;$("bigMap").hidden=false;setPaused(true);resizeMap();drawBigMap()}
 function closeMap(){BMAP.open=false;$("bigMap").hidden=true;setPaused(false)}
 function resizeMap(){const cv=$("bmCv"),r=cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);cv.width=r.width*d;cv.height=r.height*d;BMAP.dpr=d}
@@ -2377,6 +2723,7 @@ function drawBigMap(){if(!BMAP.open)return;const cv=$("bmCv"),g=cv.getContext("2
  g.beginPath();g.moveTo(X(MDX*53.7),Y(MDZ*53.7));g.lineTo(X(MDX*MU0),Y(MDZ*MU0));g.stroke();
  {const L=mU(MATH_N)+MS.end-MU0;g.save();g.translate(X(MDX*MU0),Y(MDZ*MU0));g.rotate(-MA);g.fillStyle="#3D3645";g.fillRect(-(MS.inner+2)*s,0,(MS.inner+2)*2*s,L*s);g.fillStyle="#FF6A00";g.fillRect(-MS.inner*s,0,MS.inner*2*s,L*s);
   g.fillStyle="#6A5F70";for(let i=0;i<=MATH_N;i++){const a=i?mU(i)-MS.plat:MU0,l=i===0?MS.start:i===MATH_N?MS.end:MS.plat;g.fillRect(-MS.half*s,(a-MU0)*s,MS.half*2*s,l*s)}g.restore()}
+ islMap(g,X,Y,s);
  circ(C3.x,C3.z,I3.B+3,"#E9D49A");circ(C3.x,C3.z,I3.R0,"#4E8F3E");circ(C3.x,C3.z,I3.R1+6,"#6F8F4E");circ(C3.x,C3.z,I3.R1,"#8C8070");
  g.strokeStyle="#C9A46E";g.lineWidth=Math.max(1.5,3*s);g.beginPath();for(let th=0;th<=I3.TH;th+=.05){const a=I3.phi0+th,r=roadR(th);th?g.lineTo(X(C3.x+Math.sin(a)*r),Y(C3.z+Math.cos(a)*r)):g.moveTo(X(C3.x+Math.sin(a)*r),Y(C3.z+Math.cos(a)*r))}g.stroke();
  g.strokeStyle="#9C7B55";g.lineWidth=3.2*s;g.beginPath();g.moveTo(X(DK_DX*53.7),Y(DK_DZ*53.7));g.lineTo(X(DK_DX*DK_U1),Y(DK_DZ*DK_U1));g.stroke();
@@ -2524,6 +2871,18 @@ const PANTUN=[["Pergi ke pasar membeli kain,","Kain dipotong dibuat baju.","Ayo 
  ["Burung camar terbang tinggi,","Hinggap sebentar di atas batu.","Rajin membaca setiap hari,","Pasti bertambah banyak ilmu."],
  ["Buah mangga buah delima,","Dipetik ibu di kebun kami.","Bahasa Indonesia bahasa kita,","Mari dijaga dan dicintai."],
  ["Jalan-jalan ke kota Bima,","Jangan lupa membeli madu.","Berbahasa santun kepada sesama,","Hati senang hidup pun padu."]];
+const CLF_NAMES=["Peri Kumulus","Peri Embun","Peri Pelangi","Peri Gerimis","Peri Bintang","Peri Angin","Peri Salju","Peri Kabut"];
+/* peri awan: makhluk awan kecil berwajah lucu dengan tongkat bintang (desain orisinal) */
+function cloudFairy(tint){const f=new THREE.Group();const wm=new THREE.MeshStandardMaterial({color:"#FFFFFF",roughness:.9,emissive:"#E8F0FF",emissiveIntensity:.45});
+ [[0,0,0,.42],[.32,-.05,0,.3],[-.32,-.05,0,.3],[0,.28,0,.3],[.18,-.25,.05,.24],[-.18,-.25,.05,.24]].forEach(([x,y,z,r])=>mesh(G.sph(r,16,12),wm,x,y,z,f));
+ const dk=new THREE.MeshBasicMaterial({color:"#2B2140"});[-.13,.13].forEach(x=>{const e=mesh(G.sph(.055,10,8),dk,x,.06,.4,f,true);e.scale.y=1.4;mesh(G.sph(.05,8,6),new THREE.MeshBasicMaterial({color:"#FF8FB1"}),x*1.8,-.06,.36,f,true).scale.set(1.3,.7,.5)});
+ const mo=mesh(new THREE.TorusGeometry(.05,.016,6,12,Math.PI),dk,0,-.02,.42,f,true);mo.rotation.z=Math.PI;
+ const wing=new THREE.MeshStandardMaterial({color:tint,transparent:true,opacity:.75,side:THREE.DoubleSide,emissive:tint,emissiveIntensity:.35});
+ const wL=new THREE.Group(),wR=new THREE.Group();wL.position.set(-.3,.15,-.25);wR.position.set(.3,.15,-.25);f.add(wL,wR);
+ const wg=new THREE.CircleGeometry(.32,16);const a=new THREE.Mesh(wg,wing);a.position.x=-.3;a.scale.y=.6;wL.add(a);const b=new THREE.Mesh(wg,wing);b.position.x=.3;b.scale.y=.6;wR.add(b);
+ const wand=new THREE.Group();wand.position.set(.45,-.05,.15);wand.rotation.z=-.5;f.add(wand);mesh(G.cyl(.015,.015,.5,6),pbr("#E3B341",.3,.8),0,.25,0,wand,true);
+ const st=mesh(new THREE.OctahedronGeometry(.1,0),new THREE.MeshStandardMaterial({color:"#FFD54F",emissive:"#FFB300",emissiveIntensity:.9}),0,.52,0,wand,true);st.scale.z=.4;
+ f.userData={wL,wR,st};return f}
 function cloudMat(){return new THREE.MeshStandardMaterial({color:"#FFFFFF",roughness:1,emissive:"#EEF4FF",emissiveIntensity:.62})}
 function puff(g,cx,cz,R,n,y,mat){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*R,s=1.6+Math.random()*2.6;const m=mesh(G.sph(s,14,10),mat,cx+Math.sin(a)*r,y-s*.45+Math.random()*.3,cz+Math.cos(a)*r,g,true);m.scale.y=.55;m.castShadow=false;m.receiveShadow=true}}
 function buildCloudWorld(){const g=new THREE.Group();scene.add(g);CL.g=g;const cm=cloudMat(),Y=CL.Y;
@@ -2551,6 +2910,13 @@ function buildCloudWorld(){const g=new THREE.Group();scene.add(g);CL.g=g;const c
   const bar=new THREE.Group();bar.position.set(-2.2,1.05,0);gg.add(bar);mesh(G.cyl(.09,.09,4.4,10),pbr("#8E24AA",.5),2.2,0,0,bar).rotation.z=Math.PI/2;
   const obs=[-1.3,0,1.3].map(o=>({x:gx+(I.dx?0:o),z:gz+(I.dx?o:0),r:.95}));obs.forEach(o=>obstacles.push(o));
   const G0={i,x:gx,z:gz,h:Y,gg,bar,obs,open:false,q:null,lift:0,qf:bindoQ,list:CL.gates,head:()=>`GERBANG KATA ${i+1}/4 · Bahasa Indonesia ${GR().label}`,doneMsg:"Semua gerbang kata terbuka! Kumpulkan 4 Kristal Kata!"};CL.gates.push(G0);W2.dyn.push(bar);
+  // peri awan penanya di sepanjang jembatan pelangi
+  [4.5,9.5].forEach((dd,k)=>{const fx=CL.c.x+I.dx*(CL.R+dd),fz=CL.c.z+I.dz*(CL.R+dd);const fg=new THREE.Group();fg.position.set(fx,Y,fz);fg.rotation.y=Math.atan2(-I.dx,-I.dz);g.add(fg);
+   const nm=CLF_NAMES[(i*2+k)%CLF_NAMES.length];const body=cloudFairy(["#FFF59D","#B3E5FC","#F8BBD0","#C5E1A5"][i]);body.position.y=1.2;fg.add(body);
+   const sg=labelSprite(`${nm} · Soal Kata`,"#6A1B9A","#FFFFFF",330);sg.position.set(0,2.9,0);fg.add(sg);const qm=labelSprite("?","#F7D23E","#10303A",96);qm.position.set(0,3.5,0);qm.scale.multiplyScalar(.6);fg.add(qm);
+   const obs=[-1.3,0,1.3].map(o=>({x:fx+(I.dx?0:o),z:fz+(I.dx?o:0),r:.95}));obs.forEach(o=>obstacles.push(o));
+   const F={i:CL.gates.length,x:fx,z:fz,h:Y,gg:fg,bar:new THREE.Group(),obs,open:false,q:null,lift:0,qf:bindoQ,list:CL.gates,fairy:{body,qm,sg,ph:Math.random()*6},okTxt:`${nm} terbang memberi jalan.`,
+    head:()=>`${nm} bertanya · Bahasa Indonesia ${GR().label}`,doneMsg:"Semua soal kata terjawab! Kumpulkan 4 Kristal Kata!"};CL.gates.push(F);W2.dyn.push(fg)});
   // kristal + papan pantun
   const cr=mesh(new THREE.OctahedronGeometry(.6,0),new THREE.MeshStandardMaterial({color:["#4FC3F7","#F06292","#AED581","#FFD54F"][i],emissive:["#0288D1","#C2185B","#689F38","#FFA000"][i],emissiveIntensity:.6,roughness:.2,metalness:.2}),I.x,Y+1.7,I.z,g);
   mesh(G.cyl(.5,.65,1,16),pbr("#ECEFF1",.6),I.x,Y+.5,I.z,g);CL.crystals.push({i,x:I.x,z:I.z,m:cr,got:false});W2.dyn.push(cr);obstacles.push({x:I.x,z:I.z,r:.8});
@@ -2568,10 +2934,8 @@ function buildCloudWorld(){const g=new THREE.Group();scene.add(g);CL.g=g;const c
  // raksasa baik hati
  if(BASE.guy){const gi=makeChar("guy",null,4.2,null);gi.root.position.set(CL.c.x+Math.sin(face+.7)*8.5,Y,CL.c.z+Math.cos(face+.7)*8.5);gi.root.rotation.y=face;scene.add(gi.root);CL.giant=gi;obstacles.push({x:gi.root.position.x,z:gi.root.position.z,r:1.3});
   const gl=labelSprite("Raksasa Baik Hati","#8D6E63","#FFFFFF",300);gl.position.set(gi.root.position.x,Y+5.4,gi.root.position.z);scene.add(gl)}
- // payung terbang
- const ua=face+.75,ux=CL.c.x+Math.sin(ua)*(CL.R-3),uz=CL.c.z+Math.cos(ua)*(CL.R-3);const um=new THREE.Group();um.position.set(ux,Y,uz);g.add(um);
- mesh(G.cyl(.04,.04,1.8,8),pbr("#444",.4,.6),0,.9,0,um);mesh(new THREE.ConeGeometry(1.1,.5,12,1,true),new THREE.MeshStandardMaterial({color:"#E91E63",side:THREE.DoubleSide,roughness:.6}),0,1.95,0,um);
- const ul=labelSprite("PAYUNG TERBANG · turun ke darat","#E91E63","#FFFFFF",400);ul.position.set(0,3,0);um.add(ul);CL.umb={x:ux,z:uz,h:ua}
+ // flying fox: dari tepi Negeri Awan meluncur ke tengah Kota Speak Island
+ const ua=face+.75,ux=CL.c.x+Math.sin(ua)*(CL.R-3),uz=CL.c.z+Math.cos(ua)*(CL.R-3);zipBuild(g,ux,uz,Y);
  // hanggar layang gantung di tepi awan (menghadap laut lepas)
  const ha=face+Math.PI+.4,hx=CL.c.x+Math.sin(ha)*(CL.R-3.2),hz=CL.c.z+Math.cos(ha)*(CL.R-3.2);const hg=new THREE.Group();hg.position.set(hx,Y,hz);hg.rotation.y=ha;g.add(hg);
  mesh(RB(4.6,.25,3.2,.08),pbr("#ECEFF1",.6),0,.12,0,hg);[[-2,-1.4],[2,-1.4],[-2,1.4],[2,1.4]].forEach(([x,z])=>mesh(G.cyl(.07,.07,3,8),pbr("#90A4AE",.3,.7),x,1.5,z,hg));
@@ -2582,26 +2946,52 @@ function pantunTex(lines){const c=document.createElement("canvas");c.width=1024;
  g.fillStyle="#6A1B9A";g.font=`900 64px ${MGFONT()}`;g.textAlign="center";g.fillText("PANTUN",512,100);g.fillStyle="#3E2723";g.font=`700 50px ${MGFONT()}`;lines.forEach((l,k)=>g.fillText(l,512,210+k*105));
  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
 function beanTop(P){endAct();const pos=player.root.position;const a=Math.atan2(CL.c.x-BEAN.x,CL.c.z-BEAN.z);pos.set(BEAN.x+Math.sin(a)*2.4,CL.Y,BEAN.z+Math.cos(a)*2.4);player.root.rotation.y=a;yaw=a+Math.PI;vy=0;
- blip("win");if(!CL.visited){CL.visited=true;confetti(30);toast("Selamat datang di NEGERI AWAN! Buka 4 Gerbang Kata & kumpulkan Kristal Kata")}}
-function cloudUpdate(dt,t,pp){if(!CL.g)return;CL.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want){G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*1.5);G.bar.rotation.z=G.lift*Math.PI/2*.95}});
+ blip("win");if(!CL.visited){CL.visited=true;confetti(30);toast("Selamat datang di NEGERI AWAN! Jawab 12 soal kata (4 gerbang + 8 peri awan) & kumpulkan Kristal Kata")}}
+function cloudUpdate(dt,t,pp){if(!CL.g)return;CL.gates.forEach(G=>{const want=G.open?1:0;if(G.lift!==want){G.lift+=Math.sign(want-G.lift)*Math.min(Math.abs(want-G.lift),dt*1.5);if(!G.fairy)G.bar.rotation.z=G.lift*Math.PI/2*.95}
+  const F=G.fairy;if(F&&pp.y>CL.Y-8){const U=F.body.userData;F.body.position.set(G.lift*1.6,1.2+Math.sin(t*2.4+F.ph)*.12+G.lift*2.4,0);F.body.rotation.y=Math.sin(t*.8+F.ph)*.3+G.lift*4;
+   U.wL.rotation.y=Math.sin(t*14+F.ph)*.5;U.wR.rotation.y=-Math.sin(t*14+F.ph)*.5;U.st.rotation.y+=dt*3;F.qm.visible=!G.open;F.sg.visible=G.lift<.6;F.body.visible=G.lift<.98}});
  const hi=pp.y>CL.Y-5;CL.crystals.forEach(C=>{C.m.rotation.y+=dt*1.5;C.m.position.y=CL.Y+1.7+Math.sin(t*2+C.i)*.15;if(!C.got&&hi&&Math.hypot(pp.x-C.x,pp.z-C.z)<3){C.got=true;C.m.visible=false;CL.got++;SAVE.coins+=3;persist();updateStats();blip("win");confetti(20);
    toast(CL.got<4?`Kristal Kata ${CL.got}/4 didapat! +$30`:"4 Kristal Kata terkumpul! Buka Telur Emas di depan istana!")}});
  if(CL.egg){CL.egg.m.rotation.y+=dt;if(!CL.done&&CL.got>=4){CL.egg.cage.visible=false;if(hi&&Math.hypot(pp.x-CL.egg.x,pp.z-CL.egg.z)<2.2){CL.done=true;SAVE.cloud=(SAVE.cloud||0)+1;SAVE.xp+=80;SAVE.coins+=8;persist();updateStats();blip("win");confetti(70);toast("TELUR EMAS! Kamu menaklukkan Negeri Awan: +80 XP · +$80")}}}
  if(CL.giant&&Math.hypot(pp.x-CL.giant.root.position.x,pp.z-CL.giant.root.position.z)<60)animChar(CL.giant,dt,{speed:0,wave:Math.hypot(pp.x-CL.giant.root.position.x,pp.z-CL.giant.root.position.z)<9&&hi})}
-/* payung terbang: turun perlahan sambil diarahkan */
-function umbStart(){ACT={type:"umb",h:CL.umb.h,v:0};const pos=player.root.position;pos.set(CL.umb.x+Math.sin(CL.umb.h)*2.5,CL.Y,CL.umb.z+Math.cos(CL.umb.h)*2.5);
- if(!W2.umbMesh){const u=new THREE.Group();mesh(G.cyl(.03,.03,1.4,6),pbr("#444",.4,.6),0,.7,0,u);mesh(new THREE.ConeGeometry(1.1,.5,12,1,true),new THREE.MeshStandardMaterial({color:"#E91E63",side:THREE.DoubleSide,roughness:.6}),0,1.45,0,u);W2.umbMesh=u;scene.add(u)}
- W2.umbMesh.visible=true;$("jumpBtn").textContent="Payung";toast("Payung terbuka! Arahkan dengan joystick, kamu turun pelan-pelan");blip("jump")}
-function umbUpdate(dt){const pos=player.root.position,{ix,iz}=inputVec();ACT.h-=ix*1.6*dt;const sp=4+Math.max(0,iz)*3;pos.x+=Math.sin(ACT.h)*sp*dt;pos.z+=Math.cos(ACT.h)*sp*dt;pos.y-=3.2*dt;
- player.root.rotation.y=ACT.h;animChar(player,dt,{speed:0});if(player.gltf){const B=bonesOf(player);player.root.updateMatrixWorld(true);setAxis(1,0,0);rotBone(B.RightArm,-2.9);rotBone(B.RightForeArm,-.2);rotBone(B.LeftUpLeg,Math.sin(clock.elapsedTime*3)*.2);rotBone(B.RightUpLeg,-Math.sin(clock.elapsedTime*3)*.2)}
- const hh=(TARGET_H[player.kind]||1.3);W2.umbMesh.position.set(pos.x,pos.y+hh*.95,pos.z);
- let ground=0;if(onIpas(pos.x,pos.z)){const q=i3pol(pos.x,pos.z);ground=Math.max(0,i3T(q.r,q.a))}
- if(pos.y<=ground+.02){W2.umbMesh.visible=false;$("jumpBtn").textContent="Lompat";if(walkable(pos.x,pos.z)&&!inMath(pos.x,pos.z)){pos.y=ground;ACT=null;toast("Mendarat dengan selamat!")}
-  else{ACT=null;SWIM=true;pos.y=-.9;toast("Byur! Kamu mendarat di laut. Berenanglah ke pantai")}}}
-function cloudObjective(tg){if(tg.y<CL.Y-6)return null;const left=CL.gates.filter(g=>!g.open).length;
- if(CL.done)return`Negeri Awan selesai! <span class="small">Turun lewat pohon kacang atau pakai PAYUNG TERBANG di sisi belakang istana.</span>`;
+/* flying fox: kabel dari awan ke plaza tengah kota */
+function zipBuild(g,ux,uz,Y){const ea=Math.atan2(ux,uz),er=6.5,ex=Math.sin(ea)*er,ez=Math.cos(ea)*er;
+ const A=new THREE.Vector3(ux,Y+4.4,uz),B=new THREE.Vector3(ex,3.1,ez);const dir=B.clone().sub(A),L=dir.length();dir.normalize();
+ const steel=pbr("#59626B",.35,.8),wood=pbr("#8B5E3C",.75),yel=pbr("#F2B705",.5);
+ // menara atas (di awan)
+ const tw=new THREE.Group();tw.position.set(ux,Y,uz);tw.rotation.y=Math.atan2(dir.x,dir.z);g.add(tw);
+ mesh(RB(3.2,.3,3.2,.06),wood,0,.15,0,tw);[[-1.3,-1.3],[1.3,-1.3],[-1.3,1.3],[1.3,1.3]].forEach(([x,z])=>mesh(G.cyl(.09,.11,4.6,8),wood,x,2.3,z,tw));
+ mesh(G.box(3,.18,.18),wood,0,4.5,1.3,tw);mesh(G.box(3,.18,.18),wood,0,4.5,-1.3,tw);mesh(G.box(.18,.18,3),yel,0,4.5,0,tw);
+ [-1.3,1.3].forEach(x=>{mesh(G.box(.06,.9,2.6),wood,x,.75,0,tw)});
+ const ul=labelSprite("FLYING FOX · meluncur ke kota","#E65100","#FFFFFF",440);ul.position.set(0,5.7,0);ul.scale.multiplyScalar(1.15);tw.add(ul);
+ // tiang bawah (plaza kota)
+ const bp=new THREE.Group();bp.position.set(ex,0,ez);bp.rotation.y=Math.atan2(dir.x,dir.z);scene.add(bp);
+ [-.9,.9].forEach(x=>mesh(G.cyl(.1,.13,3.3,10),steel,x,1.65,-.3,bp));mesh(G.box(2.1,.2,.2),yel,0,3.2,-.3,bp);
+ mesh(G.cyl(.13,.16,3,8),steel,0,1.5,-1.2,bp).rotation.x=-.4;mesh(RB(2.6,.12,2.4,.04),pbr("#3E7B3A",.9),0,.06,.9,bp);
+ const bl=labelSprite("FLYING FOX · dari Negeri Awan","#E65100","#FFFFFF",440);bl.position.set(0,4.4,-.3);bp.add(bl);
+ [-.9,.9].forEach(x=>{const w=toWorldXY(ex,ez,bp.rotation.y,x,-.3);obstacles.push({x:w.x,z:w.z,r:.25})});
+ // kabel
+ const cab=mesh(G.cyl(.035,.035,L,6),steel,(A.x+B.x)/2,(A.y+B.y)/2,(A.z+B.z)/2,scene,true);cab.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+ CL.umb={x:ux,z:uz,h:Math.atan2(dir.x,dir.z),A,B,L,dir}}
+function umbStart(){const Z=CL.umb;ACT={type:"umb",s:1.2,v:1.5};
+ if(!W2.umbMesh){const u=new THREE.Group();const st=pbr("#2C3E50",.4,.7);mesh(G.box(.32,.2,.14),pbr("#F2B705",.5),0,.0,0,u);mesh(G.cyl(.08,.08,.16,12),st,0,.08,0,u).rotation.x=Math.PI/2;
+  mesh(G.cyl(.015,.015,.75,6),st,-.16,-.42,0,u);mesh(G.cyl(.015,.015,.75,6),st,.16,-.42,0,u);mesh(G.cyl(.025,.025,.62,8),pbr("#E53935",.5),0,-.8,0,u).rotation.z=Math.PI/2;W2.umbMesh=u;scene.add(u)}
+ W2.umbMesh.visible=true;$("jumpBtn").textContent="Meluncur";toast("Pegangan kuat! Meluncur dengan flying fox ke tengah kota 🦊");blip("jump");zipPlace(0)}
+function zipPlace(dt){const Z=CL.umb,pos=player.root.position;const p=Z.A.clone().addScaledVector(Z.dir,ACT.s);
+ W2.umbMesh.position.copy(p);W2.umbMesh.rotation.set(0,Z.h,0);
+ const hh=(TARGET_H[player.kind]||1.3);pos.set(p.x,p.y-.8-hh*1.18,p.z);player.root.rotation.y=Z.h;vy=0;
+ animChar(player,dt||.016,{speed:0});if(player.gltf){const B=bonesOf(player);player.root.updateMatrixWorld(true);setAxis(1,0,0);rotBone(B.RightArm,-2.9);rotBone(B.LeftArm,-2.9);rotBone(B.RightForeArm,-.15);rotBone(B.LeftForeArm,-.15);
+  const k=Math.sin(clock.elapsedTime*5)*.25;rotBone(B.LeftUpLeg,-.35+k);rotBone(B.RightUpLeg,-.35-k);rotBone(B.LeftLeg,.5);rotBone(B.RightLeg,.5)}
+ if(player.gs)player.gs.visible=false}
+function umbUpdate(dt){const Z=CL.umb;const left=Z.L-ACT.s;
+ if(left>14)ACT.v=Math.min(15,ACT.v+(9.8*(-Z.dir.y)-ACT.v*.12)*dt);else ACT.v=Math.max(2.2,ACT.v-12*dt);
+ ACT.s=Math.min(Z.L-1.6,ACT.s+ACT.v*dt);zipPlace(dt);
+ if(ACT.s>=Z.L-1.6){W2.umbMesh.visible=false;$("jumpBtn").textContent="Lompat";ACT=null;if(player.gs)player.gs.visible=true;vy=0;onGround=false;
+  SAVE.zip=(SAVE.zip||0)+1;if(SAVE.zip===1){SAVE.xp+=10;persist();updateStats();confetti(25);toast("Wuuush! Sampai di tengah Kota Speak Island! +10 XP")}else toast("Wuuush! Sampai di tengah kota!");blip("win")}}
+function cloudObjective(tg){if(tg.y<CL.Y-6)return null;const left=CL.gates.filter(g=>!g.open).length,NG=CL.gates.length;
+ if(CL.done)return`Negeri Awan selesai! <span class="small">Turun lewat pohon kacang atau meluncur dengan FLYING FOX ke tengah kota.</span>`;
  if(CL.got>=4)return`<span class="y">Telur Emas</span> sudah bisa diambil di depan istana!`;
- return`<span class="y">Negeri Awan</span> · Buka Gerbang Kata (${4-left}/4) lalu ambil Kristal Kata (${CL.got}/4).<span class="small">Soal Bahasa Indonesia sesuai kelasmu</span>`}
+ return`<span class="y">Negeri Awan</span> · Jawab soal di Gerbang Kata & Peri Awan (${NG-left}/${NG}) lalu ambil Kristal Kata (${CL.got}/4).<span class="small">Soal Bahasa Indonesia sesuai kelasmu</span>`}
 
 /* ================= ARENA NINJA (lintasan halang rintang di atas air) ================= */
 const NJ={x0:89,x1:166,zw:7,plats:[],movers:[],arm:null,armAng:0,cps:[93,113,129,145],cp:0,t0:0,run:false,best:0,doneT:0};
@@ -3665,7 +4055,7 @@ const VCFG={boat:{maxF:20,maxR:-4,acc:8,wb:3.4,rad:1.7,ride:true,label:"Speedboa
 const MA=Math.PI*19/12,MDX=Math.sin(MA),MDZ=Math.cos(MA),MU0=118,MATH_N=10;
 const BR_A=Math.PI*11/12,BR_DX=Math.sin(BR_A),BR_DZ=Math.cos(BR_A),C2D=215,R2=52,C2={x:BR_DX*C2D,z:BR_DZ*C2D};
 function axisUV(x,z){return{u:x*BR_DX+z*BR_DZ,v:x*BR_DZ-z*BR_DX}}
-function walkable(x,z,m){m=m||0;if(typeof player!=="undefined"&&player&&player.root&&player.root.position.y>CL.Y-8&&!W2.fly)return cloudWalk(x,z);if(inNinja(x,z))return true;if(Math.hypot(x,z)<ISLAND_R-m)return true;if(onDock(x,z))return true;if(onIpas(x,z))return i3Walk(x,z);if(onMathBridge(x,z)||inMath(x,z))return true;const q=axisUV(x,z);
+function walkable(x,z,m){m=m||0;if(typeof player!=="undefined"&&player&&player.root&&player.root.position.y>CL.Y-8&&!W2.fly)return cloudWalk(x,z);if(inNinja(x,z))return true;if(Math.hypot(x,z)<ISLAND_R-m)return true;if(onDock(x,z))return true;if(onIpas(x,z))return i3Walk(x,z);if(islZone(x,z))return islWalk(x,z);if(onMathBridge(x,z)||inMath(x,z))return true;const q=axisUV(x,z);
  if(q.u>80&&q.u<C2D-R2+8&&Math.abs(q.v)<2.7-m*.55)return true;return Math.hypot(x-C2.x,z-C2.z)<R2-2-m}
 function onIsland2(x,z){return Math.hypot(x-C2.x,z-C2.z)<R2+8}
 function suggestedPk(){for(let i=0;i<PK.length;i++)if(!SAVE.pk[i])return i;return -1}
@@ -3766,7 +4156,7 @@ function buildWorld(){
  [["balon",.19,"#E74C3C"],["pancing",.26,"#2E86C1"],["tikus",.33,"#8E5A2B"],["ketik",.40,"#5E35B1"]].forEach(([gm,a,c])=>makeKiosk(gm,"en",Math.sin(a)*61,Math.cos(a)*61,a+Math.PI,c,"en-"+gm));
  const centers=AREAS.map((A,i)=>areaFrame(i));
  let placed=0,tries=0;
- const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=mUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=dkUV(x,z);if(q.u>40&&Math.abs(q.v)<4.5)return false}if((x>82&&Math.abs(z)<8)||Math.hypot(x-BEAN.x,z-BEAN.z)<6||Math.hypot(x+11.5,z-19.5)<4||Math.hypot(x+6.5,z-4)<2.5)return false;if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
+ const freeSpot=(x,z,r,a,margin)=>{if(r>42.5&&r<55.5)return false;{const q=axisUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=mUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}{const q=dkUV(x,z);if(q.u>40&&Math.abs(q.v)<4.5)return false}{const q=iUV(x,z);if(q.u>40&&Math.abs(q.v)<5.5)return false}if((x>82&&Math.abs(z)<8)||Math.hypot(x-BEAN.x,z-BEAN.z)<6||Math.hypot(x+11.5,z-19.5)<4||Math.hypot(x+6.5,z-4)<2.5)return false;if(Math.hypot(x,z-19)<8||Math.hypot(x,z+19)<7)return false;
   if(!centers.every((F,k)=>Math.hypot(x-F.x,z-F.z)>(AREAS[k].type==="field"?19:13)))return false;
   if(!centers.every(F=>Math.abs(Math.atan2(Math.sin(a-F.a),Math.cos(a-F.a)))*r>2.4||r>F.r+2))return false;
   return obstacles.every(o=>Math.hypot(x-o.x,z-o.z)>o.r+margin)};
@@ -4046,7 +4436,7 @@ function tick(){
    if(key!==null&&key!==undefined){el.style.opacity=1;locT=2.6}}}
  if(locT>0){locT-=dt;if(locT<=0)$("loc").style.opacity=0}
  updateHelp();updateObjective(target);if(FRAME%2===0)drawRadar(target);adaptQuality(dt);
- if(!cineRender())renderer.render(scene,camera);
+ islPre();if(!cineRender())renderer.render(scene,camera);islPost();
 }
 function inputVec(){let ix=(keys.KeyD?1:0)-(keys.KeyA?1:0)+joyVec.x;let iz=(keys.KeyW?1:0)-(keys.KeyS?1:0)+joyVec.y;const len=Math.hypot(ix,iz);if(len>1){ix/=len;iz/=len}return{ix,iz,len:Math.min(1,len)}}
 function movePlayer(dt){
@@ -4061,7 +4451,7 @@ function movePlayer(dt){
  pushOutCircles(pos,PRAD,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.25})).concat(odongCircles(),VEH.map(v=>({x:v.x,z:v.z,r:v.cfg.rad+.1})),peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.35}))));
  pushOutPlats(pos,pos.y,PRAD);
  {const Wk=walkable(pos.x,pos.z);
-  if(SWIM){if(Wk&&!inMath(pos.x,pos.z)){SWIM=false;vy=0}else if(!waterAt(pos.x,pos.z)){pos.x=ox;pos.z=oz}}
+  if(SWIM){if(inMath(pos.x,pos.z)){SWIM=false;vy=0;mathRespawn("Kembali ke checkpoint terakhir")}else if(Wk){SWIM=false;vy=0}else if(!waterAt(pos.x,pos.z)){pos.x=ox;pos.z=oz}}
   else if(!Wk){if(canEnterWater(ox,oz)&&waterAt(pos.x,pos.z)&&pos.y<.6){SWIM=true;blip("jump")}else{if(walkable(pos.x,oz))pos.z=oz;else if(walkable(ox,pos.z))pos.x=ox;else{pos.x=ox;pos.z=oz}}}}
  let fl;if(SWIM){swimPose(dt,sp,pos);vy=0;onGround=true;jumps=0;fl={f:pos.y,pl:null};if(player.gs)player.gs.visible=false}else{if(player.gs&&!player.gs.visible)player.gs.visible=true;
  vy-=24*dt;pos.y+=vy*dt;fl=floorAt(pos.x,pos.z,pos.y);
@@ -4094,7 +4484,7 @@ function driveCar(dt){
  pushOutCircles(pos,C.rad,obstacles);pushOutCircles(pos,C.rad,traffic.map(T=>({x:T.m.position.x,z:T.m.position.z,r:1.25})).concat(odongCircles()));
  pushOutCircles(pos,C.rad*.8,npcs.concat(pkn).map(n=>({x:n.x,z:n.z,r:.5})).concat(peds.map(P=>({x:P.C.root.position.x,z:P.C.root.position.z,r:.5})),VEH.filter(v=>v!==car).map(v=>({x:v.x,z:v.z,r:v.cfg.rad}))));
  pushOutPlats(pos,0,C.rad);
- if(C.boat?!boatOK(pos.x,pos.z,C.rad):!walkable(pos.x,pos.z,C.rad*.7)){pos.x=car.x;pos.z=car.z}
+ if(C.boat?!boatOK(pos.x,pos.z,C.rad):(!walkable(pos.x,pos.z,C.rad*.7)||inMath(pos.x,pos.z))){pos.x=car.x;pos.z=car.z}
  if(Math.hypot(pos.x-before.x,pos.z-before.z)>.01){car.speed*=-.25;if(Math.abs(car.speed)>2)blip("bad")}
  car.x=pos.x;car.z=pos.z;
  if(C.ride){player.root.rotation.y=car.h;const sz=car.type==="bike"?-.17*VSC.bike:car.type==="boat"?-.65:-.3*VSC.motor;player.root.position.set(car.x+Math.sin(car.h)*sz,C.seat,car.z+Math.cos(car.h)*sz);
@@ -4138,7 +4528,7 @@ function updateHelp(){const h=$("help");let k="",html="";
  if(ACT&&ACT.type==="fly"){k="fly";html="Terbang: Belok <kbd>A</kbd><kbd>D</kbd> · Menukik <kbd>W</kbd> · Melambat <kbd>S</kbd> · Tahan <kbd>Spasi</kbd> / <b>Kepak</b> untuk naik"}
  else if(ACT){k="act"+ACT.type+(ACT.phase||"");html=ACT.type==="soccer"?(SOC.role==="kick"?"Tekan <kbd>Spasi</kbd> / <b>Tendang</b> saat lingkaran kuning ada di sasaran · <kbd>E</kbd> keluar":"Geser <kbd>A</kbd> <kbd>D</kbd>, tekan <kbd>Spasi</kbd> untuk menepis · lingkaran merah = arah bola · <kbd>E</kbd> keluar"):ACT.type==="climb"?"Panjat: Naik <kbd>W</kbd> · Turun <kbd>S</kbd> · Lompat turun <kbd>Spasi</kbd>":ACT.type==="swing"?"Ayunan: Dorong <kbd>W</kbd> · Rem <kbd>S</kbd> · Turun <kbd>Spasi</kbd>":ACT.type==="fish"?(ACT.phase==="bite"?"Ada yang makan umpan! Tekan <kbd>E</kbd> / <b>Tarik!</b>":"Tunggu tanda <b style='color:#E74C3C'>!</b> lalu tekan <kbd>E</kbd> · Berhenti <kbd>Spasi</kbd>"):"";if(!html)k=""}
  else if(SWIM){k="swim"+(W2.diveWant>0?1:0);html=W2.diveWant>0?"Menyelam: gerakkan <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Naik ke permukaan <kbd>Spasi</kbd> / <b>Naik</b> · Awas napas!":"Berenang: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Cepat <kbd>Shift</kbd> · Menyelam <kbd>Spasi</kbd> / <b>Selam</b>"}
- else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk turun dengan payung terbang":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":n.type==="soccer"?"Tekan <kbd>E</kbd> untuk <b style=\"color:#7CFC9A\">main bola</b>: pilih jadi kiper atau penendang":n.type==="odong"?"Tekan <kbd>E</kbd> untuk naik <b style=\"color:#FFD54F\">odong-odong</b>":n.type!=="gate"?"Tekan <kbd>E</kbd> untuk mulai":(n.ref.npc?`Tekan <kbd>E</kbd> untuk bicara dengan <b style="color:#5DD39E">${esc(n.ref.npc.name)}</b> (soal IPAS ${n.ref.i+1})`:`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`)}
+ else if(W2.near&&nearNpc<0&&nearPk<0&&nearKiosk<0){const n=W2.near;k="near"+W2.nearKey;html=n.type==="glider"?"Tekan <kbd>E</kbd> untuk terbang dengan layang gantung":n.type==="climbdown"?"Tekan <kbd>E</kbd> untuk turun lewat pohon kacang":n.type==="umbrella"?"Tekan <kbd>E</kbd> untuk meluncur dengan flying fox ke tengah kota":n.type==="climb"&&n.ref.bean?"Tekan <kbd>E</kbd> untuk memanjat pohon kacang ajaib":n.type==="shop"?`Tekan <kbd>E</kbd> untuk ${n.ref.type==="market"?"menjual ikan di":"masuk ke"} <b style="color:#B388FF">${esc(n.ref.name)}</b>`:n.type==="wings"?"Tekan <kbd>E</kbd> untuk memakai sayap dan terbang":n.type==="pet"?`Tekan <kbd>E</kbd> untuk mengelus <b style="color:#FF8FD1">${esc(n.ref.A.id)}</b>`:n.type==="climb"?"Tekan <kbd>E</kbd> untuk memanjat tiang bendera":n.type==="swing"?"Tekan <kbd>E</kbd> untuk main ayunan":n.type==="fish"?"Tekan <kbd>E</kbd> untuk memancing":n.type==="soccer"?"Tekan <kbd>E</kbd> untuk <b style=\"color:#7CFC9A\">main bola</b>: pilih jadi kiper atau penendang":n.type==="odong"?"Tekan <kbd>E</kbd> untuk naik <b style=\"color:#FFD54F\">odong-odong</b>":n.type!=="gate"?"Tekan <kbd>E</kbd> untuk mulai":(n.ref.npc?`Tekan <kbd>E</kbd> untuk bicara dengan <b style="color:#5DD39E">${esc(n.ref.npc.name)}</b> (soal IPAS ${n.ref.i+1})`:`Tekan <kbd>E</kbd> untuk menjawab soal <b style="color:#5DD39E">Gerbang ${n.ref.i+1}</b>`)}
  else if(driving){k="drive"+car.type;html=`${esc(car.cfg.label)}: Gas <kbd>W</kbd> · Mundur <kbd>S</kbd> · Belok <kbd>A</kbd><kbd>D</kbd> · Rem <kbd>Spasi</kbd> · ${car.cfg.ride?"Turun":"Keluar"} <kbd>F</kbd>`}
  else if(nearNpc>=0){k="npc"+nearNpc;html=`Tekan <kbd>E</kbd> untuk ngobrol dengan <b style="color:#F7D23E">${esc(AREAS[nearNpc].npc.name)}</b>`}
  else if(nearKiosk>=0){const K=KIOSKS[nearKiosk];k="kiosk"+nearKiosk;html=`Tekan <kbd>E</kbd> untuk main <b style="color:#FF8FD1">${esc(K.name)}</b>${K.subj==="en"?" (Bahasa Inggris)":""}`}
@@ -4174,6 +4564,7 @@ function drawRadar(tg){const cv=$("radar");const g=cv.getContext("2d"),W=cv.widt
  {g.strokeStyle="#B9A57C";g.lineWidth=5*s;g.beginPath();g.moveTo(MDX*53.7*s,MDZ*53.7*s);g.lineTo(MDX*MU0*s,MDZ*MU0*s);g.stroke();
   const L=mU(MATH_N)+MS.end-MU0;g.save();g.translate(MDX*MU0*s,MDZ*MU0*s);g.rotate(-MA);g.fillStyle="#3D3645";g.fillRect(-(MS.inner+2)*s,0,(MS.inner+2)*2*s,L*s);g.fillStyle="#FF6A00";g.fillRect(-MS.inner*s,0,MS.inner*2*s,L*s);
   g.fillStyle="#6A5F70";for(let i=0;i<=MATH_N;i++){const a=i?mU(i)-MS.plat:MU0,l=i===0?MS.start:i===MATH_N?MS.end:MS.plat;g.fillRect(-MS.half*s,(a-MU0)*s,MS.half*2*s,l*s)}g.restore()}
+ islMap(g,x=>x*s,z=>z*s,s);
  KIOSKS.forEach(K=>{g.fillStyle="#FF8FD1";g.strokeStyle="#000";g.lineWidth=2;g.beginPath();g.moveTo(K.x*s,K.z*s-7);g.lineTo(K.x*s+7,K.z*s);g.lineTo(K.x*s,K.z*s+7);g.lineTo(K.x*s-7,K.z*s);g.closePath();g.fill();g.stroke()});
  g.fillStyle="#455A64";g.fillRect(NJ.x0*s,-4*s,(157-NJ.x0)*s,8*s);g.fillStyle="#FDD835";g.fillRect(97*s,-1*s,60*s,2*s);
  g.fillStyle="rgba(255,255,255,.75)";g.beginPath();g.arc(CL.c.x*s,CL.c.z*s,CL.R*s,0,7);CL.isl.forEach(I=>{g.moveTo(I.x*s+I.r*s,I.z*s);g.arc(I.x*s,I.z*s,I.r*s,0,7)});g.fill();g.fillStyle="#2E7D32";g.beginPath();g.arc(BEAN.x*s,BEAN.z*s,4,0,7);g.fill();
